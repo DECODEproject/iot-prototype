@@ -15,7 +15,7 @@ var RootCmd = &cobra.Command{
 var _config = newConfig()
 
 type config struct {
-	Binding    string `envconfig:"BINDING" default:":50051"`
+	Binding    string `envconfig:"BINDING" default:":8089"`
 	TLS        bool   `envconfig:"TLS"`
 	ServerName string `envconfig:"TLS_SERVER_NAME"`
 	CACertFile string `envconfig:"TLS_CA_CERT_FILE"`
@@ -24,7 +24,7 @@ type config struct {
 	DataDir    string `envconfig:"DATA_DIR" default:"."`
 	DataImpl   string `envconfig:"DATA_IMPL" default:"boltdb"`
 	LogFile    bool   `envconfig:"LOG_FILE"`
-	LogPath    string `envconfig:"LOG_PATH" default:"./device-hub.log"`
+	LogPath    string `envconfig:"LOG_PATH" default:"./decode_node.log"`
 	Syslog     bool   `envconfig:"LOG_SYSLOG"`
 }
 
