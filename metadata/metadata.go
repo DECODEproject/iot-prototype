@@ -1,20 +1,19 @@
-package node
+package metadata
 
 import (
 	"log"
 	"net/http"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/services"
+	"gogs.dyne.org/DECODE/decode-prototype-da/metadata/services"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 )
 
 type Options struct {
-	Binding        string
-	SwaggerUIPath  string
-	WebServicesURL string
-
+	Binding           string
+	SwaggerUIPath     string
+	WebServicesURL    string
 	UseTLS            bool
 	CertFilePath      string
 	KeyFilePath       string
@@ -26,9 +25,7 @@ type Options struct {
 
 func Serve(options Options) error {
 
-	restful.DefaultContainer.Add(services.NewEntitlementService().WebService())
-	restful.DefaultContainer.Add(services.NewDataService().WebService())
-	restful.DefaultContainer.Add(services.NewFunctionService().WebService())
+	restful.DefaultContainer.Add(services.NewCatalogService().WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),

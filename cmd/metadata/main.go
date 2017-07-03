@@ -9,15 +9,15 @@ import (
 )
 
 var RootCmd = &cobra.Command{
-	Use: "node",
+	Use: "metadata",
 }
 
 var _config = newConfig()
 
 type config struct {
-	Binding        string `envconfig:"BINDING" default:":8080"`
+	Binding        string `envconfig:"BINDING" default:":8081"`
 	SwaggerUIPath  string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
-	WebServicesURL string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8080"`
+	WebServicesURL string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8081"`
 
 	TLS        bool   `envconfig:"TLS"`
 	ServerName string `envconfig:"TLS_SERVER_NAME"`
@@ -27,7 +27,7 @@ type config struct {
 	DataDir    string `envconfig:"DATA_DIR" default:"."`
 	DataImpl   string `envconfig:"DATA_IMPL" default:"boltdb"`
 	LogFile    bool   `envconfig:"LOG_FILE"`
-	LogPath    string `envconfig:"LOG_PATH" default:"./decode_node.log"`
+	LogPath    string `envconfig:"LOG_PATH" default:"./decode_metadata.log"`
 	Syslog     bool   `envconfig:"LOG_SYSLOG"`
 }
 
