@@ -24,6 +24,8 @@ type Options struct {
 func Serve(options Options) error {
 
 	restful.DefaultContainer.Add(services.NewEntitlementService().WebService())
+	restful.DefaultContainer.Add(services.NewDataService().WebService())
+	restful.DefaultContainer.Add(services.NewFunctionService().WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),
