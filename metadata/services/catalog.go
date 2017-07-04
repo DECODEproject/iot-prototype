@@ -9,7 +9,7 @@ func NewCatalogService() catalogResource {
 	return catalogResource{}
 }
 
-func (e dataResource) WebService() *restful.WebService {
+func (e catalogResource) WebService() *restful.WebService {
 	ws := new(restful.WebService)
 
 	ws.

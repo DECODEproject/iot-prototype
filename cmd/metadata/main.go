@@ -3,6 +3,8 @@ package main
 import (
 	"os"
 
+	"gogs.dyne.org/DECODE/decode-prototype-da/cmd"
+
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -55,6 +57,8 @@ func (o *config) AddFlags(fs *pflag.FlagSet) {
 
 func init() {
 	RootCmd.AddCommand(serverCommand)
+	RootCmd.AddCommand(cmd.VersionCommand)
+
 	_config.AddFlags(RootCmd.PersistentFlags())
 }
 

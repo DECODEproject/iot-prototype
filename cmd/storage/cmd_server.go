@@ -1,6 +1,9 @@
 package main
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+	"gogs.dyne.org/DECODE/decode-prototype-da/storage"
+)
 
 var serverCommand = &cobra.Command{
 	Use:   "server",
