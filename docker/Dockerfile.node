@@ -2,5 +2,9 @@ FROM bitnami/minideb:stretch
 
 EXPOSE 8080
 
-COPY tmp/build/linux-amd64/node /
-ENTRYPOINT [ "./node", "server"]
+COPY tmp/build/linux-amd64/node /prototype/
+COPY ./swagger-ui/ /prototype/swagger-ui/
+
+ENV SWAGGER_UI_PATH=/prototype/swagger-ui/
+
+ENTRYPOINT [ "/prototype/node", "server"]
