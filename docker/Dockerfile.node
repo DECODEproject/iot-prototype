@@ -1,0 +1,6 @@
+FROM bitnami/minideb:stretch
+
+EXPOSE 8080
+
+COPY tmp/build/linux-amd64/node /
+ENTRYPOINT [ "./node", "server"]

@@ -57,6 +57,13 @@ docker_up: ## run dependencies as docker containers
 
 .PHONY: docker_up
 
+docker_build: clean linux-amd64 ## build docker images for all of the executables
+	docker build -t prototype/metadata:latest -t prototype/metadata:$(SOURCE_VERSION) -f=./docker/Dockerfile.metadata .
+	docker build -t prototype/node:latest -t prototype/node:$(SOURCE_VERSION) -f=./docker/Dockerfile.node .
+	docker build -t prototype/storage:latest -t prototype/storage:$(SOURCE_VERSION) -f=./docker/Dockerfile.storage .
+
+.PHONY: docker_build
+
 darwin-amd64: tmp/build/darwin-amd64/metadata tmp/build/darwin-amd64/storage tmp/build/darwin-amd64/node  ## build for mac amd64
 
 linux-i386: tmp/build/linux-i386/metadata tmp/build/linux-i386/storage tmp/build/linux-i386/node ## build for linux i386

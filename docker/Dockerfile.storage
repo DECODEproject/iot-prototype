@@ -1,0 +1,6 @@
+FROM bitnami/minideb:stretch
+
+EXPOSE 8083
+
+COPY tmp/build/linux-amd64/storage /
+ENTRYPOINT [ "./storage", "server"]
