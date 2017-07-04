@@ -1,0 +1,37 @@
+version: '2'
+services:
+  ## metadata service is a global service for node discovery
+  metadata:
+    image: prototype/metadata
+  ## decode node
+  node_one:
+    image : prototype/node
+    links :
+        - "node_one_storage:storage"
+        - "metadata:metadata"
+  node_one_device_hub:
+    image: thingful/device-hub
+    links:
+        - "node_one:node"
+  node_one_storage:
+    image: prototype/storage
+    links:
+        - "node_one_storage_redis:redis"
+  node_one_storage_redis:
+    image: redis:3.0.7
+  ## decode node
+  node_two:
+    image: prototype/node
+    links :
+        - "node_two_storage:storage"
+        - "metadata:metadata"
+  node_two_device_hub:
+    image: thingful/device-hub
+    links:
+        - "node_two:node"
+  node_two_storage:
+    image: prototype/storage
+    links:
+        - "node_two_storage_redis:redis"
+  node_two_storage_redis:
+    image: redis:3.0.7
