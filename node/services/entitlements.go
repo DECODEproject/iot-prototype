@@ -14,8 +14,8 @@ type EntitlementRequest struct {
 	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'"`
 }
 
-//EntitlementResponse is returned to encapsulate the current status of the request
-type EntitlementResponse struct {
+//Entitlement is returned to encapsulate the current status of the entitlement
+type Entitlement struct {
 	UID         string      `json:"uid" description:"unique identifier of the entitlement request"`
 	Path        string      `json:"path" description:"path of the data e.g. data://user/email"`
 	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'"`
@@ -41,18 +41,18 @@ const (
 
 type entitlementResource struct {
 	// all data held in memory
-	accepted  map[string]EntitlementResponse
-	declined  map[string]EntitlementResponse
-	requested map[string]EntitlementResponse
-	revoked   map[string]EntitlementResponse
+	accepted  map[string]Entitlement
+	declined  map[string]Entitlement
+	requested map[string]Entitlement
+	revoked   map[string]Entitlement
 }
 
 func NewEntitlementService() entitlementResource {
 	return entitlementResource{
-		accepted:  map[string]EntitlementResponse{},
-		declined:  map[string]EntitlementResponse{},
-		requested: map[string]EntitlementResponse{},
-		revoked:   map[string]EntitlementResponse{},
+		accepted:  map[string]Entitlement{},
+		declined:  map[string]Entitlement{},
+		requested: map[string]Entitlement{},
+		revoked:   map[string]Entitlement{},
 	}
 }
 
@@ -67,7 +67,7 @@ func (e entitlementResource) createRequest(request *restful.Request, response *r
 	}
 	// TODO: Validate that I have data at that path
 	// TODO : Need to validate AccessLevel
-	resp := EntitlementResponse{
+	resp := Entitlement{
 		UID:         uuid.NewV4().String(),
 		Path:        req.Path,
 		AccessLevel: req.AccessLevel,
@@ -100,7 +100,7 @@ func (e entitlementResource) removeRequest(request *restful.Request, response *r
 }
 
 func (e entitlementResource) allRequests(request *restful.Request, response *restful.Response) {
-	list := []EntitlementResponse{}
+	list := []Entitlement{}
 	for _, each := range e.requested {
 		list = append(list, each)
 	}
@@ -148,7 +148,7 @@ func (e entitlementResource) findEntitlements(request *restful.Request, response
 
 	path := request.QueryParameter("path")
 
-	list := []EntitlementResponse{}
+	list := []Entitlement{}
 	for _, each := range e.accepted {
 
 		if path != "" {
@@ -206,7 +206,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("create an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(EntitlementRequest{}).
-		Returns(http.StatusOK, "OK", EntitlementResponse{}).
+		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// get a request by uid
@@ -214,8 +214,8 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("get an entitlement request").
 		Param(requestUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Writes(EntitlementResponse{}).
-		Returns(200, "OK", EntitlementResponse{}).
+		Writes(Entitlement{}).
+		Returns(200, "OK", Entitlement{}).
 		Returns(404, "Not Found", nil))
 
 	// delete a request
@@ -231,20 +231,20 @@ func (e entitlementResource) WebService() *restful.WebService {
 	ws.Route(ws.GET("/requests/").To(e.allRequests).
 		Doc("get all pending requests").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Writes([]EntitlementResponse{}))
+		Writes([]Entitlement{}))
 
 	// accept request
 	ws.Route(ws.PUT("/requests/{request-uid}/accept").To(e.acceptRequest).
 		Doc("accept an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Returns(http.StatusOK, "OK", EntitlementResponse{}).
+		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// decline request
 	ws.Route(ws.PUT("/requests/{request-uid}/decline").To(e.declineRequest).
 		Doc("decline an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Returns(http.StatusOK, "OK", EntitlementResponse{}).
+		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// entitlements
@@ -253,8 +253,8 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("get all accepted entitlements").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(ws.QueryParameter("path", "filter by data path e.g. data://user/email").DataType("string")).
-		Writes([]EntitlementResponse{}).
-		Returns(200, "OK", []EntitlementResponse{}).
+		Writes([]Entitlement{}).
+		Returns(200, "OK", []Entitlement{}).
 		Returns(404, "Not Found", nil))
 
 	// revoke an entitlement
@@ -262,7 +262,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("revoke an entitlement").
 		Param(entitlementUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Returns(http.StatusOK, "OK", EntitlementResponse{}).
+		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// TODO : add isEntitled method
