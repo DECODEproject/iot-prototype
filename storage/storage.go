@@ -8,12 +8,15 @@ import (
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
+	"github.com/garyburd/redigo/redis"
 )
 
 type Options struct {
-	Binding           string
-	SwaggerUIPath     string
-	WebServicesURL    string
+	Binding             string
+	SwaggerUIPath       string
+	WebServicesURL      string
+	RedisNetworkAddress string
+
 	UseTLS            bool
 	CertFilePath      string
 	KeyFilePath       string
@@ -25,7 +28,15 @@ type Options struct {
 
 func Serve(options Options) error {
 
-	restful.DefaultContainer.Add(services.NewDataService().WebService())
+	redisConnection, err := redis.Dial("tcp", options.RedisNetworkAddress)
+
+	if err != nil {
+		return err
+	}
+
+	defer redisConnection.Close()
+
+	restful.DefaultContainer.Add(services.NewDataService(redisConnection).WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),

@@ -11,16 +11,17 @@ var serverCommand = &cobra.Command{
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		return storage.Serve(storage.Options{
-			Binding:           _config.Binding,
-			SwaggerUIPath:     _config.SwaggerUIPath,
-			WebServicesURL:    _config.WebServicesURL,
-			UseTLS:            _config.TLS,
-			CertFilePath:      _config.CertFile,
-			KeyFilePath:       _config.KeyFile,
-			TrustedCAFilePath: _config.CACertFile,
-			LogFile:           _config.LogFile,
-			LogPath:           _config.LogPath,
-			Syslog:            _config.Syslog,
+			Binding:             _config.Binding,
+			SwaggerUIPath:       _config.SwaggerUIPath,
+			WebServicesURL:      _config.WebServicesURL,
+			RedisNetworkAddress: _config.RedisNetworkAddress,
+			UseTLS:              _config.TLS,
+			CertFilePath:        _config.CertFile,
+			KeyFilePath:         _config.KeyFile,
+			TrustedCAFilePath:   _config.CACertFile,
+			LogFile:             _config.LogFile,
+			LogPath:             _config.LogPath,
+			Syslog:              _config.Syslog,
 		})
 
 	},

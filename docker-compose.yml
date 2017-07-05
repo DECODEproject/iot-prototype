@@ -3,7 +3,9 @@ services:
   ## metadata service is a global service for node discovery
   metadata:
     image: prototype/metadata
+  ##
   ## decode node
+  ##
   node_one:
     image : prototype/node
     links :
@@ -15,11 +17,17 @@ services:
         - "node_one:node"
   node_one_storage:
     image: prototype/storage
+    depends_on:
+        - "node_one_storage_redis"
     links:
         - "node_one_storage_redis:redis"
+    environment:
+        - REDIS_NETWORK_ADDRESS=redis:6379
   node_one_storage_redis:
     image: redis:3.0.7
+  ##
   ## decode node
+  ##
   node_two:
     image: prototype/node
     links :
@@ -31,7 +39,11 @@ services:
         - "node_two:node"
   node_two_storage:
     image: prototype/storage
+    depends_on:
+        - "node_one_storage_redis"
     links:
         - "node_two_storage_redis:redis"
+    environment:
+        - REDIS_NETWORK_ADDRESS=redis:6379
   node_two_storage_redis:
     image: redis:3.0.7
