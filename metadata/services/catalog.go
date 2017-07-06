@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	restful "github.com/emicklei/go-restful"
+	restfulspec "github.com/emicklei/go-restful-openapi"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -13,25 +14,24 @@ type catalogResource struct {
 }
 
 type CatalogRequest struct {
-	LocationUID string
-	Key         string
-	Tags        []string
+	LocationUID string   `json:"location-uid" description:"a valid location of a node registered previously via /announce"`
+	Key         string   `json:"key" description:"path of the data item"`
+	Tags        []string `json:"tags" description:"a collection of tags probably belonging to an ontology"`
 }
 
 type Item struct {
 	CatalogRequest
-	UID string
+	UID string `json:"uid" description:"unique identifier for a metadata item"`
 }
 
 type LocationRequest struct {
-	UID       string
-	IPAddress string
-	Port      int
+	IPAddress string `json:"ip-address" description:"public IP address of the node"`
+	Port      int    `json:"port" description:"public port of the node"`
 }
 
 type Location struct {
-	Location
-	UID string
+	LocationRequest
+	UID string `json:"uid" description:"unique identifier for a node"`
 }
 
 type ItemWithLocation struct {
@@ -41,26 +41,73 @@ type ItemWithLocation struct {
 
 func NewCatalogService() catalogResource {
 	return catalogResource{
-		all:      map[string]Item{},
-		location: map[string]Location{},
+		all:       map[string]Item{},
+		locations: map[string]Location{},
 	}
 }
 
 func (e catalogResource) registerLocation(request *restful.Request, response *restful.Response) {
 
 	req := LocationRequest{}
+	err := request.ReadEntity(&req)
+
+	if err != nil {
+		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	location := Location{
+		LocationRequest: req,
+		UID:             uuid.NewV4().String(),
+	}
+	e.locations[location.UID] = location
+
+	response.WriteEntity(location)
 
 }
 
 func (e catalogResource) moveLocation(request *restful.Request, response *restful.Response) {
+
+	locationUID := request.PathParameter("location-uid")
+
+	req := LocationRequest{}
+	err := request.ReadEntity(&req)
+
+	if err != nil {
+		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, found := e.locations[locationUID]
+	if !found {
+		response.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	location := Location{
+		LocationRequest: req,
+		UID:             locationUID,
+	}
+
+	e.locations[location.UID] = location
+	response.WriteEntity(location)
+
 }
 
 func (e catalogResource) catalogItem(request *restful.Request, response *restful.Response) {
+
 	req := CatalogRequest{}
 	err := request.ReadEntity(&req)
 
 	if err != nil {
 		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	_, found := e.locations[req.LocationUID]
+
+	if !found {
+		response.WriteErrorString(http.StatusInternalServerError, "unknown node")
 		return
 	}
 
@@ -79,6 +126,20 @@ func (e catalogResource) removeFromCatalog(request *restful.Request, response *r
 }
 
 func (e catalogResource) allItems(request *restful.Request, response *restful.Response) {
+
+	list := []ItemWithLocation{}
+
+	for _, item := range e.all {
+
+		location := e.locations[item.LocationUID]
+		list = append(list, ItemWithLocation{
+			item,
+			location,
+		})
+	}
+
+	response.WriteEntity(list)
+
 }
 
 func (e catalogResource) WebService() *restful.WebService {
@@ -89,7 +150,10 @@ func (e catalogResource) WebService() *restful.WebService {
 		Consumes(restful.MIME_JSON).
 		Produces(restful.MIME_JSON)
 
-	catalogUIDParameter := ws.PathParameter("catalog-uid", "identifier of a cataloged item").DataType("string")
+	catalogUIDParameter := ws.PathParameter("catalog-uid", "identifier for a cataloged item").DataType("string")
+	locationUIDParameter := ws.PathParameter("location-uid", "identifier for a location").DataType("string")
+
+	tags := []string{"metadata"}
 
 	// register a node at a location
 	ws.Route(ws.PUT("/announce").To(e.registerLocation).
@@ -100,6 +164,14 @@ func (e catalogResource) WebService() *restful.WebService {
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// move a location
+	ws.Route(ws.PATCH("/announce/{location-uid}").To(e.moveLocation).
+		Param(locationUIDParameter).
+		Doc("register a node's location").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(LocationRequest{}).
+		Returns(http.StatusOK, "OK", Location{}).
+		Returns(http.StatusNotFound, "Not found", nil).
+		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// add an item to the catalog
 	ws.Route(ws.PUT("/items").To(e.catalogItem).
