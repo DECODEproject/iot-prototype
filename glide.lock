@@ -1,5 +1,5 @@
-hash: d31d586736be3059d65af12c9f61c60e4c8de009b087701a9439e5876012f409
-updated: 2017-07-05T15:27:30.795933749+01:00
+hash: 29ee2ca43b7d241c337a316d15d048fb53e4ecd41d3c71b2b76a4282b2e3eb1a
+updated: 2017-07-06T12:46:36.035678655+01:00
 imports:
 - name: github.com/alecthomas/binary
   version: ec810c4448fb8161fd00898b18c6f72ec661216a
@@ -54,6 +54,8 @@ imports:
   - unicode/bidi
   - unicode/norm
   - width
+- name: gopkg.in/validator.v2
+  version: 07ffaad256c8e957050ad83d6472eb97d785013d
 - name: gopkg.in/yaml.v2
   version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
 testImports: []
