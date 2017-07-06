@@ -10,16 +10,15 @@ import (
 
 // EntitlementRequest are made to request some access to a bit of data
 type EntitlementRequest struct {
-	Path        string      `json:"path" description:"path of the data e.g. data://user/email"`
+	Subject     string      `json:"subject" description:"path of the data e.g. data://user/email"`
 	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'"`
 }
 
 //Entitlement is returned to encapsulate the current status of the entitlement
 type Entitlement struct {
-	UID         string      `json:"uid" description:"unique identifier of the entitlement request"`
-	Path        string      `json:"path" description:"path of the data e.g. data://user/email"`
-	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'"`
-	Status      Status      `json:"status" description:"current status of the request. Can be either 'requested', 'accepted', 'declined' or 'revoked'"`
+	EntitlementRequest
+	UID    string `json:"uid" description:"unique identifier of the entitlement request"`
+	Status Status `json:"status" description:"current status of the request. Can be either 'requested', 'accepted', 'declined' or 'revoked'"`
 }
 
 type AccessLevel string
@@ -58,7 +57,7 @@ func NewEntitlementService() entitlementResource {
 
 func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
 
-	req := EntitlementRequest{}
+	req := Entitlement{}
 	err := request.ReadEntity(&req)
 
 	if err != nil {
@@ -67,15 +66,11 @@ func (e entitlementResource) createRequest(request *restful.Request, response *r
 	}
 	// TODO: Validate that I have data at that path
 	// TODO : Need to validate AccessLevel
-	resp := Entitlement{
-		UID:         uuid.NewV4().String(),
-		Path:        req.Path,
-		AccessLevel: req.AccessLevel,
-		Status:      Requested,
-	}
+	req.UID = uuid.NewV4().String()
+	req.Status = Requested
 
-	e.requested[resp.UID] = resp
-	response.WriteEntity(resp)
+	e.requested[req.UID] = req
+	response.WriteEntity(req)
 
 }
 
@@ -146,17 +141,17 @@ func (e entitlementResource) declineRequest(request *restful.Request, response *
 
 func (e entitlementResource) findEntitlements(request *restful.Request, response *restful.Response) {
 
-	path := request.QueryParameter("path")
+	subject := request.QueryParameter("subject")
 
 	list := []Entitlement{}
 	for _, each := range e.accepted {
 
-		if path != "" {
+		if subject == "" {
 
 			list = append(list, each)
 		} else {
 
-			if path == each.Path {
+			if subject == each.Subject {
 
 				list = append(list, each)
 
@@ -234,14 +229,18 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Writes([]Entitlement{}))
 
 	// accept request
-	ws.Route(ws.PUT("/requests/{request-uid}/accept").To(e.acceptRequest).
+	// TODO : review GET
+	ws.Route(ws.GET("/requests/{request-uid}/accept").To(e.acceptRequest).
+		Param(requestUIDParameter).
 		Doc("accept an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// decline request
-	ws.Route(ws.PUT("/requests/{request-uid}/decline").To(e.declineRequest).
+	// TODO : review GET
+	ws.Route(ws.GET("/requests/{request-uid}/decline").To(e.declineRequest).
+		Param(requestUIDParameter).
 		Doc("decline an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
@@ -252,13 +251,14 @@ func (e entitlementResource) WebService() *restful.WebService {
 	ws.Route(ws.GET("/accepted/").To(e.findEntitlements).
 		Doc("get all accepted entitlements").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Param(ws.QueryParameter("path", "filter by data path e.g. data://user/email").DataType("string")).
+		Param(ws.QueryParameter("subject", "filter by data path e.g. data://user/email").DataType("string")).
 		Writes([]Entitlement{}).
 		Returns(200, "OK", []Entitlement{}).
 		Returns(404, "Not Found", nil))
 
 	// revoke an entitlement
-	ws.Route(ws.PUT("/accepted/{entitlement-uid}/revoke").To(e.revokeEntitlement).
+	// TODO : review GET
+	ws.Route(ws.GET("/accepted/{entitlement-uid}/revoke").To(e.revokeEntitlement).
 		Doc("revoke an entitlement").
 		Param(entitlementUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).

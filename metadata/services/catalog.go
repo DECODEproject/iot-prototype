@@ -23,10 +23,15 @@ type Item struct {
 	UID string
 }
 
-type Location struct {
+type LocationRequest struct {
 	UID       string
 	IPAddress string
 	Port      int
+}
+
+type Location struct {
+	Location
+	UID string
 }
 
 type ItemWithLocation struct {
@@ -42,6 +47,9 @@ func NewCatalogService() catalogResource {
 }
 
 func (e catalogResource) registerLocation(request *restful.Request, response *restful.Response) {
+
+	req := LocationRequest{}
+
 }
 
 func (e catalogResource) moveLocation(request *restful.Request, response *restful.Response) {
@@ -84,6 +92,12 @@ func (e catalogResource) WebService() *restful.WebService {
 	catalogUIDParameter := ws.PathParameter("catalog-uid", "identifier of a cataloged item").DataType("string")
 
 	// register a node at a location
+	ws.Route(ws.PUT("/announce").To(e.registerLocation).
+		Doc("register a node's location").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(LocationRequest{}).
+		Returns(http.StatusOK, "OK", Location{}).
+		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// move a location
 
