@@ -3,6 +3,8 @@ package services
 import (
 	"net/http"
 
+	validator "gopkg.in/validator.v2"
+
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	uuid "github.com/satori/go.uuid"
@@ -10,15 +12,15 @@ import (
 
 // EntitlementRequest are made to request some access to a bit of data
 type EntitlementRequest struct {
-	Subject     string      `json:"subject" description:"path of the data e.g. data://user/email"`
-	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'"`
+	Subject     string      `json:"subject" description:"path of the data e.g. data://user/email" validate:"nonzero"`
+	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'" validate:"nonzero"`
 }
 
 //Entitlement is returned to encapsulate the current status of the entitlement
 type Entitlement struct {
 	EntitlementRequest
-	UID    string `json:"uid" description:"unique identifier of the entitlement request"`
-	Status Status `json:"status" description:"current status of the request. Can be either 'requested', 'accepted', 'declined' or 'revoked'"`
+	UID    string `json:"uid" description:"unique identifier of the entitlement request" validate:"nonzero"`
+	Status Status `json:"status" description:"current status of the request. Can be either 'requested', 'accepted', 'declined' or 'revoked'" validate:"nonzero"`
 }
 
 type AccessLevel string
@@ -58,12 +60,17 @@ func NewEntitlementService() entitlementResource {
 func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
 
 	req := Entitlement{}
-	err := request.ReadEntity(&req)
 
-	if err != nil {
+	if err := request.ReadEntity(&req); err != nil {
 		response.WriteErrorString(http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	if errs := validator.Validate(req); errs != nil {
+		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		return
+	}
+
 	// TODO: Validate that I have data at that path
 	// TODO : Need to validate AccessLevel
 	req.UID = uuid.NewV4().String()
@@ -202,6 +209,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(EntitlementRequest{}).
 		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusBadRequest, "error validating request", nil).
 		Returns(http.StatusInternalServerError, "something went wrong", nil))
 
 	// get a request by uid

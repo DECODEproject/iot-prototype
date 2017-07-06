@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	validator "gopkg.in/validator.v2"
+
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	redis_client "github.com/garyburd/redigo/redis"
@@ -12,7 +14,7 @@ import (
 )
 
 type Data struct {
-	Value string `json:"value" description:"encoded contents to save"`
+	Value string `json:"value" description:"encoded contents to save" validate:"nonzero"`
 }
 
 type dataResource struct {
@@ -86,8 +88,14 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	data := Data{}
 	err := request.ReadEntity(&data)
 
-	if err != nil {
+	if err := request.ReadEntity(&data); err != nil {
 		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if errs := validator.Validate(data); errs != nil {
+		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		return
 	}
 
 	ts := redis.NewTimeSeries(prefix, timestep, expiry, e.db)
@@ -129,6 +137,7 @@ func (e dataResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(Data{}). // from the request
 		Returns(http.StatusCreated, "Data was accepted.", nil).
+		Returns(http.StatusBadRequest, "error validating request", nil).
 		Returns(http.StatusInternalServerError, "Something went wrong", nil))
 
 	return ws
