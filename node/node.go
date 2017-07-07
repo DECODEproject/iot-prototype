@@ -73,7 +73,7 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 	ok, host, port := hostAndIpToBits(nodePublicAddress)
 
 	if !ok {
-		return "", errors.New("unable to parse nodePublicAddress")
+		return "", errors.New("unable to parse WEBSERVICES_URL or flag -u. Expected value : http[s]://host:port")
 	}
 
 	// TODO : need to retry with backoff
