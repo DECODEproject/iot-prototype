@@ -17,9 +17,10 @@ var RootCmd = &cobra.Command{
 var _config = newConfig()
 
 type config struct {
-	Binding        string `envconfig:"BINDING" default:":8080"`
-	SwaggerUIPath  string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
-	WebServicesURL string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8080"`
+	Binding                string `envconfig:"BINDING" default:":8080"`
+	SwaggerUIPath          string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
+	WebServicesURL         string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8080"`
+	MetadataServiceAddress string `envconfig:"METADATA_SERVICE_ADDRESS" default:"http://localhost:8081"`
 
 	TLS        bool   `envconfig:"TLS"`
 	ServerName string `envconfig:"TLS_SERVER_NAME"`
@@ -42,7 +43,8 @@ func newConfig() *config {
 func (o *config) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Binding, "binding", "b", o.Binding, "binding address in form of {ip}:port")
 	fs.StringVarP(&o.SwaggerUIPath, "swagger-ui", "s", o.SwaggerUIPath, "path to folder to server Swagger UI")
-	fs.StringVarP(&o.WebServicesURL, "url", "u", o.WebServicesURL, "external address of the API service")
+	fs.StringVarP(&o.WebServicesURL, "url", "u", o.WebServicesURL, "public address of the API service")
+	fs.StringVarP(&o.MetadataServiceAddress, "metadata", "m", o.MetadataServiceAddress, "public address of the Metadata service")
 
 	fs.BoolVar(&o.TLS, "tls", o.TLS, "enable tls")
 	fs.StringVar(&o.CACertFile, "tls-ca-cert-file", o.CACertFile, "ca certificate file")

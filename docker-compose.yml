@@ -6,15 +6,27 @@ services:
   ##
   ## decode node
   ##
+  ## node_one is the api server for the decode node
   node_one:
     image : prototype/node
     links :
         - "node_one_storage:storage"
         - "metadata:metadata"
+    depends_on:
+        - "metadata"
+    environment:
+        # address of the metadata service
+        - METADATA_SERVICE_ADDRESS=metadata:8081
+        # address of the node
+        # TODO : resolve this to be the external address
+        - WEBSERVICES_URL=node_one:8080
+  ## node_one_device_hub is an instance of device hub fro IOT integration
   node_one_device_hub:
     image: thingful/device-hub
     links:
         - "node_one:node"
+  ## node_one_storage is a server responsible for managing the local
+  ## storage on the node - fromts a redis server for persistence 
   node_one_storage:
     image: prototype/storage
     depends_on:
@@ -22,28 +34,7 @@ services:
     links:
         - "node_one_storage_redis:redis"
     environment:
-        - REDIS_NETWORK_ADDRESS=redis:6379
+        - REDIS_SERVICE_ADDRESS=redis:6379
   node_one_storage_redis:
     image: redis:3.0.7
-  ##
-  ## decode node
-  ##
-  node_two:
-    image: prototype/node
-    links :
-        - "node_two_storage:storage"
-        - "metadata:metadata"
-  node_two_device_hub:
-    image: thingful/device-hub
-    links:
-        - "node_two:node"
-  node_two_storage:
-    image: prototype/storage
-    depends_on:
-        - "node_one_storage_redis"
-    links:
-        - "node_two_storage_redis:redis"
-    environment:
-        - REDIS_NETWORK_ADDRESS=redis:6379
-  node_two_storage_redis:
-    image: redis:3.0.7
+

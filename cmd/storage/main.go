@@ -20,7 +20,7 @@ type config struct {
 	Binding             string `envconfig:"BINDING" default:":8083"`
 	SwaggerUIPath       string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
 	WebServicesURL      string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8081"`
-	RedisNetworkAddress string `envconfig:"REDIS_NETWORK_ADDRESS" default:":6379"`
+	RedisNetworkAddress string `envconfig:"REDIS_SERVICE_ADDRESS" default:":6379"`
 
 	TLS        bool   `envconfig:"TLS"`
 	ServerName string `envconfig:"TLS_SERVER_NAME"`
