@@ -55,14 +55,14 @@ docker-up: ## run dependencies as docker containers
 	docker-compose up -d
 	docker ps
 
-.PHONY: docker_up
+.PHONY: docker-up
 
 docker-build: clean linux-amd64 ## build docker images for all of the executables
 	docker build -t prototype/metadata:latest -t prototype/metadata:$(SOURCE_VERSION) -f=./docker/Dockerfile.metadata .
 	docker build -t prototype/node:latest -t prototype/node:$(SOURCE_VERSION) -f=./docker/Dockerfile.node .
 	docker build -t prototype/storage:latest -t prototype/storage:$(SOURCE_VERSION) -f=./docker/Dockerfile.storage .
 
-.PHONY: docker_build
+.PHONY: docker-build
 
 client-metadata: ## build golang client for the metadata service
 	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8081/apidocs.json -l go -o ./client/metadata/

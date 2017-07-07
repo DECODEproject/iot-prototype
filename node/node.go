@@ -69,8 +69,6 @@ func Serve(options Options) error {
 
 func registerWithMetadataService(metadataServiceAddress, nodePublicAddress string) (string, error) {
 
-	log.Printf("registering %s with metadata service %s", nodePublicAddress, metadataServiceAddress)
-
 	// parse the nods public address into its component parts
 	ok, host, port := hostAndIpToBits(nodePublicAddress)
 
@@ -84,6 +82,7 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 
 	f := func() error {
 
+		log.Printf(".")
 		response, _, err := api.RegisterLocation(metadataclient.ServicesLocationRequest{
 			IpAddress: host,
 			Port:      int32(port),
