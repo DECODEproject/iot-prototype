@@ -1,8 +1,10 @@
-hash: c4c61848aa546fe470375498c66d4935ce2c1f8dcdfc728a39fd73bc8870919c
-updated: 2017-07-07T13:15:48.712959452+01:00
+hash: 0174df5330c268eaae891636f26b3c6d57f26a63cd5d05c9b58547464663a64a
+updated: 2017-07-07T13:48:00.554926517+01:00
 imports:
 - name: github.com/alecthomas/binary
   version: ec810c4448fb8161fd00898b18c6f72ec661216a
+- name: github.com/cenkalti/backoff
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/emicklei/go-restful
   version: cf834cf8da5b681af81bde6fa32304e6ce8eec71
   subpackages:

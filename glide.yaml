@@ -17,3 +17,5 @@ import:
 - package: gopkg.in/validator.v2
 - package: github.com/go-resty/resty
   version: ^0.13.0
+- package: github.com/cenkalti/backoff
+  version: ^1.0.0
