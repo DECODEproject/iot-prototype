@@ -1,5 +1,5 @@
-hash: 29ee2ca43b7d241c337a316d15d048fb53e4ecd41d3c71b2b76a4282b2e3eb1a
-updated: 2017-07-06T12:46:36.035678655+01:00
+hash: c4c61848aa546fe470375498c66d4935ce2c1f8dcdfc728a39fd73bc8870919c
+updated: 2017-07-07T13:15:48.712959452+01:00
 imports:
 - name: github.com/alecthomas/binary
   version: ec810c4448fb8161fd00898b18c6f72ec661216a
@@ -22,6 +22,8 @@ imports:
   version: 9cf697d99bf904e29363382a2e8c23dde5c8d377
 - name: github.com/go-openapi/swag
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
+- name: github.com/go-resty/resty
+  version: cf81ed0a604d373be63b4c036c6b05c06520615f
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kelseyhightower/envconfig
@@ -46,6 +48,7 @@ imports:
   version: d1e1b351919c6738fdeb9893d5c998b161464f0c
   subpackages:
   - idna
+  - publicsuffix
 - name: golang.org/x/text
   version: f4b4367115ec2de254587813edaa901bc1c723a8
   subpackages:
