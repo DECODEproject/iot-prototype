@@ -97,3 +97,20 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 	err := backoff.Retry(f, backoff.NewExponentialBackOff())
 	return token, err
 }
+
+/*
+func pretendToBeADeviceHubEndpoint( metadataClient metadataclient.MetadataApi, storageClient interface{} ){
+
+	//input := map[string] interface{}{}
+
+	// for every item from device-hub
+
+    // break down to individual pieces
+
+	// find entitlement for path
+
+	// if can_discover -> send metadata to the metadata service
+
+	// write to the storage service
+}
+*/

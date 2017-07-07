@@ -42,151 +42,13 @@ const (
 
 type entitlementResource struct {
 	// all data held in memory
-	accepted  map[string]Entitlement
-	declined  map[string]Entitlement
-	requested map[string]Entitlement
-	revoked   map[string]Entitlement
+	store entitlementStore
 }
 
 func NewEntitlementService() entitlementResource {
 	return entitlementResource{
-		accepted:  map[string]Entitlement{},
-		declined:  map[string]Entitlement{},
-		requested: map[string]Entitlement{},
-		revoked:   map[string]Entitlement{},
+		store: NewEntitlementStore(),
 	}
-}
-
-func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
-
-	req := Entitlement{}
-
-	if err := request.ReadEntity(&req); err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if errs := validator.Validate(req); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
-		return
-	}
-
-	// TODO: Validate that I have data at that path
-	// TODO : Need to validate AccessLevel
-	req.UID = uuid.NewV4().String()
-	req.Status = Requested
-
-	e.requested[req.UID] = req
-	response.WriteEntity(req)
-
-}
-
-func (e entitlementResource) findRequest(request *restful.Request, response *restful.Response) {
-
-	requestUID := request.PathParameter("request-uid")
-
-	req, found := e.requested[requestUID]
-
-	if !found {
-		response.WriteErrorString(http.StatusNotFound, "request not found")
-		return
-	}
-
-	response.WriteEntity(req)
-
-}
-
-func (e entitlementResource) removeRequest(request *restful.Request, response *restful.Response) {
-	requestUID := request.PathParameter("request-uid")
-	delete(e.requested, requestUID)
-}
-
-func (e entitlementResource) allRequests(request *restful.Request, response *restful.Response) {
-	list := []Entitlement{}
-	for _, each := range e.requested {
-		list = append(list, each)
-	}
-	response.WriteEntity(list)
-}
-
-func (e entitlementResource) acceptRequest(request *restful.Request, response *restful.Response) {
-
-	requestUID := request.PathParameter("request-uid")
-
-	req, found := e.requested[requestUID]
-
-	if !found {
-		response.WriteErrorString(http.StatusNotFound, "request not found")
-		return
-	}
-
-	delete(e.requested, requestUID)
-	req.Status = Accepted
-	e.accepted[req.UID] = req
-
-	response.WriteEntity(req)
-
-}
-
-func (e entitlementResource) declineRequest(request *restful.Request, response *restful.Response) {
-
-	requestUID := request.PathParameter("request-uid")
-
-	req, found := e.requested[requestUID]
-
-	if !found {
-		response.WriteErrorString(http.StatusNotFound, "request not found")
-		return
-	}
-
-	delete(e.requested, requestUID)
-	req.Status = Declined
-	e.declined[req.UID] = req
-
-	response.WriteEntity(req)
-}
-
-func (e entitlementResource) findEntitlements(request *restful.Request, response *restful.Response) {
-
-	subject := request.QueryParameter("subject")
-
-	list := []Entitlement{}
-	for _, each := range e.accepted {
-
-		if subject == "" {
-
-			list = append(list, each)
-		} else {
-
-			if subject == each.Subject {
-
-				list = append(list, each)
-
-			}
-		}
-	}
-
-	response.WriteEntity(list)
-
-}
-
-func (e entitlementResource) revokeEntitlement(request *restful.Request, response *restful.Response) {
-
-	uid := request.PathParameter("entitlement-uid")
-
-	req, found := e.accepted[uid]
-
-	if !found {
-		response.WriteErrorString(http.StatusNotFound, "entitlement not found")
-		return
-	}
-
-	delete(e.accepted, uid)
-	req.Status = Revoked
-	e.revoked[req.UID] = req
-
-	response.WriteEntity(req)
-
 }
 
 func (e entitlementResource) WebService() *restful.WebService {
@@ -276,4 +138,132 @@ func (e entitlementResource) WebService() *restful.WebService {
 	// TODO : add isEntitled method
 
 	return ws
+}
+
+func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
+
+	req := Entitlement{}
+
+	if err := request.ReadEntity(&req); err != nil {
+		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	if errs := validator.Validate(req); errs != nil {
+		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		return
+	}
+
+	// TODO: Validate that I have data at that path
+	// TODO : Need to validate AccessLevel
+	req.UID = uuid.NewV4().String()
+	req.Status = Requested
+
+	e.store.Requested.Add(req)
+	//e.requested[req.UID] = req
+	response.WriteEntity(req)
+
+}
+
+func (e entitlementResource) findRequest(request *restful.Request, response *restful.Response) {
+
+	requestUID := request.PathParameter("request-uid")
+
+	req, found := e.store.Requested.Get(requestUID)
+
+	if !found {
+		response.WriteErrorString(http.StatusNotFound, "request not found")
+		return
+	}
+
+	response.WriteEntity(req)
+
+}
+
+func (e entitlementResource) removeRequest(request *restful.Request, response *restful.Response) {
+	requestUID := request.PathParameter("request-uid")
+	e.store.Requested.Delete(requestUID)
+}
+
+func (e entitlementResource) allRequests(request *restful.Request, response *restful.Response) {
+	response.WriteEntity(e.store.Requested.All())
+}
+
+func (e entitlementResource) acceptRequest(request *restful.Request, response *restful.Response) {
+
+	requestUID := request.PathParameter("request-uid")
+
+	req, found := e.store.Requested.Get(requestUID)
+	if !found {
+
+		response.WriteErrorString(http.StatusNotFound, "request not found")
+		return
+
+	}
+	e.store.Requested.Delete(requestUID)
+	req.Status = Accepted
+	e.store.Accepted.Add(req)
+
+	response.WriteEntity(req)
+}
+
+func (e entitlementResource) declineRequest(request *restful.Request, response *restful.Response) {
+
+	requestUID := request.PathParameter("request-uid")
+
+	req, found := e.store.Requested.Get(requestUID)
+
+	if !found {
+		response.WriteErrorString(http.StatusNotFound, "request not found")
+		return
+	}
+
+	e.store.Requested.Delete(requestUID)
+	req.Status = Declined
+	e.store.Declined.Add(req)
+
+	response.WriteEntity(req)
+}
+
+func (e entitlementResource) findEntitlements(request *restful.Request, response *restful.Response) {
+
+	subject := request.QueryParameter("subject")
+
+	list := []Entitlement{}
+	for _, each := range e.store.Accepted.All() {
+
+		if subject == "" {
+
+			list = append(list, each)
+		} else {
+
+			if subject == each.Subject {
+
+				list = append(list, each)
+
+			}
+		}
+	}
+
+	response.WriteEntity(list)
+
+}
+
+func (e entitlementResource) revokeEntitlement(request *restful.Request, response *restful.Response) {
+
+	uid := request.PathParameter("entitlement-uid")
+
+	req, found := e.store.Accepted.Get(uid)
+
+	if !found {
+		response.WriteErrorString(http.StatusNotFound, "entitlement not found")
+		return
+	}
+
+	e.store.Accepted.Delete(uid)
+	req.Status = Revoked
+	e.store.Revoked.Add(req)
+
+	response.WriteEntity(req)
+
 }
