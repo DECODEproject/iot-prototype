@@ -18,8 +18,8 @@ services:
         # address of the metadata service
         - METADATA_SERVICE_ADDRESS=metadata:8081
         # address of the node
-        # TODO : resolve this to be the external address
-        - WEBSERVICES_URL=node_one:8080
+        # TODO : resolve this to nbe the external address
+        - WEBSERVICES_URL=http://node_one:8080
   ## node_one_device_hub is an instance of device hub fro IOT integration
   node_one_device_hub:
     image: thingful/device-hub

@@ -12,6 +12,7 @@ import (
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
 
+	"github.com/cenkalti/backoff"
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 )
@@ -70,24 +71,33 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 
 	log.Printf("registering %s with metadata service %s", nodePublicAddress, metadataServiceAddress)
 
+	// parse the nods public address into its component parts
 	ok, host, port := hostAndIpToBits(nodePublicAddress)
 
 	if !ok {
 		return "", errors.New("unable to parse WEBSERVICES_URL or flag -u. Expected value : http[s]://host:port")
 	}
 
-	// TODO : need to retry with backoff
+	// register with the metadata service using an exponential backoff
 	api := metadataclient.NewMetadataApiWithBasePath(metadataServiceAddress)
-	response, _, err := api.RegisterLocation(metadataclient.ServicesLocationRequest{
-		IpAddress: host,
-		Port:      int32(port),
-	})
+	var token string
 
-	if err != nil {
-		return "", err
+	f := func() error {
+
+		response, _, err := api.RegisterLocation(metadataclient.ServicesLocationRequest{
+			IpAddress: host,
+			Port:      int32(port),
+		})
+
+		if err != nil {
+			return err
+		}
+		token = response.Uid
+		return nil
 	}
 
-	return response.Uid, nil
+	err := backoff.Retry(f, backoff.NewExponentialBackOff())
+	return token, err
 }
 
 func hostAndIpToBits(address string) (bool, string, int) {
