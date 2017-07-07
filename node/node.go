@@ -1,8 +1,12 @@
 package node
 
 import (
+	"errors"
 	"log"
 	"net/http"
+	"net/url"
+	"strconv"
+	"strings"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/services"
 
@@ -66,12 +70,17 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 
 	log.Printf("registering %s with metadata service %s", nodePublicAddress, metadataServiceAddress)
 
-	// TODO : need to retry with backoff
+	ok, host, port := hostAndIpToBits(nodePublicAddress)
 
+	if !ok {
+		return "", errors.New("unable to parse nodePublicAddress")
+	}
+
+	// TODO : need to retry with backoff
 	api := metadataclient.NewMetadataApiWithBasePath(metadataServiceAddress)
 	response, _, err := api.RegisterLocation(metadataclient.ServicesLocationRequest{
-		IpAddress: "localhost",
-		Port:      8080,
+		IpAddress: host,
+		Port:      int32(port),
 	})
 
 	if err != nil {
@@ -79,4 +88,27 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 	}
 
 	return response.Uid, nil
+}
+
+func hostAndIpToBits(address string) (bool, string, int) {
+
+	url, err := url.Parse(address)
+
+	if err != nil {
+		return false, "", 0
+	}
+
+	bits := strings.Split(url.Host, ":")
+
+	if len(bits) != 2 {
+		return false, "", 0
+	}
+
+	port, err := strconv.Atoi(bits[1])
+
+	if err != nil {
+		return false, "", 0
+	}
+
+	return true, bits[0], port
 }
