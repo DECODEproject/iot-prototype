@@ -42,12 +42,12 @@ const (
 
 type entitlementResource struct {
 	// all data held in memory
-	store entitlementStore
+	store *EntitlementStore
 }
 
-func NewEntitlementService() entitlementResource {
+func NewEntitlementService(store *EntitlementStore) entitlementResource {
 	return entitlementResource{
-		store: NewEntitlementStore(),
+		store: store,
 	}
 }
 

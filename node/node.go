@@ -45,8 +45,10 @@ func Serve(options Options) error {
 
 	log.Printf("registered with metadata service : %s", token)
 
+	store := services.NewEntitlementStore()
+
 	// TODO : add service to receive data from the device hub and/or any other service
-	restful.DefaultContainer.Add(services.NewEntitlementService().WebService())
+	restful.DefaultContainer.Add(services.NewEntitlementService(store).WebService())
 	restful.DefaultContainer.Add(services.NewFunctionService().WebService())
 
 	config := restfulspec.Config{
