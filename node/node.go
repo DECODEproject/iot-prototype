@@ -4,11 +4,9 @@ import (
 	"errors"
 	"log"
 	"net/http"
-	"net/url"
-	"strconv"
-	"strings"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/services"
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
 
@@ -38,7 +36,7 @@ func Serve(options Options) error {
 
 	// TODO : check for existing token
 	// If found then update the location by telling the metadata service where I am
-	// The path for the eprototype is to just register again
+	// The prototype will just register again
 	token, err := registerWithMetadataService(options.MetadataServiceAddress, options.WebServicesURL)
 
 	if err != nil {
@@ -67,10 +65,11 @@ func Serve(options Options) error {
 	return http.ListenAndServe(options.Binding, nil)
 }
 
+// registerWithMetadataService returns the 'announce' token from the metadata service
 func registerWithMetadataService(metadataServiceAddress, nodePublicAddress string) (string, error) {
 
 	// parse the nods public address into its component parts
-	ok, host, port := hostAndIpToBits(nodePublicAddress)
+	ok, host, port := utils.HostAndIpToBits(nodePublicAddress)
 
 	if !ok {
 		return "", errors.New("unable to parse WEBSERVICES_URL or flag -u. Expected value : http[s]://host:port")
@@ -97,27 +96,4 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 
 	err := backoff.Retry(f, backoff.NewExponentialBackOff())
 	return token, err
-}
-
-func hostAndIpToBits(address string) (bool, string, int) {
-
-	url, err := url.Parse(address)
-
-	if err != nil {
-		return false, "", 0
-	}
-
-	bits := strings.Split(url.Host, ":")
-
-	if len(bits) != 2 {
-		return false, "", 0
-	}
-
-	port, err := strconv.Atoi(bits[1])
-
-	if err != nil {
-		return false, "", 0
-	}
-
-	return true, bits[0], port
 }

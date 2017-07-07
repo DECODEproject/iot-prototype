@@ -140,7 +140,7 @@ func (e catalogResource) registerLocation(request *restful.Request, response *re
 	}
 	e.locations[location.UID] = location
 
-	log.Print("registered", location)
+	log.Print("node registered :", location)
 
 	response.WriteEntity(location)
 
@@ -178,6 +178,9 @@ func (e catalogResource) moveLocation(request *restful.Request, response *restfu
 	}
 
 	e.locations[location.UID] = location
+
+	log.Print("node moved :", location)
+
 	response.WriteEntity(location)
 
 }
