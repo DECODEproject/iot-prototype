@@ -1,7 +1,9 @@
 package services
 
 import (
+	"log"
 	"net/http"
+	"sync"
 
 	validator "gopkg.in/validator.v2"
 
@@ -11,6 +13,7 @@ import (
 )
 
 type catalogResource struct {
+	lock      sync.RWMutex
 	all       map[string]Item
 	locations map[string]Location
 }
@@ -26,19 +29,21 @@ type Item struct {
 	UID string `json:"uid" description:"unique identifier for a metadata item" validate:"nonzero"`
 }
 
+type ItemWithLocation struct {
+	Item
+	Location
+}
+
+// LocationRequest allows a node to register its presence with the service
 type LocationRequest struct {
 	IPAddress string `json:"ip-address" description:"public IP address of the node" validate:"nonzero"`
 	Port      int    `json:"port" description:"public port of the node" validate:"nonzero"`
 }
 
+// Location contains the original request and a UID to use when interacting with the service e.g. adding Items to the catalog.
 type Location struct {
 	LocationRequest
 	UID string `json:"uid" description:"unique identifier for a node" validate:"nonzero"`
-}
-
-type ItemWithLocation struct {
-	Item
-	Location
 }
 
 func NewCatalogService() catalogResource {
@@ -49,6 +54,9 @@ func NewCatalogService() catalogResource {
 }
 
 func (e catalogResource) registerLocation(request *restful.Request, response *restful.Response) {
+
+	e.lock.Lock()
+	defer e.lock.Unlock()
 
 	req := LocationRequest{}
 
@@ -68,11 +76,16 @@ func (e catalogResource) registerLocation(request *restful.Request, response *re
 	}
 	e.locations[location.UID] = location
 
+	log.Print("registered", location)
+
 	response.WriteEntity(location)
 
 }
 
 func (e catalogResource) moveLocation(request *restful.Request, response *restful.Response) {
+
+	e.lock.Lock()
+	defer e.lock.Unlock()
 
 	locationUID := request.PathParameter("location-uid")
 
@@ -107,6 +120,9 @@ func (e catalogResource) moveLocation(request *restful.Request, response *restfu
 
 func (e catalogResource) catalogItem(request *restful.Request, response *restful.Response) {
 
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
 	req := CatalogRequest{}
 	err := request.ReadEntity(&req)
 
@@ -137,11 +153,18 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 }
 
 func (e catalogResource) removeFromCatalog(request *restful.Request, response *restful.Response) {
+
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
 	uid := request.PathParameter("catalog-uid")
 	delete(e.all, uid)
 }
 
 func (e catalogResource) allItems(request *restful.Request, response *restful.Response) {
+
+	e.lock.Lock()
+	defer e.lock.Unlock()
 
 	list := []ItemWithLocation{}
 
