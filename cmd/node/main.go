@@ -21,6 +21,7 @@ type config struct {
 	SwaggerUIPath          string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
 	WebServicesURL         string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8080"`
 	MetadataServiceAddress string `envconfig:"METADATA_SERVICE_ADDRESS" default:"http://localhost:8081"`
+	StorageServiceAddress  string `envconfig:"STORAGE_SERVICE_ADDRESS" default:"http://localhost:8083"`
 
 	TLS        bool   `envconfig:"TLS"`
 	ServerName string `envconfig:"TLS_SERVER_NAME"`
@@ -42,9 +43,10 @@ func newConfig() *config {
 
 func (o *config) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Binding, "binding", "b", o.Binding, "binding address in form of {ip}:port")
-	fs.StringVarP(&o.SwaggerUIPath, "swagger-ui", "s", o.SwaggerUIPath, "path to folder to server Swagger UI")
+	fs.StringVarP(&o.SwaggerUIPath, "swagger-ui", "w", o.SwaggerUIPath, "path to folder to server Swagger UI")
 	fs.StringVarP(&o.WebServicesURL, "url", "u", o.WebServicesURL, "public address of the API service")
 	fs.StringVarP(&o.MetadataServiceAddress, "metadata", "m", o.MetadataServiceAddress, "public address of the Metadata service")
+	fs.StringVarP(&o.StorageServiceAddress, "storage", "s", o.StorageServiceAddress, "public address of the Storage service")
 
 	fs.BoolVar(&o.TLS, "tls", o.TLS, "enable tls")
 	fs.StringVar(&o.CACertFile, "tls-ca-cert-file", o.CACertFile, "ca certificate file")
