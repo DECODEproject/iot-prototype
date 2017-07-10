@@ -23,11 +23,22 @@ type Entitlement struct {
 	Status Status `json:"status" description:"current status of the request. Can be either 'requested', 'accepted', 'declined' or 'revoked'" validate:"nonzero"`
 }
 
+// IsDiscoverable returns true if the presence of the data can be discovered
+// For the purposes of the prototype this means the data will be sent to the metadata service
+func (e Entitlement) IsDiscoverable() bool {
+	return e.AccessLevel == CanAccess || e.AccessLevel == CanDiscover
+}
+
+// IsAccessible returns true if the data can be accessed e.g. viewed, collated etc
+func (e Entitlement) IsAccessible() bool {
+	return e.AccessLevel == CanDiscover
+}
+
 type AccessLevel string
 
 const (
 	None        = AccessLevel("none")
-	CanRead     = AccessLevel("can-read")
+	CanAccess   = AccessLevel("can-access")
 	CanDiscover = AccessLevel("can-discover")
 )
 

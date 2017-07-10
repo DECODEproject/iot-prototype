@@ -19,7 +19,7 @@ var _config = newConfig()
 type config struct {
 	Binding             string `envconfig:"BINDING" default:":8083"`
 	SwaggerUIPath       string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
-	WebServicesURL      string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8081"`
+	WebServicesURL      string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8083"`
 	RedisNetworkAddress string `envconfig:"REDIS_SERVICE_ADDRESS" default:":6379"`
 
 	TLS        bool   `envconfig:"TLS"`

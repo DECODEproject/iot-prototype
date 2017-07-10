@@ -21,8 +21,6 @@ package swagger
 import (
 	"net/url"
 	"encoding/json"
-	"fmt"
-	"strings"
 )
 
 type DataApi struct {
@@ -49,16 +47,14 @@ func NewDataApiWithBasePath(basePath string) *DataApi {
  * append data to a bucket, will create the bucket if it does not exist.
  * append data to a bucket, will create the bucket if it does not exist.
  *
- * @param bucketUid name of the &#39;bucket&#39; of data
  * @param body 
  * @return void
  */
-func (a DataApi) Append(bucketUid string, body ServicesData) (*APIResponse, error) {
+func (a DataApi) Append(body ServicesData) (*APIResponse, error) {
 
 	var httpMethod = "Put"
 	// create path and map variables
-	path := a.Configuration.BasePath + "/data/{bucket-uid}"
-	path = strings.Replace(path, "{"+"bucket-uid"+"}", fmt.Sprintf("%v", bucketUid), -1)
+	path := a.Configuration.BasePath + "/data/"
 
 
 	headerParams := make(map[string]string)
@@ -107,17 +103,16 @@ func (a DataApi) Append(bucketUid string, body ServicesData) (*APIResponse, erro
  * returns all of the data stored in a logical &#39;bucket&#39;.
  * returns all of the data stored in a logical &#39;bucket&#39;.
  *
- * @param bucketUid name of the &#39;bucket&#39; of data
  * @param from return data from this ISO8601 timestamp. Defaults to 24 hours ago.
  * @param to finish at this ISO8601 timestamp 
+ * @param bucketUid name of the &#39;bucket&#39; of data
  * @return []ServicesData
  */
-func (a DataApi) GetAll(bucketUid string, from string, to string) ([]ServicesData, *APIResponse, error) {
+func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ServicesData, *APIResponse, error) {
 
 	var httpMethod = "Get"
 	// create path and map variables
-	path := a.Configuration.BasePath + "/data/{bucket-uid}"
-	path = strings.Replace(path, "{"+"bucket-uid"+"}", fmt.Sprintf("%v", bucketUid), -1)
+	path := a.Configuration.BasePath + "/data/"
 
 
 	headerParams := make(map[string]string)
@@ -132,6 +127,7 @@ func (a DataApi) GetAll(bucketUid string, from string, to string) ([]ServicesDat
 	}
 		queryParams.Add("from", a.Configuration.APIClient.ParameterToString(from, ""))
 			queryParams.Add("to", a.Configuration.APIClient.ParameterToString(to, ""))
+			queryParams.Add("bucket-uid", a.Configuration.APIClient.ParameterToString(bucketUid, ""))
 	
 
 	// to determine the Content-Type header

@@ -27,6 +27,7 @@ type Options struct {
 }
 
 func Serve(options Options) error {
+	log.Print(options)
 
 	redisConnection, err := redis.Dial("tcp", options.RedisNetworkAddress)
 

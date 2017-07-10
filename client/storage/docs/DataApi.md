@@ -4,12 +4,12 @@ All URIs are relative to *https://localhost*
 
 Method | HTTP request | Description
 ------------- | ------------- | -------------
-[**Append**](DataApi.md#Append) | **Put** /data/{bucket-uid} | append data to a bucket, will create the bucket if it does not exist.
-[**GetAll**](DataApi.md#GetAll) | **Get** /data/{bucket-uid} | returns all of the data stored in a logical &#39;bucket&#39;.
+[**Append**](DataApi.md#Append) | **Put** /data/ | append data to a bucket, will create the bucket if it does not exist.
+[**GetAll**](DataApi.md#GetAll) | **Get** /data/ | returns all of the data stored in a logical &#39;bucket&#39;.
 
 
 # **Append**
-> Append($bucketUid, $body)
+> Append($body)
 
 append data to a bucket, will create the bucket if it does not exist.
 
@@ -20,7 +20,6 @@ append data to a bucket, will create the bucket if it does not exist.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **bucketUid** | **string**| name of the &#39;bucket&#39; of data | 
  **body** | [**ServicesData**](ServicesData.md)|  | 
 
 ### Return type
@@ -39,7 +38,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **GetAll**
-> []ServicesData GetAll($bucketUid, $from, $to)
+> []ServicesData GetAll($from, $to, $bucketUid)
 
 returns all of the data stored in a logical 'bucket'.
 
@@ -50,9 +49,9 @@ returns all of the data stored in a logical 'bucket'.
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **bucketUid** | **string**| name of the &#39;bucket&#39; of data | 
  **from** | **string**| return data from this ISO8601 timestamp. Defaults to 24 hours ago. | [optional] [default to ]
- **to** | **string**| finish at this ISO8601 timestamp  | [optional] [default to 2017-07-10T11:46:10.965+01:00]
+ **to** | **string**| finish at this ISO8601 timestamp  | [optional] [default to 2017-07-10T14:47:19.475+01:00]
+ **bucketUid** | **string**| name of the &#39;bucket&#39; of data | [optional] [default to ]
 
 ### Return type
 

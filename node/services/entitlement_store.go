@@ -14,10 +14,16 @@ type EntitlementStore struct {
 
 func NewEntitlementStore() *EntitlementStore {
 	return &EntitlementStore{
-		Accepted:  entitlementMap{},
-		Declined:  entitlementMap{},
-		Requested: entitlementMap{},
-		Revoked:   entitlementMap{},
+		Accepted:  newEntitlementMap(),
+		Declined:  newEntitlementMap(),
+		Requested: newEntitlementMap(),
+		Revoked:   newEntitlementMap(),
+	}
+}
+
+func newEntitlementMap() entitlementMap {
+	return entitlementMap{
+		store: map[string]Entitlement{},
 	}
 }
 
@@ -51,6 +57,20 @@ func (e entitlementMap) Get(uid string) (Entitlement, bool) {
 
 	ent, found := e.store[uid]
 	return ent, found
+}
+
+func (e entitlementMap) FindForSubject(subject string) (Entitlement, bool) {
+	e.lock.RLock()
+	defer e.lock.RUnlock()
+
+	for _, ent := range e.store {
+
+		// TODO : look at matching by regex etc
+		if ent.Subject == subject {
+			return ent, true
+		}
+	}
+	return Entitlement{}, false
 }
 
 func (e entitlementMap) Add(ent Entitlement) {

@@ -1,4 +1,4 @@
-package redis
+package services
 
 // based on -  github.com/donnpebe/go-redis-timeseries
 import (
@@ -34,22 +34,19 @@ func NewTimeSeries(prefix string, timestep time.Duration, exp time.Duration, db 
 }
 
 // Add data to timeseries db
-func (t *timeSeries) Add(data interface{}, tm ...time.Time) (err error) {
-	inputTm := time.Now()
-	if len(tm) > 0 {
-		inputTm = tm[0]
-	}
+func (t *timeSeries) Add(data interface{}, tm time.Time) (err error) {
 
 	var dataBytes []byte
+
 	if dataBytes, err = binary.Marshal(data); err != nil {
 		return
 	}
 	t.Lock()
 	t.db.Send("MULTI")
-	t.db.Send("ZADD", t.key(inputTm), inputTm.UnixNano(), dataBytes)
+	t.db.Send("ZADD", t.key(tm), tm.UnixNano(), dataBytes)
 	if t.expiration > 0 {
 		sc := redis.NewScript(2, "local ex = redis.pcall('zcard', KEYS[1]) \n if ex == 1 then return redis.call('expire', KEYS[1], KEYS[2]) end")
-		sc.Send(t.db, t.key(inputTm), int64(t.expiration.Seconds()))
+		sc.Send(t.db, t.key(tm), int64(t.expiration.Seconds()))
 	}
 	_, err = t.db.Do("EXEC")
 

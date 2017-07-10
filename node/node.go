@@ -2,6 +2,7 @@ package node
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -9,6 +10,7 @@ import (
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
+	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
 
 	"github.com/cenkalti/backoff"
 	restful "github.com/emicklei/go-restful"
@@ -20,6 +22,7 @@ type Options struct {
 	SwaggerUIPath          string
 	WebServicesURL         string
 	MetadataServiceAddress string
+	StorageServiceAddress  string
 
 	UseTLS            bool
 	CertFilePath      string
@@ -32,12 +35,16 @@ type Options struct {
 
 func Serve(options Options) error {
 
+	metadataClient := metadataclient.NewMetadataApiWithBasePath(options.MetadataServiceAddress)
+	storageClient := storageclient.NewDataApiWithBasePath(options.StorageServiceAddress)
+
+	log.Print(options.StorageServiceAddress)
 	log.Printf("registering %s with metadata service %s", options.WebServicesURL, options.MetadataServiceAddress)
 
 	// TODO : check for existing token
 	// If found then update the location by telling the metadata service where I am
 	// The prototype will just register again
-	token, err := registerWithMetadataService(options.MetadataServiceAddress, options.WebServicesURL)
+	token, err := registerWithMetadataService(metadataClient, options.WebServicesURL)
 
 	if err != nil {
 		return err
@@ -62,13 +69,20 @@ func Serve(options Options) error {
 	// You need to download the Swagger HTML5 assets and change the FilePath location in the config below.
 	// Open http://localhost:8080/apidocs/?url=http://localhost:8080/apidocs.json
 	http.Handle("/apidocs/", http.StripPrefix("/apidocs/", http.FileServer(http.Dir(options.SwaggerUIPath))))
-
 	log.Printf("start listening on %s", options.Binding)
+
+	// start up a pretend device-hub input
+	func() {
+
+		go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
+
+	}()
+
 	return http.ListenAndServe(options.Binding, nil)
 }
 
 // registerWithMetadataService returns the 'announce' token from the metadata service
-func registerWithMetadataService(metadataServiceAddress, nodePublicAddress string) (string, error) {
+func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicAddress string) (string, error) {
 
 	// parse the nods public address into its component parts
 	ok, host, port := utils.HostAndIpToBits(nodePublicAddress)
@@ -78,13 +92,12 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 	}
 
 	// register with the metadata service using an exponential backoff
-	api := metadataclient.NewMetadataApiWithBasePath(metadataServiceAddress)
 	var token string
 
 	f := func() error {
 
 		log.Printf(".")
-		response, _, err := api.RegisterLocation(metadataclient.ServicesLocationRequest{
+		response, _, err := client.RegisterLocation(metadataclient.ServicesLocationRequest{
 			IpAddress: host,
 			Port:      int32(port),
 		})
@@ -100,19 +113,85 @@ func registerWithMetadataService(metadataServiceAddress, nodePublicAddress strin
 	return token, err
 }
 
-/*
-func pretendToBeADeviceHubEndpoint( metadataClient metadataclient.MetadataApi, storageClient interface{} ){
-
-	//input := map[string] interface{}{}
+func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *services.EntitlementStore) {
 
 	// for every item from device-hub
+	values := map[string]interface{}{
+		"temp":     23.3,
+		"humidity": 34,
+	}
+	/*
+		schema := map[string]interface{}{
+			"@context": map[string]interface{}{
+				"decode":   "http://decode.eu#",
+				"m3-lite":  "http://purl.org/iot/vocab/m3-lite#",
+				"humidity": "m3-lite:AirHumidity",
+				"temp":     "m3-lite:AirTemperature",
+				"domain":   "decode:hasDomain",
+			},
+			"@type": "m3-lite:Sensor",
+			"domain": map[string]interface{}{
+				"@type": "m3-lite:Environment",
+			},
+		}
+	*/
+	// qualify values to unique paths maybe including json-ld plus something else...
+	values = map[string]interface{}{
+		"data://private/sensor-1/temp":     23.3,
+		"data://private/sensor-1/humidity": 34,
+	}
 
-    // break down to individual pieces
+	// set up the entitlements we will use in the hard coded example
+	entitlements.Accepted.Add(services.Entitlement{
+		EntitlementRequest: services.EntitlementRequest{
+			Subject:     "data://private/sensor-1/temp",
+			AccessLevel: services.CanDiscover},
+		UID: "abc",
+	})
+	entitlements.Accepted.Add(services.Entitlement{
+		EntitlementRequest: services.EntitlementRequest{
+			Subject:     "data://private/sensor-1/humidity",
+			AccessLevel: services.CanDiscover},
+		UID: "def",
+	})
 
-	// find entitlement for path
+	log.Print("entitlements", entitlements.Accepted)
 
-	// if can_discover -> send metadata to the metadata service
+	// break down to individual key value pairs
+	for k, _ := range values {
 
-	// write to the storage service
+		// find entitlement for subject
+		ent, found := entitlements.Accepted.FindForSubject(k)
+		fmt.Println(ent, found)
+
+		if found {
+
+			// if the underlying data is accessible
+			// send to the metadata service
+			if ent.IsAccessible() {
+				r, _, err := mClient.CatalogItem(metadataclient.ServicesItem{
+					Example:     "some example",
+					Key:         k,
+					LocationUid: locationToken,
+					// Is this the expanded view???
+					Tags: []string{
+						"one", "two", "three",
+					},
+				})
+
+				log.Print(r, err)
+
+				if err != nil {
+					log.Print("error updating metadata : ", err.Error())
+				}
+			}
+		}
+
+		// write to the storage service
+		_, err := sClient.Append(storageclient.ServicesData{Bucket: k, Value: "TODO"})
+
+		if err != nil {
+			log.Print("error appending to storage : ", err.Error())
+		}
+	}
 }
-*/

@@ -193,6 +193,8 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 	req := ItemRequest{}
 	err := request.ReadEntity(&req)
 
+	log.Print("item received", req)
+
 	if err != nil {
 		response.WriteErrorString(http.StatusInternalServerError, err.Error())
 		return
@@ -215,6 +217,8 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 		UID:         uuid.NewV4().String(),
 	}
 	e.all[item.UID] = item
+
+	log.Print(e.all)
 
 	response.WriteEntity(item)
 }
