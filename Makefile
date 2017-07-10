@@ -69,6 +69,11 @@ client-metadata: ## build golang client for the metadata service
 
 .PHONY: client-metadata
 
+client-storage: ## build golang client for the storage service
+	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8083/apidocs.json -l go -o ./client/storage/
+
+.PHONY: client-storage
+
 darwin-amd64: tmp/build/darwin-amd64/metadata tmp/build/darwin-amd64/storage tmp/build/darwin-amd64/node  ## build for mac amd64
 
 linux-i386: tmp/build/linux-i386/metadata tmp/build/linux-i386/storage tmp/build/linux-i386/node ## build for linux i386
