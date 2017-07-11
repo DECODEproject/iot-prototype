@@ -136,6 +136,8 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	timestep := time.Second
 	expiry := time.Duration(0)
 
+	log.Println("append :", data)
+
 	ts := NewTimeSeries(prefix, timestep, expiry, e.db)
 
 	// TODO : should this be UTC

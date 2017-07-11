@@ -1,6 +1,8 @@
 package node
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -15,6 +17,7 @@ import (
 	"github.com/cenkalti/backoff"
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
+	"github.com/kazarena/json-gold/ld"
 )
 
 type Options struct {
@@ -115,83 +118,183 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 
 func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *services.EntitlementStore) {
 
-	// for every item from device-hub
-	values := map[string]interface{}{
+	// data from the device hub
+	data := map[string]interface{}{
 		"temp":     23.3,
 		"humidity": 34,
 	}
-	/*
-		schema := map[string]interface{}{
-			"@context": map[string]interface{}{
-				"decode":   "http://decode.eu#",
-				"m3-lite":  "http://purl.org/iot/vocab/m3-lite#",
-				"humidity": "m3-lite:AirHumidity",
-				"temp":     "m3-lite:AirTemperature",
-				"domain":   "decode:hasDomain",
-			},
-			"@type": "m3-lite:Sensor",
-			"domain": map[string]interface{}{
-				"@type": "m3-lite:Environment",
-			},
-		}
-	*/
-	// qualify values to unique paths maybe including json-ld plus something else...
-	values = map[string]interface{}{
-		"data://private/sensor-1/temp":     23.3,
-		"data://private/sensor-1/humidity": 34,
+
+	// our sensor
+	sensorID := "sensor-1"
+
+	// schema for the data
+	schema := map[string]interface{}{
+		"@context": map[string]interface{}{
+			"decode":   "http://decode.eu#",
+			"m3-lite":  "http://purl.org/iot/vocab/m3-lite#",
+			"humidity": "m3-lite:AirHumidity",
+			"temp":     "m3-lite:AirTemperature",
+			"domain":   "decode:hasDomain",
+		},
+		"@type": "m3-lite:Sensor",
+		"domain": map[string]interface{}{
+			"@type": "m3-lite:Environment",
+		},
 	}
 
 	// set up the entitlements we will use in the hard coded example
 	entitlements.Accepted.Add(services.Entitlement{
 		EntitlementRequest: services.EntitlementRequest{
-			Subject:     "data://private/sensor-1/temp",
+			Subject:     buildSubjectKey(sensorID, "temp"),
 			AccessLevel: services.CanDiscover},
 		UID: "abc",
 	})
+
 	entitlements.Accepted.Add(services.Entitlement{
 		EntitlementRequest: services.EntitlementRequest{
-			Subject:     "data://private/sensor-1/humidity",
+			Subject:     buildSubjectKey(sensorID, "humidity"),
 			AccessLevel: services.CanDiscover},
 		UID: "def",
 	})
 
 	log.Print("entitlements", entitlements.Accepted)
 
-	// break down to individual key value pairs
-	for k, _ := range values {
+	// for each bit of data
+	// find an entitlement for the data
+	// - if entitlement exists and IsAccessible() send metadata to the 'metadata' service
+	// Write data values to the 'storage' service
+	for k, v := range data {
+
+		subject := buildSubjectKey(sensorID, k)
 
 		// find entitlement for subject
-		ent, found := entitlements.Accepted.FindForSubject(k)
-		fmt.Println(ent, found)
+		ent, found := entitlements.Accepted.FindForSubject(subject)
 
 		if found {
 
 			// if the underlying data is accessible
 			// send to the metadata service
 			if ent.IsAccessible() {
-				r, _, err := mClient.CatalogItem(metadataclient.ServicesItem{
-					Example:     "some example",
-					Key:         k,
-					LocationUid: locationToken,
-					// Is this the expanded view???
-					Tags: []string{
-						"one", "two", "three",
-					},
-				})
-
-				log.Print(r, err)
+				err := sendDataToMetadataService(mClient, locationToken, schema, subject, k, v)
 
 				if err != nil {
-					log.Print("error updating metadata : ", err.Error())
+					log.Println(err.Error())
+					continue
+				}
+
+			}
+		}
+		// write to the storage service
+		err := sendDataToStorageService(sClient, subject, v)
+
+		if err != nil {
+			log.Println(err.Error())
+			continue
+		}
+	}
+}
+
+func sendDataToStorageService(sClient *storageclient.DataApi, subject string, value interface{}) error {
+
+	// jsonify and base64 the value
+	bytes, err := json.Marshal(value)
+
+	if err != nil {
+		return fmt.Errorf("error marshalling to json : %s", err.Error())
+	}
+
+	_, err = sClient.Append(storageclient.ServicesData{Bucket: subject, Value: base64.StdEncoding.EncodeToString(bytes)})
+
+	if err != nil {
+		return fmt.Errorf("error appending to storage : %s ", err.Error())
+	}
+
+	return nil
+}
+
+func sendDataToMetadataService(mClient *metadataclient.MetadataApi, locationToken string, schema map[string]interface{}, subject, key string, value interface{}) error {
+
+	// we first need to use the schema for the data to 'expand' out and fully qualify the metadata
+	// to do this we use the JSON-LD expand function that helpfully drops any unqualified metadata and values
+	proc := ld.NewJsonLdProcessor()
+	options := ld.NewJsonLdOptions("")
+
+	// we need to make a copy of the schema as we don't want to mutate the existing vaules or schemas
+	s := map[string]interface{}{}
+	// copy schema
+	for k2, v2 := range schema {
+		s[k2] = v2
+	}
+	// add in the original value
+	s[key] = value
+
+	// and 'expand' out the data, schema
+	expanded, err := proc.Expand(s, options)
+
+	if err != nil {
+		return err
+	}
+
+	// create our metadata request
+	req := metadataclient.ServicesItem{
+		Sample:      fmt.Sprintf("%v", value), // TODO : respect the confidentiality
+		Key:         subject,
+		LocationUid: locationToken,
+		Tags:        harvestTagData("", expanded),
+	}
+
+	_, _, err = mClient.CatalogItem(req)
+
+	if err != nil {
+		return fmt.Errorf("error updating metadata : %s", err.Error())
+	}
+
+	return nil
+}
+
+func buildSubjectKey(sensor, key string) string {
+	return fmt.Sprintf("data://%s/%s", sensor, key)
+}
+
+func harvestTagData(parent string, v []interface{}) []string {
+
+	r := []string{}
+
+	for i, _ := range v {
+
+		maybeMap := v[i]
+
+		m, isMap := maybeMap.(map[string]interface{})
+		if isMap {
+
+			for k, v := range m {
+
+				// does it have a '@type' annotation
+				// if it does we add it
+				if k == "@type" {
+
+					v2, ok := v.([]interface{})
+
+					if ok {
+						r = append(r, fmt.Sprintf("%v", v2[0]))
+					}
+				} else {
+
+					v2, ok := v.([]interface{})
+
+					if ok {
+						// down the rabbit hole we go...
+						r = append(r, harvestTagData(k, v2)...)
+
+						// if it is a child node with a value add the value's key
+					} else if k == "@value" {
+						r = append(r, parent)
+
+					}
 				}
 			}
 		}
-
-		// write to the storage service
-		_, err := sClient.Append(storageclient.ServicesData{Bucket: k, Value: "TODO"})
-
-		if err != nil {
-			log.Print("error appending to storage : ", err.Error())
-		}
 	}
+
+	return r
 }

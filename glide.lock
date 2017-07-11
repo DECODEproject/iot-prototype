@@ -1,5 +1,5 @@
-hash: 0174df5330c268eaae891636f26b3c6d57f26a63cd5d05c9b58547464663a64a
-updated: 2017-07-07T13:48:00.554926517+01:00
+hash: 991de31303e05b51733a150ce016c6016052c72d69aad4d0b7bebe4c85446cff
+updated: 2017-07-11T14:29:21.844907059+01:00
 imports:
 - name: github.com/alecthomas/binary
   version: ec810c4448fb8161fd00898b18c6f72ec661216a
@@ -28,6 +28,10 @@ imports:
   version: cf81ed0a604d373be63b4c036c6b05c06520615f
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/kazarena/json-gold
+  version: ef687b2d9c3e50da2a842bc199e2364b1f0f4da6
+  subpackages:
+  - ld
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/mailru/easyjson

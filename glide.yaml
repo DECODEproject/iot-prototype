@@ -19,3 +19,4 @@ import:
   version: ^0.13.0
 - package: github.com/cenkalti/backoff
   version: ^1.0.0
+- package: github.com/kazarena/json-gold
