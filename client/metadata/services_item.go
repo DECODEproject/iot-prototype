@@ -20,13 +20,13 @@ package swagger
 
 type ServicesItem struct {
 
-	Example string `json:"example,omitempty"`
-
 	// path of the data item
 	Key string `json:"key,omitempty"`
 
-	// a valid location of a node registered previously via /announce
+	// a valid location of a node registered previously
 	LocationUid string `json:"location-uid,omitempty"`
+
+	Sample string `json:"sample,omitempty"`
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`

@@ -20,19 +20,19 @@ package swagger
 
 type ServicesItemWithLocation struct {
 
-	Example string `json:"example,omitempty"`
-
 	// public IP address of the node
 	IpAddress string `json:"ip-address,omitempty"`
 
 	// path of the data item
 	Key string `json:"key,omitempty"`
 
-	// a valid location of a node registered previously via /announce
+	// a valid location of a node registered previously
 	LocationUid string `json:"location-uid,omitempty"`
 
 	// public port of the node
 	Port int32 `json:"port,omitempty"`
+
+	Sample string `json:"sample,omitempty"`
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`
