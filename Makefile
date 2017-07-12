@@ -64,12 +64,17 @@ docker-build: clean linux-amd64 ## build docker images for all of the executable
 
 .PHONY: docker-build
 
-client-metadata: ## build golang client for the metadata service
+docker-redis: ## run a local instance of docker for the storage service
+	docker run -p 6379:6379 redis:3.0.7
+
+.PHONY: docker-redis
+
+client-metadata: ## build golang client for the metadata service - requires a local running metadata service
 	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8081/apidocs.json -l go -o ./client/metadata/
 
 .PHONY: client-metadata
 
-client-storage: ## build golang client for the storage service
+client-storage: ## build golang client for the storage service - requires a local running storage service
 	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8083/apidocs.json -l go -o ./client/storage/
 
 .PHONY: client-storage
