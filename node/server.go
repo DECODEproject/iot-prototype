@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/services"
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
@@ -76,9 +77,10 @@ func Serve(options Options) error {
 
 	// start up a pretend device-hub input
 	func() {
-
-		go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
-
+		c := time.Tick(10 * time.Second)
+		for _ = range c {
+			go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
+		}
 	}()
 
 	return http.ListenAndServe(options.Binding, nil)
