@@ -1,0 +1,13 @@
+FROM bitnami/minideb:stretch
+
+EXPOSE 8085
+
+COPY tmp/build/linux-amd64/ui /prototype/
+
+# add static web assets
+COPY ui/index.html /prototype/assets/
+COPY ui/main.js /prototype/assets/
+
+ENV ASSETS_PATH=/prototype/assets/
+
+ENTRYPOINT [ "/prototype/ui", "server"]
