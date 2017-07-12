@@ -66,6 +66,7 @@ docker-build: clean linux-amd64 ## build docker images for all of the executable
 	docker build -t prototype/metadata:latest -t prototype/metadata:$(SOURCE_VERSION) -f=./docker/Dockerfile.metadata .
 	docker build -t prototype/node:latest -t prototype/node:$(SOURCE_VERSION) -f=./docker/Dockerfile.node .
 	docker build -t prototype/storage:latest -t prototype/storage:$(SOURCE_VERSION) -f=./docker/Dockerfile.storage .
+	docker build -t prototype/ui:latest -t prototype/ui:$(SOURCE_VERSION) -f=./docker/Dockerfile.ui .
 
 .PHONY: docker-build
 
@@ -84,13 +85,13 @@ client-storage: ## build golang client for the storage service - requires a loca
 
 .PHONY: client-storage
 
-darwin-amd64: tmp/build/darwin-amd64/metadata tmp/build/darwin-amd64/storage tmp/build/darwin-amd64/node  ## build for mac amd64
+darwin-amd64: tmp/build/darwin-amd64/metadata tmp/build/darwin-amd64/storage tmp/build/darwin-amd64/node tmp/build/darwin-amd64/ui ## build for mac amd64
 
-linux-i386: tmp/build/linux-i386/metadata tmp/build/linux-i386/storage tmp/build/linux-i386/node ## build for linux i386
+linux-i386: tmp/build/linux-i386/metadata tmp/build/linux-i386/storage tmp/build/linux-i386/node tmp/build/linux-i386/ui ## build for linux i386
 
-linux-amd64: tmp/build/linux-amd64/metadata tmp/build/linux-amd64/storage tmp/build/linux-amd64/node ## build for linux amd64
+linux-amd64: tmp/build/linux-amd64/metadata tmp/build/linux-amd64/storage tmp/build/linux-amd64/node tmp/build/linux-amd64/ui ## build for linux amd64
 
-linux-arm: tmp/build/linux-arm/metadata tmp/build/linux-arm/sort tmp/build/linux-arm/node ## build for linux arm (raspberry-pi)
+linux-arm: tmp/build/linux-arm/metadata tmp/build/linux-arm/sort tmp/build/linux-arm/node tmp/build/linux-arm/ui ## build for linux arm (raspberry-pi)
 
 .PHONY: darwin-amd64 linux-i386 linux-amd64 linux-arm
 
@@ -103,6 +104,8 @@ tmp/build/linux-i386/storage:
 tmp/build/linux-i386/node:
 	GOOS=linux GOARCH=386 go build $(BUILD_FLAGS) -o $(@) ./cmd/node
 
+tmp/build/linux-i386/ui:
+	GOOS=linux GOARCH=386 go build $(BUILD_FLAGS) -o $(@) ./cmd/ui
 
 ## linux-amd64
 tmp/build/linux-amd64/metadata:
@@ -114,6 +117,9 @@ tmp/build/linux-amd64/storage:
 tmp/build/linux-amd64/node:
 	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o $(@) ./cmd/node
 
+tmp/build/linux-amd64/ui:
+	GOOS=linux GOARCH=amd64 go build $(BUILD_FLAGS) -o $(@) ./cmd/ui
+
 ## linux-arm
 tmp/build/linux-arm/metadata:
 	GOOS=linux GOARCH=arm go build $(BUILD_FLAGS) -o $(@) ./cmd/metadata
@@ -124,6 +130,9 @@ tmp/build/linux-arm/storage:
 tmp/build/linux-arm/node:
 	GOOS=linux GOARCH=arm go build $(BUILD_FLAGS) -o $(@) ./cmd/node
 
+tmp/build/linux-arm/ui:
+	GOOS=linux GOARCH=arm go build $(BUILD_FLAGS) -o $(@) ./cmd/ui
+
 ## darwin-amd64
 tmp/build/darwin-amd64/metadata:
 	GOOS=darwin GOARCH=amd64 go build $(BUILD_FLAGS) -o $(@) ./cmd/metadata
@@ -133,6 +142,10 @@ tmp/build/darwin-amd64/storage:
 
 tmp/build/darwin-amd64/node:
 	GOOS=darwin GOARCH=amd64 go build $(BUILD_FLAGS) -o $(@) ./cmd/node
+
+tmp/build/darwin-amd64/ui:
+	GOOS=darwin GOARCH=amd64 go build $(BUILD_FLAGS) -o $(@) ./cmd/ui
+
 
 # 'help' parses the Makefile and displays the help text
 help:
