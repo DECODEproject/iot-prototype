@@ -57,6 +57,11 @@ docker-up: ## run dependencies as docker containers
 
 .PHONY: docker-up
 
+docker-down: ## stop docker containers
+	docker-compose down
+
+.PHONY: docker-down
+
 docker-build: clean linux-amd64 ## build docker images for all of the executables
 	docker build -t prototype/metadata:latest -t prototype/metadata:$(SOURCE_VERSION) -f=./docker/Dockerfile.metadata .
 	docker build -t prototype/node:latest -t prototype/node:$(SOURCE_VERSION) -f=./docker/Dockerfile.node .
