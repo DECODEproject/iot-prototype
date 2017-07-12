@@ -29,10 +29,9 @@ type ItemRequest struct {
 	Sample      string   `json:"sample" description:"sample value e.g. a json object `
 }
 
-// Item contains the original request alongside an immutable UID
+// Item contains the original request
 type Item struct {
 	ItemRequest
-	UID string `json:"uid" description:"unique identifier for a metadata item" validate:"nonzero"`
 }
 
 // ItemWithLocation contains the item metadata and its location
@@ -214,9 +213,8 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 
 	item := Item{
 		ItemRequest: req,
-		UID:         uuid.NewV4().String(),
 	}
-	e.all[item.UID] = item
+	e.all[item.Key] = item
 
 	log.Print(e.all)
 

@@ -30,7 +30,4 @@ type ServicesItem struct {
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`
-
-	// unique identifier for a metadata item
-	Uid string `json:"uid,omitempty"`
 }
