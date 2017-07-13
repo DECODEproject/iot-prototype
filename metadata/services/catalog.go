@@ -19,6 +19,11 @@ type catalogResource struct {
 	locations map[string]Location
 }
 
+// ErrorResponse signals error messages back to the client
+type ErrorResponse struct {
+	Error string `json:"error" description:"error message if any"`
+}
+
 // ItemRequest contains the information required to register some data as being available at some location
 // The Tags property should contain enough information to enable a search index
 // The Sample property should contain enough detail to interact with the data
@@ -78,8 +83,8 @@ func (e catalogResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(LocationRequest{}).
 		Returns(http.StatusOK, "OK", Location{}).
-		Returns(http.StatusBadRequest, "error validating request", nil).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// move a location
 	ws.Route(ws.PATCH("/announce/{location-uid}").To(e.moveLocation).
@@ -88,9 +93,9 @@ func (e catalogResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(LocationRequest{}).
 		Returns(http.StatusOK, "OK", Location{}).
-		Returns(http.StatusBadRequest, "error validating request", nil).
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
 		Returns(http.StatusNotFound, "Not found", nil).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// add an item to the catalog
 	ws.Route(ws.PUT("/items").To(e.catalogItem).
@@ -98,13 +103,14 @@ func (e catalogResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(Item{}).
 		Returns(http.StatusOK, "OK", Item{}).
-		Returns(http.StatusBadRequest, "error validating request", nil).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// delete an item from the catalog
 	ws.Route(ws.DELETE("/items/{catalog-uid}").To(e.removeFromCatalog).
 		Doc("delete an item from the catalog").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Returns(http.StatusOK, "OK", nil).
 		Param(catalogUIDParameter))
 
 	// get all items - simple search
@@ -124,12 +130,12 @@ func (e catalogResource) registerLocation(request *restful.Request, response *re
 	req := LocationRequest{}
 
 	if err := request.ReadEntity(&req); err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if errs := validator.Validate(req); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
 		return
 	}
 
@@ -153,15 +159,14 @@ func (e catalogResource) moveLocation(request *restful.Request, response *restfu
 	locationUID := request.PathParameter("location-uid")
 
 	req := LocationRequest{}
-	err := request.ReadEntity(&req)
 
-	if err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+	if err := request.ReadEntity(&req); err != nil {
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if errs := validator.Validate(req); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
 		return
 	}
 
@@ -190,24 +195,21 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 	defer e.lock.Unlock()
 
 	req := ItemRequest{}
-	err := request.ReadEntity(&req)
 
-	log.Print("item received", req)
-
-	if err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+	if err := request.ReadEntity(&req); err != nil {
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if errs := validator.Validate(req); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
 		return
 	}
 
 	_, found := e.locations[req.LocationUID]
 
 	if !found {
-		response.WriteErrorString(http.StatusInternalServerError, "unknown node")
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "unknown node"})
 		return
 	}
 
