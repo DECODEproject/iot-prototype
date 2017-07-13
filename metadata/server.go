@@ -31,8 +31,18 @@ func Serve(options Options) error {
 		WebServices:    restful.RegisteredWebServices(),
 		WebServicesURL: options.WebServicesURL,
 		APIPath:        "/apidocs.json",
+		//		Filter:         restful.OPTIONSFilter(),
 	}
 	restful.DefaultContainer.Add(restfulspec.NewOpenAPIService(config))
+
+	// Add container filter to enable CORS
+	cors := restful.CrossOriginResourceSharing{
+		AllowedHeaders: []string{"Content-Type", "Accept"},
+		AllowedMethods: []string{"GET", "POST"},
+	}
+
+	// install the cors filter
+	restful.DefaultContainer.Filter(cors.Filter)
 
 	// Optionally, you can install the Swagger Service which provides a nice Web UI on your REST API
 	// You need to download the Swagger HTML5 assets and change the FilePath location in the config below.

@@ -117,7 +117,7 @@ func (e catalogResource) WebService() *restful.WebService {
 	ws.Route(ws.GET("/items/").To(e.allItems).
 		Doc("get all cataloged items").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Writes([]ItemWithLocation{}))
+		Returns(http.StatusOK, "OK", []ItemWithLocation{}))
 
 	return ws
 }
