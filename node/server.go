@@ -102,7 +102,7 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 	f := func() error {
 
 		log.Printf(".")
-		response, _, err := client.RegisterLocation(metadataclient.ServicesLocationRequest{
+		response, _, err := client.RegisterLocation(metadataclient.ApiLocationRequest{
 			IpAddress: host,
 			Port:      int32(port),
 		})
@@ -238,14 +238,13 @@ func sendDataToMetadataService(mClient *metadataclient.MetadataApi, locationToke
 	}
 
 	// create our metadata request
-	req := metadataclient.ServicesItem{
-		Sample:      fmt.Sprintf("%v", value), // TODO : respect the confidentiality
-		Key:         subject,
-		LocationUid: locationToken,
-		Tags:        harvestTagData("", expanded),
+	req := metadataclient.ApiCatalogRequest{
+		Sample: fmt.Sprintf("%v", value), // TODO : respect the confidentiality
+		Key:    subject,
+		Tags:   harvestTagData("", expanded),
 	}
 
-	_, _, err = mClient.CatalogItem(req)
+	_, _, err = mClient.CatalogItem(locationToken, req)
 
 	if err != nil {
 		return fmt.Errorf("error updating metadata : %s", err.Error())
