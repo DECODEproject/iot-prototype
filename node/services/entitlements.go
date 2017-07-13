@@ -10,6 +10,11 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+// ErrorResponse signals error messages back to the client
+type ErrorResponse struct {
+	Error string `json:"error" description:"error message if any"`
+}
+
 // EntitlementRequest are made to request some access to a bit of data
 type EntitlementRequest struct {
 	Subject     string      `json:"subject" description:"path of the data e.g. data://user/email" validate:"nonzero"`
@@ -82,8 +87,8 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(EntitlementRequest{}).
 		Returns(http.StatusOK, "OK", Entitlement{}).
-		Returns(http.StatusBadRequest, "error validating request", nil).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// get a request by uid
 	ws.Route(ws.GET("/requests/{request-uid}").To(e.findRequest).
@@ -116,7 +121,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("accept an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// decline request
 	// TODO : review GET
@@ -125,7 +130,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("decline an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// entitlements
 	// get all entitlements by path
@@ -144,7 +149,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Param(entitlementUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
-		Returns(http.StatusInternalServerError, "something went wrong", nil))
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// TODO : add isEntitled method
 
@@ -154,14 +159,13 @@ func (e entitlementResource) WebService() *restful.WebService {
 func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
 
 	req := Entitlement{}
-
 	if err := request.ReadEntity(&req); err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if errs := validator.Validate(req); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
 		return
 	}
 
@@ -171,7 +175,6 @@ func (e entitlementResource) createRequest(request *restful.Request, response *r
 	req.Status = Requested
 
 	e.store.Requested.Add(req)
-	//e.requested[req.UID] = req
 	response.WriteEntity(req)
 
 }
@@ -183,7 +186,7 @@ func (e entitlementResource) findRequest(request *restful.Request, response *res
 	req, found := e.store.Requested.Get(requestUID)
 
 	if !found {
-		response.WriteErrorString(http.StatusNotFound, "request not found")
+		response.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -206,8 +209,7 @@ func (e entitlementResource) acceptRequest(request *restful.Request, response *r
 
 	req, found := e.store.Requested.Get(requestUID)
 	if !found {
-
-		response.WriteErrorString(http.StatusNotFound, "request not found")
+		response.WriteHeader(http.StatusNotFound)
 		return
 
 	}
@@ -225,7 +227,7 @@ func (e entitlementResource) declineRequest(request *restful.Request, response *
 	req, found := e.store.Requested.Get(requestUID)
 
 	if !found {
-		response.WriteErrorString(http.StatusNotFound, "request not found")
+		response.WriteHeader(http.StatusNotFound)
 		return
 	}
 
@@ -267,7 +269,7 @@ func (e entitlementResource) revokeEntitlement(request *restful.Request, respons
 	req, found := e.store.Accepted.Get(uid)
 
 	if !found {
-		response.WriteErrorString(http.StatusNotFound, "entitlement not found")
+		response.WriteHeader(http.StatusNotFound)
 		return
 	}
 
