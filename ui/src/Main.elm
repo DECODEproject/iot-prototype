@@ -97,7 +97,8 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ text "Hello, world!"
-        , text (toString model)
+        [ text "Nodes"
+        , text "Data"
         , button [ onClick RefreshMetadata] [text "refresh"]
-        ]
+        , text (toString model)
+    ]

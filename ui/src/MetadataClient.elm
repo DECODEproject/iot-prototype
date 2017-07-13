@@ -13,10 +13,8 @@ decodeItems =
 
 type alias Item =
     {
-    ipAddress: String,
-    ipPort: Int,
     key: String,
-    locationUid : String,
+    location : Location,
     sample : String,
     tags : List String,
     uid: String
@@ -24,11 +22,24 @@ type alias Item =
 
 decodeItem : Json.Decode.Decoder Item
 decodeItem =
-    Json.Decode.map7 Item
-        (Json.Decode.field "ip-address" Json.Decode.string)
-        (Json.Decode.field "port" Json.Decode.int)
+    Json.Decode.map5 Item
         (Json.Decode.field "key" Json.Decode.string)
-        (Json.Decode.field "location-uid" Json.Decode.string)
+        (Json.Decode.field "location" decodeLocation)
         (Json.Decode.field "sample" Json.Decode.string)
         (Json.Decode.field "tags" (Json.Decode.list Json.Decode.string)) 
         (Json.Decode.field "uid" Json.Decode.string)
+
+type alias Location =
+    {
+    ipAddress: String,
+    ipPort: Int,
+    uid : String
+    }
+
+decodeLocation : Json.Decode.Decoder Location
+decodeLocation =
+    Json.Decode.map3 Location
+        (Json.Decode.field "ip-address" Json.Decode.string)
+        (Json.Decode.field "port" Json.Decode.int)
+        (Json.Decode.field "uid" Json.Decode.string)
+
