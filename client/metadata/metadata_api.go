@@ -49,9 +49,9 @@ func NewMetadataApiWithBasePath(basePath string) *MetadataApi {
  * get all cataloged items
  * get all cataloged items
  *
- * @return void
+ * @return []ApiItemWithLocation
  */
-func (a MetadataApi) AllItems() (*APIResponse, error) {
+func (a MetadataApi) AllItems() ([]ApiItemWithLocation, *APIResponse, error) {
 
 	var httpMethod = "Get"
 	// create path and map variables
@@ -88,27 +88,29 @@ func (a MetadataApi) AllItems() (*APIResponse, error) {
 	if localVarHttpHeaderAccept != "" {
 		headerParams["Accept"] = localVarHttpHeaderAccept
 	}
-
+	var successPayload = new([]ApiItemWithLocation)
 	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
 	if err != nil {
-		return NewAPIResponse(httpResponse.RawResponse), err
+		return *successPayload, NewAPIResponse(httpResponse.RawResponse), err
 	}
-
-	return NewAPIResponse(httpResponse.RawResponse), err
+	err = json.Unmarshal(httpResponse.Body(), &successPayload)
+	return *successPayload, NewAPIResponse(httpResponse.RawResponse), err
 }
 
 /**
  * catalog an item for discovery e.g. what and where
  * catalog an item for discovery e.g. what and where
  *
+ * @param locationUid identifier for a location
  * @param body 
- * @return *ServicesItem
+ * @return *ApiCatalogItem
  */
-func (a MetadataApi) CatalogItem(body ServicesItem) (*ServicesItem, *APIResponse, error) {
+func (a MetadataApi) CatalogItem(locationUid string, body ApiCatalogRequest) (*ApiCatalogItem, *APIResponse, error) {
 
 	var httpMethod = "Put"
 	// create path and map variables
-	path := a.Configuration.BasePath + "/catalog/items"
+	path := a.Configuration.BasePath + "/catalog/items/{location-uid}"
+	path = strings.Replace(path, "{"+"location-uid"+"}", fmt.Sprintf("%v", locationUid), -1)
 
 
 	headerParams := make(map[string]string)
@@ -144,7 +146,7 @@ func (a MetadataApi) CatalogItem(body ServicesItem) (*ServicesItem, *APIResponse
 	// body params
 	postBody = &body
 
-	var successPayload = new(ServicesItem)
+	var successPayload = new(ApiCatalogItem)
 	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
 	if err != nil {
 		return successPayload, NewAPIResponse(httpResponse.RawResponse), err
@@ -159,9 +161,9 @@ func (a MetadataApi) CatalogItem(body ServicesItem) (*ServicesItem, *APIResponse
  *
  * @param locationUid identifier for a location
  * @param body 
- * @return *ServicesLocation
+ * @return *ApiLocation
  */
-func (a MetadataApi) MoveLocation(locationUid string, body ServicesLocationRequest) (*ServicesLocation, *APIResponse, error) {
+func (a MetadataApi) MoveLocation(locationUid string, body ApiLocationRequest) (*ApiLocation, *APIResponse, error) {
 
 	var httpMethod = "Patch"
 	// create path and map variables
@@ -202,7 +204,7 @@ func (a MetadataApi) MoveLocation(locationUid string, body ServicesLocationReque
 	// body params
 	postBody = &body
 
-	var successPayload = new(ServicesLocation)
+	var successPayload = new(ApiLocation)
 	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
 	if err != nil {
 		return successPayload, NewAPIResponse(httpResponse.RawResponse), err
@@ -216,9 +218,9 @@ func (a MetadataApi) MoveLocation(locationUid string, body ServicesLocationReque
  * register a node&#39;s location
  *
  * @param body 
- * @return *ServicesLocation
+ * @return *ApiLocation
  */
-func (a MetadataApi) RegisterLocation(body ServicesLocationRequest) (*ServicesLocation, *APIResponse, error) {
+func (a MetadataApi) RegisterLocation(body ApiLocationRequest) (*ApiLocation, *APIResponse, error) {
 
 	var httpMethod = "Put"
 	// create path and map variables
@@ -258,7 +260,7 @@ func (a MetadataApi) RegisterLocation(body ServicesLocationRequest) (*ServicesLo
 	// body params
 	postBody = &body
 
-	var successPayload = new(ServicesLocation)
+	var successPayload = new(ApiLocation)
 	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
 	if err != nil {
 		return successPayload, NewAPIResponse(httpResponse.RawResponse), err

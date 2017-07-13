@@ -1,6 +1,10 @@
 package api
 
 import (
+	"crypto/md5"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -15,7 +19,7 @@ import (
 // catalogResource is an 'in-memory' instance of a metadata service
 type catalogResource struct {
 	lock      sync.RWMutex
-	all       map[string]Item
+	all       map[string]CatalogItem
 	locations map[string]Location
 }
 
@@ -24,25 +28,26 @@ type ErrorResponse struct {
 	Error string `json:"error" description:"error message if any"`
 }
 
-// ItemRequest contains the information required to register some data as being available at some location
+// CatalogRequest contains the information required to register some data as being available at some location
 // The Tags property should contain enough information to enable a search index
 // The Sample property should contain enough detail to interact with the data
-type ItemRequest struct {
-	LocationUID string   `json:"location-uid" description:"a valid location of a node registered previously" validate:"nonzero"`
-	Key         string   `json:"key" description:"path of the data item" validate:"nonzero"`
-	Tags        []string `json:"tags" description:"a collection of tags probably belonging to an ontology" validate:"nonzero"`
-	Sample      string   `json:"sample" description:"sample value e.g. a json object `
+type CatalogRequest struct {
+	Key    string   `json:"key" description:"path of the data item" validate:"nonzero"`
+	Tags   []string `json:"tags" description:"a collection of tags probably belonging to an ontology" validate:"nonzero"`
+	Sample string   `json:"sample" description:"sample value e.g. a json object `
 }
 
-// Item contains the original request
-type Item struct {
-	ItemRequest
+// CatalogItem contains the original request
+type CatalogItem struct {
+	CatalogRequest
+	UID         string `json:"uid" description:"unique identifier for the catalogued piece of data" validate:"nonzero"`
+	LocationUID string `json:"-"`
 }
 
 // ItemWithLocation contains the item metadata and its location
 type ItemWithLocation struct {
-	Item
-	Location
+	CatalogItem
+	Location Location `json:"location" description:"location for the catalogued piece of data" validate:"nonzero"`
 }
 
 // LocationRequest allows a node to register its presence with the service
@@ -59,7 +64,7 @@ type Location struct {
 
 func NewCatalogService() catalogResource {
 	return catalogResource{
-		all:       map[string]Item{},
+		all:       map[string]CatalogItem{},
 		locations: map[string]Location{},
 	}
 }
@@ -98,11 +103,12 @@ func (e catalogResource) WebService() *restful.WebService {
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// add an item to the catalog
-	ws.Route(ws.PUT("/items").To(e.catalogItem).
+	ws.Route(ws.PUT("/items/{location-uid}").To(e.catalogItem).
 		Doc("catalog an item for discovery e.g. what and where").
+		Param(locationUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Reads(Item{}).
-		Returns(http.StatusOK, "OK", Item{}).
+		Reads(CatalogRequest{}).
+		Returns(http.StatusOK, "OK", CatalogItem{}).
 		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
@@ -194,7 +200,7 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	req := ItemRequest{}
+	req := CatalogRequest{}
 
 	if err := request.ReadEntity(&req); err != nil {
 		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
@@ -206,17 +212,26 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 		return
 	}
 
-	_, found := e.locations[req.LocationUID]
+	locationUID := request.PathParameter("location-uid")
+
+	_, found := e.locations[locationUID]
 
 	if !found {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "unknown node"})
 		return
 	}
 
-	item := Item{
-		ItemRequest: req,
+	// generate a consistent uid
+	key := []byte(fmt.Sprintf("%s:%s", locationUID, req.Key))
+	hash := md5.Sum(key)
+	encoded := base64.StdEncoding.EncodeToString(hash[:])
+
+	item := CatalogItem{
+		CatalogRequest: req,
+		UID:            encoded,
+		LocationUID:    locationUID,
 	}
-	e.all[item.Key] = item
+	e.all[item.UID] = item
 
 	log.Print(e.all)
 
@@ -224,7 +239,7 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 }
 
 func (e catalogResource) removeFromCatalog(request *restful.Request, response *restful.Response) {
-
+	// TODO : fix this!
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
@@ -240,13 +255,15 @@ func (e catalogResource) allItems(request *restful.Request, response *restful.Re
 	list := []ItemWithLocation{}
 
 	for _, item := range e.all {
-
 		location := e.locations[item.LocationUID]
 		list = append(list, ItemWithLocation{
 			item,
 			location,
 		})
 	}
+
+	b, _ := json.Marshal(list)
+	fmt.Println("json: ", string(b))
 
 	response.WriteEntity(list)
 

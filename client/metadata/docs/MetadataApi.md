@@ -5,14 +5,14 @@ All URIs are relative to *https://localhost*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**AllItems**](MetadataApi.md#AllItems) | **Get** /catalog/items/ | get all cataloged items
-[**CatalogItem**](MetadataApi.md#CatalogItem) | **Put** /catalog/items | catalog an item for discovery e.g. what and where
+[**CatalogItem**](MetadataApi.md#CatalogItem) | **Put** /catalog/items/{location-uid} | catalog an item for discovery e.g. what and where
 [**MoveLocation**](MetadataApi.md#MoveLocation) | **Patch** /catalog/announce/{location-uid} | change a node&#39;s location - keeping the same location-uid
 [**RegisterLocation**](MetadataApi.md#RegisterLocation) | **Put** /catalog/announce | register a node&#39;s location
 [**RemoveFromCatalog**](MetadataApi.md#RemoveFromCatalog) | **Delete** /catalog/items/{catalog-uid} | delete an item from the catalog
 
 
 # **AllItems**
-> AllItems()
+> []ApiItemWithLocation AllItems()
 
 get all cataloged items
 
@@ -24,7 +24,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-void (empty response body)
+[**[]ApiItemWithLocation**](api.ItemWithLocation.md)
 
 ### Authorization
 
@@ -38,7 +38,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **CatalogItem**
-> ServicesItem CatalogItem($body)
+> ApiCatalogItem CatalogItem($locationUid, $body)
 
 catalog an item for discovery e.g. what and where
 
@@ -49,11 +49,12 @@ catalog an item for discovery e.g. what and where
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | [**ServicesItem**](ServicesItem.md)|  | 
+ **locationUid** | **string**| identifier for a location | 
+ **body** | [**ApiCatalogRequest**](ApiCatalogRequest.md)|  | 
 
 ### Return type
 
-[**ServicesItem**](services.Item.md)
+[**ApiCatalogItem**](api.CatalogItem.md)
 
 ### Authorization
 
@@ -67,7 +68,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **MoveLocation**
-> ServicesLocation MoveLocation($locationUid, $body)
+> ApiLocation MoveLocation($locationUid, $body)
 
 change a node's location - keeping the same location-uid
 
@@ -79,11 +80,11 @@ change a node's location - keeping the same location-uid
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **locationUid** | **string**| identifier for a location | 
- **body** | [**ServicesLocationRequest**](ServicesLocationRequest.md)|  | 
+ **body** | [**ApiLocationRequest**](ApiLocationRequest.md)|  | 
 
 ### Return type
 
-[**ServicesLocation**](services.Location.md)
+[**ApiLocation**](api.Location.md)
 
 ### Authorization
 
@@ -97,7 +98,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **RegisterLocation**
-> ServicesLocation RegisterLocation($body)
+> ApiLocation RegisterLocation($body)
 
 register a node's location
 
@@ -108,11 +109,11 @@ register a node's location
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body** | [**ServicesLocationRequest**](ServicesLocationRequest.md)|  | 
+ **body** | [**ApiLocationRequest**](ApiLocationRequest.md)|  | 
 
 ### Return type
 
-[**ServicesLocation**](services.Location.md)
+[**ApiLocation**](api.Location.md)
 
 ### Authorization
 
