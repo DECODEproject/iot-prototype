@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/services"
+	"gogs.dyne.org/DECODE/decode-prototype-da/node/api"
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
@@ -56,11 +56,11 @@ func Serve(options Options) error {
 
 	log.Printf("registered with metadata service : %s", token)
 
-	store := services.NewEntitlementStore()
+	store := api.NewEntitlementStore()
 
 	// TODO : add service to receive data from the device hub and/or any other service
-	restful.DefaultContainer.Add(services.NewEntitlementService(store).WebService())
-	restful.DefaultContainer.Add(services.NewFunctionService().WebService())
+	restful.DefaultContainer.Add(api.NewEntitlementService(store).WebService())
+	restful.DefaultContainer.Add(api.NewFunctionService().WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),
@@ -118,7 +118,7 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 	return token, err
 }
 
-func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *services.EntitlementStore) {
+func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore) {
 
 	// data from the device hub
 	data := map[string]interface{}{
@@ -145,17 +145,17 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 	}
 
 	// set up the entitlements we will use in the hard coded example
-	entitlements.Accepted.Add(services.Entitlement{
-		EntitlementRequest: services.EntitlementRequest{
+	entitlements.Accepted.Add(api.Entitlement{
+		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey(sensorID, "temp"),
-			AccessLevel: services.CanDiscover},
+			AccessLevel: api.CanDiscover},
 		UID: "abc",
 	})
 
-	entitlements.Accepted.Add(services.Entitlement{
-		EntitlementRequest: services.EntitlementRequest{
+	entitlements.Accepted.Add(api.Entitlement{
+		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey(sensorID, "humidity"),
-			AccessLevel: services.CanDiscover},
+			AccessLevel: api.CanDiscover},
 		UID: "def",
 	})
 

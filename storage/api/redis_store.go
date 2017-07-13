@@ -1,4 +1,4 @@
-package services
+package api
 
 // based on -  github.com/donnpebe/go-redis-timeseries
 import (

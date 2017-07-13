@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/storage/services"
+	"gogs.dyne.org/DECODE/decode-prototype-da/storage/api"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
@@ -37,7 +37,7 @@ func Serve(options Options) error {
 
 	defer redisConnection.Close()
 
-	restful.DefaultContainer.Add(services.NewDataService(redisConnection).WebService())
+	restful.DefaultContainer.Add(api.NewDataService(redisConnection).WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),

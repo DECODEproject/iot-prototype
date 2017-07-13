@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/metadata/services"
+	"gogs.dyne.org/DECODE/decode-prototype-da/metadata/api"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
@@ -25,7 +25,7 @@ type Options struct {
 
 func Serve(options Options) error {
 
-	restful.DefaultContainer.Add(services.NewCatalogService().WebService())
+	restful.DefaultContainer.Add(api.NewCatalogService().WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),
