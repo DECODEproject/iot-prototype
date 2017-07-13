@@ -13,11 +13,18 @@ import (
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 )
 
+// ErrorResponse signals error messages back to the client
+type ErrorResponse struct {
+	Error string `json:"error" description:"error message if any"`
+}
+
+// Data is a value to save to storage
 type Data struct {
 	Value  string `json:"value" description:"encoded contents to save" validate:"nonzero"`
 	Bucket string `json:"bucket" description:"unique bucket to save value to" validate:"nonzero"`
 }
 
+// DataResponse is the saved value with the time it was last saved
 type DataResponse struct {
 	Value     string    `json:"value" description:"saved value"`
 	Timestamp time.Time `json:"ts" description:"when the item was saved"`
@@ -53,15 +60,16 @@ func (e dataResource) WebService() *restful.WebService {
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes([]DataResponse{}).
 		Returns(http.StatusOK, "OK", []Data{}).
-		Returns(http.StatusNotFound, "Not Found", nil))
+		Returns(http.StatusNotFound, "Not Found", nil).
+		Returns(http.StatusInternalServerError, "Something went wrong", ErrorResponse{}))
 
 	ws.Route(ws.PUT("/").To(e.append).
 		Doc("append data to a bucket, will create the bucket if it does not exist.").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(Data{}).
 		Returns(http.StatusCreated, "Data was accepted.", nil).
-		Returns(http.StatusBadRequest, "error validating request", nil).
-		Returns(http.StatusInternalServerError, "Something went wrong", nil))
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
+		Returns(http.StatusInternalServerError, "Something went wrong", ErrorResponse{}))
 
 	return ws
 }
@@ -89,7 +97,7 @@ func (e dataResource) getAll(request *restful.Request, response *restful.Respons
 		from, err = time.Parse(utils.ISO8601, fromStr)
 
 		if err != nil {
-			response.WriteErrorString(http.StatusInternalServerError, err.Error())
+			response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 			return
 		}
 
@@ -101,21 +109,20 @@ func (e dataResource) getAll(request *restful.Request, response *restful.Respons
 		to, err = time.Parse(utils.ISO8601, toStr)
 
 		if err != nil {
-			response.WriteErrorString(http.StatusInternalServerError, err.Error())
+			response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 			return
 		}
 	}
 
 	data := []*DataResponse{}
 
-	log.Print(from, to, prefix)
 	err = ts.FetchRange(from, to, &data)
 
 	if err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
-	} else {
-		response.WriteEntity(data)
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 	}
+
+	response.WriteEntity(data)
 }
 
 func (e dataResource) append(request *restful.Request, response *restful.Response) {
@@ -123,12 +130,12 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	data := Data{}
 
 	if err := request.ReadEntity(&data); err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
 	if errs := validator.Validate(data); errs != nil {
-		response.WriteErrorString(http.StatusBadRequest, errs.Error())
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
 		return
 	}
 
@@ -145,8 +152,9 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	err := ts.Add(&DataResponse{Value: data.Value, Timestamp: now}, now)
 
 	if err != nil {
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
-	} else {
-		response.WriteHeader(http.StatusCreated)
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 	}
+
+	response.WriteHeader(http.StatusCreated)
+
 }

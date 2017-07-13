@@ -18,11 +18,8 @@
 
 package swagger
 
-type ServicesData struct {
+type ServicesErrorResponse struct {
 
-	// unique bucket to save value to
-	Bucket string `json:"bucket,omitempty"`
-
-	// encoded contents to save
-	Value string `json:"value,omitempty"`
+	// error message if any
+	Error_ string `json:"error,omitempty"`
 }
