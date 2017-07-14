@@ -24,3 +24,10 @@ _testmain.go
 *.test
 *.prof
 
+# Project specific files
+cmd/metadata/metadata
+cmd/node/node
+cmd/storage/storage
+tmp/
+ui/elm-stuff/build-artifacts/
+
