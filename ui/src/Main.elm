@@ -2,7 +2,6 @@ module Main exposing (..)
 
 import Http
 import MetadataClient
-
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -23,15 +22,13 @@ main =
 
 
 type alias Model =
-    {
-        all : Maybe MetadataClient.Items
-}
+    { all : Maybe MetadataClient.Items
+    }
 
 
 initialModel : Model
 initialModel =
-    {
-        all = Nothing
+    { all = Nothing
     }
 
 
@@ -45,7 +42,7 @@ init =
 
 
 type Msg
-    = NoOp 
+    = NoOp
     | RefreshMetadata
     | RefreshMetadataCompleted (Result Http.Error MetadataClient.Items)
 
@@ -55,8 +52,10 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
         RefreshMetadata ->
             ( model, getAllMetadata )
+
         RefreshMetadataCompleted result ->
             case result of
                 Err httpError ->
@@ -67,19 +66,20 @@ update msg model =
                         ( model, Cmd.none )
 
                 Ok items ->
-                    ( {model | all = Just items }, Cmd.none )
+                    ( { model | all = Just items }, Cmd.none )
 
 
-getAllMetadata :  Cmd Msg
+getAllMetadata : Cmd Msg
 getAllMetadata =
-  let
-    url =
-      "http://localhost:8081/catalog/items/"
+    let
+        url =
+            "http://localhost:8081/catalog/items/"
 
-    request =
-      Http.get url MetadataClient.decodeItems
-  in
-    Http.send RefreshMetadataCompleted request
+        request =
+            Http.get url MetadataClient.decodeItems
+    in
+        Http.send RefreshMetadataCompleted request
+
 
 
 -- SUBSCRIPTIONS
@@ -99,6 +99,6 @@ view model =
     div []
         [ text "Nodes"
         , text "Data"
-        , button [ onClick RefreshMetadata] [text "refresh"]
+        , button [ onClick RefreshMetadata ] [ text "refresh" ]
         , text (toString model)
-    ]
+        ]
