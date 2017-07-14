@@ -4,6 +4,7 @@ import Json.Decode exposing (Decoder, string, int, float, dict, list, bool, map,
 import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded)
 import Dict exposing (Dict)
 
+
 type alias Items =
     List Item
 

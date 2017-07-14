@@ -1,10 +1,11 @@
 module Main exposing (..)
 
 import Http
-import MetadataClient
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
+import List.Extra exposing (unique)
+import MetadataClient
 
 
 main : Program Never Model Msg
@@ -96,9 +97,39 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ text "Nodes"
-        , text "Data"
-        , button [ onClick RefreshMetadata ] [ text "refresh" ]
-        , text (toString model)
-        ]
+    case model.all of
+        Nothing ->
+            button [ onClick RefreshMetadata ] [ text "refresh" ]
+
+        Just d ->
+            div []
+                [ div [] [ text "Nodes" ]
+                , drawNodes d
+                , div [] [ text "Data" ]
+                , drawData d
+                , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
+
+                --, div [] [text (toString model)]
+                ]
+
+
+drawNodes : MetadataClient.Items -> Html Msg
+drawNodes items =
+    div [] <| List.map (\x -> text (toString (x))) (uniqueLocations items)
+
+
+drawData : MetadataClient.Items -> Html Msg
+drawData items =
+    div [] <| List.map (\x -> text (toString (x))) (uniqueTags items)
+
+
+uniqueLocations : MetadataClient.Items -> List String
+uniqueLocations items =
+    List.map (\x -> x.location.uid) items
+        |> List.Extra.unique
+
+
+uniqueTags : MetadataClient.Items -> List String
+uniqueTags items =
+    List.concatMap (\x -> x.tags) items
+        |> List.Extra.unique
