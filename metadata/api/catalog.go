@@ -3,11 +3,9 @@ package api
 import (
 	"crypto/md5"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
-	"sync"
 
 	validator "gopkg.in/validator.v2"
 
@@ -18,9 +16,7 @@ import (
 
 // catalogResource is an 'in-memory' instance of a metadata service
 type catalogResource struct {
-	lock      sync.RWMutex
-	all       map[string]CatalogItem
-	locations map[string]Location
+	store *MetadataStore
 }
 
 // ErrorResponse signals error messages back to the client
@@ -62,10 +58,9 @@ type Location struct {
 	UID string `json:"uid" description:"unique identifier for a node" validate:"nonzero"`
 }
 
-func NewCatalogService() catalogResource {
+func NewCatalogService(store *MetadataStore) catalogResource {
 	return catalogResource{
-		all:       map[string]CatalogItem{},
-		locations: map[string]Location{},
+		store: store,
 	}
 }
 
@@ -130,9 +125,6 @@ func (e catalogResource) WebService() *restful.WebService {
 
 func (e catalogResource) registerLocation(request *restful.Request, response *restful.Response) {
 
-	e.lock.Lock()
-	defer e.lock.Unlock()
-
 	req := LocationRequest{}
 
 	if err := request.ReadEntity(&req); err != nil {
@@ -149,8 +141,7 @@ func (e catalogResource) registerLocation(request *restful.Request, response *re
 		LocationRequest: req,
 		UID:             uuid.NewV4().String(),
 	}
-	e.locations[location.UID] = location
-
+	e.store.Locations.Add(location)
 	log.Print("node registered :", location)
 
 	response.WriteEntity(location)
@@ -158,9 +149,6 @@ func (e catalogResource) registerLocation(request *restful.Request, response *re
 }
 
 func (e catalogResource) moveLocation(request *restful.Request, response *restful.Response) {
-
-	e.lock.Lock()
-	defer e.lock.Unlock()
 
 	locationUID := request.PathParameter("location-uid")
 
@@ -176,18 +164,23 @@ func (e catalogResource) moveLocation(request *restful.Request, response *restfu
 		return
 	}
 
-	_, found := e.locations[locationUID]
-	if !found {
-		response.WriteHeader(http.StatusNotFound)
-		return
-	}
-
 	location := Location{
 		LocationRequest: req,
 		UID:             locationUID,
 	}
 
-	e.locations[location.UID] = location
+	err := e.store.Locations.Replace(locationUID, location)
+
+	if err != nil {
+		if err == ErrLocationNotExists {
+			response.WriteHeader(http.StatusNotFound)
+			return
+
+		}
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+
+	}
 
 	log.Print("node moved :", location)
 
@@ -196,9 +189,6 @@ func (e catalogResource) moveLocation(request *restful.Request, response *restfu
 }
 
 func (e catalogResource) catalogItem(request *restful.Request, response *restful.Response) {
-
-	e.lock.Lock()
-	defer e.lock.Unlock()
 
 	req := CatalogRequest{}
 
@@ -214,7 +204,7 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 
 	locationUID := request.PathParameter("location-uid")
 
-	_, found := e.locations[locationUID]
+	found := e.store.Locations.Exists(locationUID)
 
 	if !found {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "unknown node"})
@@ -231,40 +221,17 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 		UID:            encoded,
 		LocationUID:    locationUID,
 	}
-	e.all[item.UID] = item
-
-	log.Print(e.all)
+	e.store.Items.Add(item)
 
 	response.WriteEntity(item)
 }
 
 func (e catalogResource) removeFromCatalog(request *restful.Request, response *restful.Response) {
-	// TODO : fix this!
-	e.lock.Lock()
-	defer e.lock.Unlock()
-
 	uid := request.PathParameter("catalog-uid")
-	delete(e.all, uid)
+	e.store.Items.Delete(uid)
 }
 
 func (e catalogResource) allItems(request *restful.Request, response *restful.Response) {
-
-	e.lock.Lock()
-	defer e.lock.Unlock()
-
-	list := []ItemWithLocation{}
-
-	for _, item := range e.all {
-		location := e.locations[item.LocationUID]
-		list = append(list, ItemWithLocation{
-			item,
-			location,
-		})
-	}
-
-	b, _ := json.Marshal(list)
-	fmt.Println("json: ", string(b))
-
+	list := e.store.All()
 	response.WriteEntity(list)
-
 }
