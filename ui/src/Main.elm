@@ -24,12 +24,14 @@ main =
 
 type alias Model =
     { all : Maybe MetadataClient.Items
+    , filtered : Maybe MetadataClient.Items
     }
 
 
 initialModel : Model
 initialModel =
     { all = Nothing
+    , filtered = Nothing
     }
 
 
@@ -46,6 +48,8 @@ type Msg
     = NoOp
     | RefreshMetadata
     | RefreshMetadataCompleted (Result Http.Error MetadataClient.Items)
+    | ShowLocations String
+    | ViewGraph String MetadataClient.Location
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -68,6 +72,17 @@ update msg model =
 
                 Ok items ->
                     ( { model | all = Just items }, Cmd.none )
+
+        ShowLocations tag ->
+            case model.all of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just r ->
+                    ( { model | filtered = (filterByTag tag r) }, Cmd.none )
+
+        ViewGraph key location ->
+            ( model, Cmd.none )
 
 
 getAllMetadata : Cmd Msg
@@ -103,31 +118,39 @@ view model =
 
         Just d ->
             div []
-                [ div [] [ text "Nodes" ]
-                , drawNodes d
-                , div [] [ text "Data" ]
+                [ div [] [ text "Metadata" ]
                 , drawData d
-                , div [] [ text "Keys" ]
-                , drawKeys d
+                , drawFiltered model.filtered
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
-
-                --, div [] [text (toString model)]
+                , div [] [ text (toString model) ]
                 ]
 
 
-drawNodes : MetadataClient.Items -> Html Msg
-drawNodes items =
-    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueLocations items)
+
+--drawNodes : MetadataClient.Items -> Html Msg
+--drawNodes items =
+--    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueLocations items)
 
 
 drawData : MetadataClient.Items -> Html Msg
 drawData items =
-    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueTags items)
+    div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
 
-drawKeys : MetadataClient.Items -> Html Msg
-drawKeys items =
-    div [] <| List.map (\x -> div [] [ text (x.key) ]) items
+
+--drawKeys : MetadataClient.Items -> Html Msg
+--drawKeys items =
+--    div [] <| List.map (\x -> div [] [ text (x.key) ]) items
+
+
+drawFiltered : Maybe MetadataClient.Items -> Html Msg
+drawFiltered items =
+    case items of
+        Nothing ->
+            text ("")
+
+        Just r ->
+            div [] <| List.map (\x -> div [] [ text x.key, text (toString (x.location)), a [ onClick (ViewGraph x.key x.location), href "#" ] [ text "view" ] ]) r
 
 
 uniqueLocations : MetadataClient.Items -> List String
@@ -140,3 +163,17 @@ uniqueTags : MetadataClient.Items -> List String
 uniqueTags items =
     List.concatMap (\x -> x.tags) items
         |> List.Extra.unique
+
+
+filterByTag : String -> MetadataClient.Items -> Maybe MetadataClient.Items
+filterByTag tag data =
+    let
+        r =
+            List.filter (\x -> List.member tag x.tags) data
+    in
+        case r of
+            [] ->
+                Nothing
+
+            _ ->
+                Just r
