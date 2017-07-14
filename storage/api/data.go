@@ -153,6 +153,7 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
 	}
 
 	response.WriteHeader(http.StatusCreated)
