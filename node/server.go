@@ -1,15 +1,16 @@
 package node
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/api"
+	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
@@ -77,10 +78,7 @@ func Serve(options Options) error {
 
 	// start up a pretend device-hub input
 	func() {
-		c := time.Tick(10 * time.Second)
-		for _ = range c {
-			go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
-		}
+		go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
 	}()
 
 	return http.ListenAndServe(options.Binding, nil)
@@ -120,78 +118,81 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 
 func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore) {
 
-	// data from the device hub
-	data := map[string]interface{}{
-		"temp":     23.3,
-		"humidity": 34,
-	}
+	sensorMessages := make(chan sensors.SensorMessage)
+	ctx := context.Background()
 
-	// our sensor
-	sensorID := "sensor-1"
+	// start up a few temp, humdity sensors
+	one := sensors.NewTemperatureHumiditySensor(ctx, "sensor-1", sensorMessages)
+	two := sensors.NewTemperatureHumiditySensor(ctx, "sensor-2", sensorMessages)
 
-	// schema for the data
-	schema := map[string]interface{}{
-		"@context": map[string]interface{}{
-			"decode":   "http://decode.eu#",
-			"m3-lite":  "http://purl.org/iot/vocab/m3-lite#",
-			"humidity": "m3-lite:AirHumidity",
-			"temp":     "m3-lite:AirTemperature",
-			"domain":   "decode:hasDomain",
-		},
-		"@type": "m3-lite:Sensor",
-		"domain": map[string]interface{}{
-			"@type": "m3-lite:Environment",
-		},
-	}
+	one.Start()
+	two.Start()
 
 	// set up the entitlements we will use in the hard coded example
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey(sensorID, "temp"),
+			Subject:     buildSubjectKey("sensor-1", "temp"),
 			AccessLevel: api.CanDiscover},
 		UID: "abc",
+	})
+	entitlements.Accepted.Add(api.Entitlement{
+		EntitlementRequest: api.EntitlementRequest{
+			Subject:     buildSubjectKey("sensor-1", "humidity"),
+			AccessLevel: api.CanAccess},
+		UID: "def",
 	})
 
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey(sensorID, "humidity"),
+			Subject:     buildSubjectKey("sensor-2", "temp"),
 			AccessLevel: api.CanDiscover},
-		UID: "def",
+		UID: "ghi",
+	})
+	entitlements.Accepted.Add(api.Entitlement{
+		EntitlementRequest: api.EntitlementRequest{
+			Subject:     buildSubjectKey("sensor-2", "humidity"),
+			AccessLevel: api.CanAccess},
+		UID: "klm",
 	})
 
-	log.Print("entitlements", entitlements.Accepted)
+	for {
+		select {
+		case message := <-sensorMessages:
 
-	// for each bit of data
-	// find an entitlement for the data
-	// - if entitlement exists and IsAccessible() send metadata to the 'metadata' service
-	// Write data values to the 'storage' service
-	for k, v := range data {
+			// for each bit of data
+			// find an entitlement for the data
+			// - if entitlement exists and IsAccessible() send metadata to the 'metadata' service
+			// Write data values to the 'storage' service
+			for k, v := range message.Data {
 
-		subject := buildSubjectKey(sensorID, k)
+				subject := buildSubjectKey(message.SensorUID, k)
+				log.Println(subject)
+				// find entitlement for subject
+				ent, found := entitlements.Accepted.FindForSubject(subject)
 
-		// find entitlement for subject
-		ent, found := entitlements.Accepted.FindForSubject(subject)
+				if found {
 
-		if found {
+					// if the underlying data is discoverable
+					// send to the metadata service
+					if ent.IsDiscoverable() {
+						err := sendDataToMetadataService(mClient, locationToken, message.Schema, subject, k, v)
 
-			// if the underlying data is accessible
-			// send to the metadata service
-			if ent.IsAccessible() {
-				err := sendDataToMetadataService(mClient, locationToken, schema, subject, k, v)
+						if err != nil {
+							log.Println(err.Error())
+							continue
+						}
+
+					}
+				}
+				// write to the storage service
+				err := sendDataToStorageService(sClient, subject, v)
 
 				if err != nil {
 					log.Println(err.Error())
 					continue
 				}
-
 			}
-		}
-		// write to the storage service
-		err := sendDataToStorageService(sClient, subject, v)
 
-		if err != nil {
-			log.Println(err.Error())
-			continue
 		}
 	}
 }
