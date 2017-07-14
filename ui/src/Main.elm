@@ -117,17 +117,17 @@ view model =
 
 drawNodes : MetadataClient.Items -> Html Msg
 drawNodes items =
-    div [] <| List.map (\x -> text (x)) (uniqueLocations items)
+    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueLocations items)
 
 
 drawData : MetadataClient.Items -> Html Msg
 drawData items =
-    div [] <| List.map (\x -> text (x)) (uniqueTags items)
+    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueTags items)
 
 
 drawKeys : MetadataClient.Items -> Html Msg
 drawKeys items =
-    div [] <| List.map (\x -> text (x.key)) items
+    div [] <| List.map (\x -> div [] [ text (x.key) ]) items
 
 
 uniqueLocations : MetadataClient.Items -> List String
