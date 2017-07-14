@@ -125,8 +125,12 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 	one := sensors.NewTemperatureHumiditySensor(ctx, "sensor-1", sensorMessages)
 	two := sensors.NewTemperatureHumiditySensor(ctx, "sensor-2", sensorMessages)
 
+	// and a sine wave generator
+	three := sensors.NewSineCurveEmitterSensor(ctx, "sine", sensorMessages)
+
 	one.Start()
 	two.Start()
+	three.Start()
 
 	// set up the entitlements we will use in the hard coded example
 	entitlements.Accepted.Add(api.Entitlement{
@@ -153,6 +157,13 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 			Subject:     buildSubjectKey("sensor-2", "humidity"),
 			AccessLevel: api.CanAccess},
 		UID: "klm",
+	})
+
+	entitlements.Accepted.Add(api.Entitlement{
+		EntitlementRequest: api.EntitlementRequest{
+			Subject:     buildSubjectKey("sine", "value"),
+			AccessLevel: api.CanDiscover},
+		UID: "nop",
 	})
 
 	for {

@@ -6,12 +6,6 @@ import (
 	"time"
 )
 
-type SensorMessage struct {
-	Data      map[string]interface{}
-	Schema    map[string]interface{}
-	SensorUID string
-}
-
 type temp_humidity struct {
 	ctx  context.Context
 	out  chan<- SensorMessage
