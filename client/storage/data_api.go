@@ -50,7 +50,7 @@ func NewDataApiWithBasePath(basePath string) *DataApi {
  * @param body 
  * @return void
  */
-func (a DataApi) Append(body ServicesData) (*APIResponse, error) {
+func (a DataApi) Append(body ApiData) (*APIResponse, error) {
 
 	var httpMethod = "Put"
 	// create path and map variables
@@ -106,9 +106,9 @@ func (a DataApi) Append(body ServicesData) (*APIResponse, error) {
  * @param from return data from this ISO8601 timestamp. Defaults to 24 hours ago.
  * @param to finish at this ISO8601 timestamp 
  * @param bucketUid name of the &#39;bucket&#39; of data
- * @return []ServicesData
+ * @return []ApiDataResponse
  */
-func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ServicesData, *APIResponse, error) {
+func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ApiDataResponse, *APIResponse, error) {
 
 	var httpMethod = "Get"
 	// create path and map variables
@@ -148,7 +148,7 @@ func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ServicesDat
 	if localVarHttpHeaderAccept != "" {
 		headerParams["Accept"] = localVarHttpHeaderAccept
 	}
-	var successPayload = new([]ServicesData)
+	var successPayload = new([]ApiDataResponse)
 	httpResponse, err := a.Configuration.APIClient.CallAPI(path, httpMethod, postBody, headerParams, queryParams, formParams, fileName, fileBytes)
 	if err != nil {
 		return *successPayload, NewAPIResponse(httpResponse.RawResponse), err
