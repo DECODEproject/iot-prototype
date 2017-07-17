@@ -36,7 +36,7 @@ func (e Entitlement) IsDiscoverable() bool {
 
 // IsAccessible returns true if the data can be accessed e.g. viewed, collated etc
 func (e Entitlement) IsAccessible() bool {
-	return e.AccessLevel == CanDiscover
+	return e.AccessLevel == CanAccess
 }
 
 type AccessLevel string

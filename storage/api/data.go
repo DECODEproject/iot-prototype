@@ -20,7 +20,7 @@ type ErrorResponse struct {
 
 // Data is a value to save to storage
 type Data struct {
-	Value  string `json:"value" description:"encoded contents to save" validate:"nonzero"`
+	Value  string `json:"value" description:"data to save" validate:"nonzero"`
 	Bucket string `json:"bucket" description:"unique bucket to save value to" validate:"nonzero"`
 }
 
@@ -59,7 +59,7 @@ func (e dataResource) WebService() *restful.WebService {
 		Param(ws.QueryParameter("bucket-uid", "name of the 'bucket' of data").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes([]DataResponse{}).
-		Returns(http.StatusOK, "OK", []Data{}).
+		Returns(http.StatusOK, "OK", []DataResponse{}).
 		Returns(http.StatusNotFound, "Not Found", nil).
 		Returns(http.StatusInternalServerError, "Something went wrong", ErrorResponse{}))
 

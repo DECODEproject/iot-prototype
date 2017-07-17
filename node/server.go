@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,7 +45,7 @@ func Serve(options Options) error {
 	log.Print(options.StorageServiceAddress)
 	log.Printf("registering %s with metadata service %s", options.WebServicesURL, options.MetadataServiceAddress)
 
-	// TODO : check for existing token
+	// TODO : reuse existing token
 	// If found then update the location by telling the metadata service where I am
 	// The prototype will just register again
 	token, err := registerWithMetadataService(metadataClient, options.WebServicesURL)
@@ -61,7 +60,8 @@ func Serve(options Options) error {
 
 	// TODO : add service to receive data from the device hub and/or any other service
 	restful.DefaultContainer.Add(api.NewEntitlementService(store).WebService())
-	restful.DefaultContainer.Add(api.NewFunctionService().WebService())
+	restful.DefaultContainer.Add(api.NewDataService(store, storageClient).WebService())
+	//	restful.DefaultContainer.Add(api.NewFunctionService().WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),
@@ -217,7 +217,7 @@ func sendDataToStorageService(sClient *storageclient.DataApi, subject string, va
 		return fmt.Errorf("error marshalling to json : %s", err.Error())
 	}
 
-	_, err = sClient.Append(storageclient.ServicesData{Bucket: subject, Value: base64.StdEncoding.EncodeToString(bytes)})
+	_, err = sClient.Append(storageclient.ApiData{Bucket: subject, Value: string(bytes)})
 
 	if err != nil {
 		return fmt.Errorf("error appending to storage : %s ", err.Error())
