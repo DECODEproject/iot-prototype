@@ -96,8 +96,8 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Param(requestUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes(Entitlement{}).
-		Returns(200, "OK", Entitlement{}).
-		Returns(404, "Not Found", nil))
+		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusNotFound, "Not Found", nil))
 
 	// delete a request
 	// TODO : when adding in authN/R ensure only the creator can delete
@@ -107,7 +107,6 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Param(requestUIDParameter))
 
 	// get all requests
-	// TODO : add filter on status type
 	// TODO : add filter on path
 	ws.Route(ws.GET("/requests/").To(e.allRequests).
 		Doc("get all pending requests").
