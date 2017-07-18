@@ -20,14 +20,14 @@ type ErrorResponse struct {
 
 // Data is a value to save to storage
 type Data struct {
-	Value  string `json:"value" description:"data to save" validate:"nonzero"`
-	Bucket string `json:"bucket" description:"unique bucket to save value to" validate:"nonzero"`
+	Value  interface{} `json:"value" description:"data to save" validate:"nonzero"`
+	Bucket string      `json:"bucket" description:"unique bucket to save value to" validate:"nonzero"`
 }
 
-// DataResponse is the saved value with the time it was last saved
+// DataResponse is the saved value with the time it was saved
 type DataResponse struct {
-	Value     string    `json:"value" description:"saved value"`
-	Timestamp time.Time `json:"ts" description:"when the item was saved"`
+	Value     interface{} `json:"value" description:"saved value"`
+	Timestamp time.Time   `json:"ts" description:"when the item was saved"`
 }
 
 type dataResource struct {
