@@ -33,7 +33,6 @@ func Serve(options Options) error {
 		WebServices:    restful.RegisteredWebServices(),
 		WebServicesURL: options.WebServicesURL,
 		APIPath:        "/apidocs.json",
-		//		Filter:         restful.OPTIONSFilter(),
 	}
 	restful.DefaultContainer.Add(restfulspec.NewOpenAPIService(config))
 
