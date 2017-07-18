@@ -1,7 +1,6 @@
 package api
 
 import (
-	"log"
 	"net/http"
 
 	validator "gopkg.in/validator.v2"
@@ -21,7 +20,7 @@ type DataRequest struct {
 }
 
 type DataResponse struct {
-	Data interface{} `data:"key" description:"data returned"`
+	Data interface{} `json:"data" description:"data returned"`
 }
 
 func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi) dataResource {
@@ -56,7 +55,6 @@ func (e dataResource) WebService() *restful.WebService {
 }
 
 func (e dataResource) getData(request *restful.Request, response *restful.Response) {
-	log.Println("X")
 	req := DataRequest{}
 
 	if err := request.ReadEntity(&req); err != nil {
@@ -73,14 +71,11 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 	ent, found := e.store.Accepted.FindForSubject(req.Key)
 
 	if !found {
-
-		log.Println("no entitlement")
 		response.WriteHeader(http.StatusForbidden)
 		return
 	}
 
 	if !ent.IsAccessible() {
-		log.Println("not accessible")
 		response.WriteHeader(http.StatusForbidden)
 		return
 	}
@@ -93,12 +88,9 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 		return
 	}
 
-	log.Println(data, err)
-
 	resp := DataResponse{
 		Data: data,
 	}
 
 	response.WriteEntity(resp)
-
 }
