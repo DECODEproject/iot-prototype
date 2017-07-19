@@ -2,12 +2,44 @@
 <head>
     <title>Prototype</title>
     <script src="main.js"></script>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js'></script>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+
+    <script src="static/metricsgraphics.min.js"></script>
+    <link href="static/metricsgraphics.css" rel="stylesheet" type="text/css">
 </head>
 <body>
   <div id="main"></div>
+  <div id="graph"></div>
 </body>
 <script type="text/javascript">
   var div = document.getElementById('main');
   var app = Elm.Main.embed(div);
+
+  app.ports.unsafeDrawGraph.subscribe(function(data) {
+      drawGraph(data)
+  });
+
+
+  function drawGraph( data ){
+
+    var prepared = []
+
+    for (var i in data) {
+        prepared.push({'date':new Date(data[i].date ),'value': data[i].value})
+    }
+
+    MG.data_graphic({
+        //title: "Downloads",
+        //description: "This graphic shows a time-series of downloads.",
+        data: prepared,
+        width: 600,
+        height: 250,
+        target: '#graph',
+        x_accessor: 'date',
+        y_accessor: 'value',
+    })
+}
 </script>
 </html>

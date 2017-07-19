@@ -1,5 +1,6 @@
-module Main exposing (..)
+port module Main exposing (..)
 
+import Date
 import Http
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -20,6 +21,7 @@ main =
         }
 
 
+port unsafeDrawGraph : List FloatDataItem -> Cmd msg
 
 -- MODEL
 
@@ -87,7 +89,7 @@ update msg model =
                     ( { model | filtered = (filterByTag tag r), currentGraph = Nothing }, Cmd.none )
 
         ViewGraph key location ->
-            ( {model | currentGraph = Nothing}, getTimeSeriesData key )
+            ( {model | currentGraph = Nothing }, getTimeSeriesData key )
         ViewGraphCompleted result ->
             case result of
                 Err httpError ->
@@ -98,7 +100,22 @@ update msg model =
                         ( model, Cmd.none )
 
                 Ok items ->
-                    ( { model | currentGraph = Just items }, Cmd.none )
+                    ( { model | currentGraph = Just items }, unsafeDrawGraph( prepareGraphData(items.data) ))
+
+
+type alias FloatDataItem =
+    {
+        value : Float,
+        date : String
+    }
+
+prepareGraphData : List NodeClient.DataItem -> List FloatDataItem
+prepareGraphData items =
+    List.filterMap (\item -> case item.value of
+            NodeClient.JsFloat f ->  Just (FloatDataItem f item.timeStamp)
+            _ -> Nothing
+        ) items
+
 
 getAllMetadata : Cmd Msg
 getAllMetadata =
@@ -128,8 +145,6 @@ getTimeSeriesData key =
         Http.send ViewGraphCompleted request
 
 
-
-
 -- SUBSCRIPTIONS
 
 
@@ -153,7 +168,6 @@ view model =
                 [ div [] [ text "Metadata" ]
                 , drawData d
                 , drawFiltered model.filtered
-                , drawGraph model.currentGraph
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
 --                , div [] [ text (toString model) ]
                 ]
@@ -176,12 +190,6 @@ drawFiltered items =
 drawViewerWidget : MetadataClient.Item -> Html Msg
 drawViewerWidget item =
     a [ onClick (ViewGraph item.key item.location), href "#" ] [ text "view" ]
-
-drawGraph : Maybe NodeClient.DataResponse -> Html Msg
-drawGraph response =
-    case response of
-        Nothing -> text("")
-        Just r -> text("graph!")
 
 -- RPC
 -- TODO :  move to MetadataClient
