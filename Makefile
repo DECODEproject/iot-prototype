@@ -76,12 +76,12 @@ docker-redis: ## run a local instance of docker for the storage service
 .PHONY: docker-redis
 
 client-metadata: ## build golang client for the metadata service - requires a local running metadata service
-	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8081/apidocs.json -l go -o ./client/metadata/
+	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8081/apidocs.json -l go -o ./client/metadata/ --type-mappings  object=interface{}
 
 .PHONY: client-metadata
 
 client-storage: ## build golang client for the storage service - requires a local running storage service
-	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8083/apidocs.json -l go -o ./client/storage/
+	java -jar ./tools/swagger-codegen-cli-2.2.1.jar generate -i http://localhost:8083/apidocs.json -l go -o ./client/storage/ --type-mappings  object=interface{}
 
 .PHONY: client-storage
 
