@@ -6,7 +6,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra exposing (unique)
 import MetadataClient
+import NodeClient
 
+import Json.Encode exposing(..)
 
 main : Program Never Model Msg
 main =
@@ -25,6 +27,7 @@ main =
 type alias Model =
     { all : Maybe MetadataClient.Items
     , filtered : Maybe MetadataClient.Items
+    , currentGraph : Maybe NodeClient.DataResponse
     }
 
 
@@ -32,6 +35,7 @@ initialModel : Model
 initialModel =
     { all = Nothing
     , filtered = Nothing
+    , currentGraph = Nothing
     }
 
 
@@ -50,6 +54,7 @@ type Msg
     | RefreshMetadataCompleted (Result Http.Error MetadataClient.Items)
     | ShowLocations String
     | ViewGraph String MetadataClient.Location
+    | ViewGraphCompleted (Result Http.Error NodeClient.DataResponse)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -79,11 +84,21 @@ update msg model =
                     ( model, Cmd.none )
 
                 Just r ->
-                    ( { model | filtered = (filterByTag tag r) }, Cmd.none )
+                    ( { model | filtered = (filterByTag tag r), currentGraph = Nothing }, Cmd.none )
 
         ViewGraph key location ->
-            ( model, Cmd.none )
+            ( {model | currentGraph = Nothing}, getTimeSeriesData key )
+        ViewGraphCompleted result ->
+            case result of
+                Err httpError ->
+                    let
+                        _ =
+                            Debug.log "ViewGraph error" httpError
+                    in
+                        ( model, Cmd.none )
 
+                Ok items ->
+                    ( { model | currentGraph = Just items }, Cmd.none )
 
 getAllMetadata : Cmd Msg
 getAllMetadata =
@@ -95,6 +110,23 @@ getAllMetadata =
             Http.get url MetadataClient.decodeItems
     in
         Http.send RefreshMetadataCompleted request
+
+
+getTimeSeriesEncoder : String -> Json.Encode.Value
+getTimeSeriesEncoder key =
+    Json.Encode.object [ ("key", Json.Encode.string key) ]
+
+getTimeSeriesData : String -> Cmd Msg
+getTimeSeriesData key =
+    let
+        url =
+            "http://localhost:8080/data/"
+
+        request =
+            Http.post url (Http.jsonBody (getTimeSeriesEncoder key)) NodeClient.decodeDataResponse
+    in
+        Http.send ViewGraphCompleted request
+
 
 
 
@@ -121,27 +153,15 @@ view model =
                 [ div [] [ text "Metadata" ]
                 , drawData d
                 , drawFiltered model.filtered
+                , drawGraph model.currentGraph
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
-                , div [] [ text (toString model) ]
+--                , div [] [ text (toString model) ]
                 ]
-
-
-
---drawNodes : MetadataClient.Items -> Html Msg
---drawNodes items =
---    div [] <| List.map (\x -> div [] [ text (x) ]) (uniqueLocations items)
 
 
 drawData : MetadataClient.Items -> Html Msg
 drawData items =
     div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
-
-
-
---drawKeys : MetadataClient.Items -> Html Msg
---drawKeys items =
---    div [] <| List.map (\x -> div [] [ text (x.key) ]) items
-
 
 drawFiltered : Maybe MetadataClient.Items -> Html Msg
 drawFiltered items =
@@ -149,10 +169,22 @@ drawFiltered items =
         Nothing ->
             text ("")
 
-        Just r ->
-            div [] <| List.map (\x -> div [] [ text x.key, text (toString (x.location)), a [ onClick (ViewGraph x.key x.location), href "#" ] [ text "view" ] ]) r
+        Just items ->
+            div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget(item) ]) items
 
 
+drawViewerWidget : MetadataClient.Item -> Html Msg
+drawViewerWidget item =
+    a [ onClick (ViewGraph item.key item.location), href "#" ] [ text "view" ]
+
+drawGraph : Maybe NodeClient.DataResponse -> Html Msg
+drawGraph response =
+    case response of
+        Nothing -> text("")
+        Just r -> text("graph!")
+
+-- RPC
+-- TODO :  move to MetadataClient
 uniqueLocations : MetadataClient.Items -> List String
 uniqueLocations items =
     List.map (\x -> x.location.uid) items
