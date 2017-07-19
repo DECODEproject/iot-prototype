@@ -24,5 +24,5 @@ type ApiData struct {
 	Bucket string `json:"bucket,omitempty"`
 
 	// data to save
-	Value string `json:"value,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }

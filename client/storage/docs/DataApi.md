@@ -50,7 +50,7 @@ returns all of the data stored in a logical 'bucket'.
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **from** | **string**| return data from this ISO8601 timestamp. Defaults to 24 hours ago. | [optional] [default to ]
- **to** | **string**| finish at this ISO8601 timestamp  | [optional] [default to 2017-07-17T11:36:19.547+01:00]
+ **to** | **string**| finish at this ISO8601 timestamp  | [optional] [default to ]
  **bucketUid** | **string**| name of the &#39;bucket&#39; of data | [optional] [default to ]
 
 ### Return type

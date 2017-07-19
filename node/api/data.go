@@ -20,7 +20,7 @@ type DataRequest struct {
 }
 
 type DataResponse struct {
-	Data interface{} `json:"data" description:"data returned"`
+	Data interface{} `json:"data" description:"data returned type="object"`
 }
 
 func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi) dataResource {

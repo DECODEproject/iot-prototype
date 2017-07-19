@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"reflect"
 	"time"
 
 	validator "gopkg.in/validator.v2"
@@ -20,13 +21,13 @@ type ErrorResponse struct {
 
 // Data is a value to save to storage
 type Data struct {
-	Value  interface{} `json:"value" description:"data to save" validate:"nonzero"`
+	Value  interface{} `json:"value" description:"data to save" validate:"nonzero" type:"object"`
 	Bucket string      `json:"bucket" description:"unique bucket to save value to" validate:"nonzero"`
 }
 
 // DataResponse is the saved value with the time it was saved
 type DataResponse struct {
-	Value     interface{} `json:"value" description:"saved value"`
+	Value     interface{} `json:"value" description:"saved value" type:"object"`
 	Timestamp time.Time   `json:"ts" description:"when the item was saved"`
 }
 
@@ -50,12 +51,10 @@ func (e dataResource) WebService() *restful.WebService {
 
 	tags := []string{"data"}
 
-	now := time.Now()
-
 	ws.Route(ws.GET("/").To(e.getAll).
 		Doc("returns all of the data stored in a logical 'bucket'.").
 		Param(ws.QueryParameter("from", "return data from this ISO8601 timestamp. Defaults to 24 hours ago.").DataType("date").DataFormat(utils.ISO8601)).
-		Param(ws.QueryParameter("to", "finish at this ISO8601 timestamp ").DataType("date").DataFormat(utils.ISO8601).DefaultValue(utils.ISO8601Time{now}.String())).
+		Param(ws.QueryParameter("to", "finish at this ISO8601 timestamp ").DataType("date").DataFormat(utils.ISO8601)).
 		Param(ws.QueryParameter("bucket-uid", "name of the 'bucket' of data").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes([]DataResponse{}).
@@ -118,6 +117,8 @@ func (e dataResource) getAll(request *restful.Request, response *restful.Respons
 
 	err = ts.FetchRange(from, to, &data)
 
+	log.Println("get", data)
+
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 	}
@@ -144,7 +145,7 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	expiry := time.Duration(0)
 
 	log.Println("append :", data)
-
+	log.Println("type : ", reflect.TypeOf(data.Value))
 	ts := NewTimeSeries(prefix, timestep, expiry, e.db)
 
 	// TODO : should this be UTC

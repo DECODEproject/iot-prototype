@@ -2,7 +2,6 @@ package node
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -219,14 +218,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 
 func sendDataToStorageService(sClient *storageclient.DataApi, subject string, value interface{}) error {
 
-	// jsonify and base64 the value
-	bytes, err := json.Marshal(value)
-
-	if err != nil {
-		return fmt.Errorf("error marshalling to json : %s", err.Error())
-	}
-
-	_, err = sClient.Append(storageclient.ApiData{Bucket: subject, Value: string(bytes)})
+	_, err := sClient.Append(storageclient.ApiData{Bucket: subject, Value: value})
 
 	if err != nil {
 		return fmt.Errorf("error appending to storage : %s ", err.Error())

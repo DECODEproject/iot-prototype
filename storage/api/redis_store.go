@@ -2,13 +2,13 @@ package api
 
 // based on -  github.com/donnpebe/go-redis-timeseries
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"reflect"
 	"sync"
 	"time"
 
-	"github.com/alecthomas/binary"
 	"github.com/garyburd/redigo/redis"
 )
 
@@ -38,7 +38,7 @@ func (t *timeSeries) Add(data interface{}, tm time.Time) (err error) {
 
 	var dataBytes []byte
 
-	if dataBytes, err = binary.Marshal(data); err != nil {
+	if dataBytes, err = json.Marshal(data); err != nil {
 		return
 	}
 	t.Lock()
@@ -117,7 +117,7 @@ func (t *timeSeries) FetchRange(begin, end time.Time, dest interface{}) (err err
 				val = d.Addr().Interface()
 			}
 
-			binary.Unmarshal([]byte(r), val)
+			json.Unmarshal([]byte(r), val)
 			i++
 		}
 	}

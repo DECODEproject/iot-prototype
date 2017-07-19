@@ -28,5 +28,5 @@ type ApiDataResponse struct {
 	Ts time.Time `json:"ts,omitempty"`
 
 	// saved value
-	Value string `json:"value,omitempty"`
+	Value interface{} `json:"value,omitempty"`
 }
