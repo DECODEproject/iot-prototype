@@ -1,4 +1,4 @@
-port module Main exposing (..)
+port module Search exposing (..)
 
 import Date
 import Http
@@ -6,10 +6,9 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra exposing (unique)
-import MetadataClient
-import NodeClient
+import Decoders
+import Json.Encode exposing (..)
 
-import Json.Encode exposing(..)
 
 main : Program Never Model Msg
 main =
@@ -23,13 +22,15 @@ main =
 
 port unsafeDrawGraph : List FloatDataItem -> Cmd msg
 
+
+
 -- MODEL
 
 
 type alias Model =
-    { all : Maybe MetadataClient.Items
-    , filtered : Maybe MetadataClient.Items
-    , currentGraph : Maybe NodeClient.DataResponse
+    { all : Maybe Decoders.Items
+    , filtered : Maybe Decoders.Items
+    , currentGraph : Maybe Decoders.DataResponse
     }
 
 
@@ -53,10 +54,11 @@ init =
 type Msg
     = NoOp
     | RefreshMetadata
-    | RefreshMetadataCompleted (Result Http.Error MetadataClient.Items)
+    | RefreshMetadataCompleted (Result Http.Error Decoders.Items)
     | ShowLocations String
-    | ViewGraph String MetadataClient.Location
-    | ViewGraphCompleted (Result Http.Error NodeClient.DataResponse)
+    | ViewGraph Decoders.Item
+    | ViewGraphCompleted (Result Http.Error Decoders.DataResponse)
+    | RequestAccess Decoders.Item
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -88,8 +90,9 @@ update msg model =
                 Just r ->
                     ( { model | filtered = (filterByTag tag r), currentGraph = Nothing }, Cmd.none )
 
-        ViewGraph key location ->
-            ( {model | currentGraph = Nothing }, getTimeSeriesData key )
+        ViewGraph item ->
+            ( { model | currentGraph = Nothing }, getTimeSeriesData item )
+
         ViewGraphCompleted result ->
             case result of
                 Err httpError ->
@@ -100,21 +103,33 @@ update msg model =
                         ( model, Cmd.none )
 
                 Ok items ->
-                    ( { model | currentGraph = Just items }, unsafeDrawGraph( prepareGraphData(items.data) ))
-
+                    ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
+        RequestAccess item ->
+                -- make entitlement request
+                -- update model 
+            (model, Cmd.none )
 
 type alias FloatDataItem =
-    {
-        value : Float,
-        date : String
+    { value : Float
+    , date : String
     }
 
-prepareGraphData : List NodeClient.DataItem -> List FloatDataItem
+
+prepareGraphData : List Decoders.DataItem -> List FloatDataItem
 prepareGraphData items =
-    List.filterMap (\item -> case item.value of
-            NodeClient.JsFloat f ->  Just (FloatDataItem f item.timeStamp)
-            _ -> Nothing
-        ) items
+    List.filterMap
+        (\item ->
+            case item.value of
+                Decoders.JsFloat f ->
+                    Just (FloatDataItem f item.timeStamp)
+
+                Decoders.JsInt i ->
+                    Just (FloatDataItem (toFloat i) item.timeStamp)
+
+                _ ->
+                    Nothing
+        )
+        items
 
 
 getAllMetadata : Cmd Msg
@@ -124,25 +139,27 @@ getAllMetadata =
             "http://localhost:8081/catalog/items/"
 
         request =
-            Http.get url MetadataClient.decodeItems
+            Http.get url Decoders.decodeItems
     in
         Http.send RefreshMetadataCompleted request
 
 
 getTimeSeriesEncoder : String -> Json.Encode.Value
 getTimeSeriesEncoder key =
-    Json.Encode.object [ ("key", Json.Encode.string key) ]
+    Json.Encode.object [ ( "key", Json.Encode.string key ) ]
 
-getTimeSeriesData : String -> Cmd Msg
-getTimeSeriesData key =
+
+getTimeSeriesData : Decoders.Item -> Cmd Msg
+getTimeSeriesData item =
     let
         url =
             "http://localhost:8080/data/"
 
         request =
-            Http.post url (Http.jsonBody (getTimeSeriesEncoder key)) NodeClient.decodeDataResponse
+            Http.post url (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
     in
         Http.send ViewGraphCompleted request
+
 
 
 -- SUBSCRIPTIONS
@@ -169,43 +186,48 @@ view model =
                 , drawData d
                 , drawFiltered model.filtered
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
---                , div [] [ text (toString model) ]
+
+                --                , div [] [ text (toString model) ]
                 ]
 
 
-drawData : MetadataClient.Items -> Html Msg
+drawData : Decoders.Items -> Html Msg
 drawData items =
     div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
-drawFiltered : Maybe MetadataClient.Items -> Html Msg
+
+drawFiltered : Maybe Decoders.Items -> Html Msg
 drawFiltered items =
     case items of
         Nothing ->
             text ("")
 
         Just items ->
-            div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget(item) ]) items
+            div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) items
 
 
-drawViewerWidget : MetadataClient.Item -> Html Msg
+drawViewerWidget : Decoders.Item -> Html Msg
 drawViewerWidget item =
-    a [ onClick (ViewGraph item.key item.location), href "#" ] [ text "view" ]
+    case item.location.right of
+        Decoders.Unknown -> a [ onClick (ViewGraph item ), href "#" ] [ text "view" ]
+        Decoders.RequestAccess -> a [ onClick (RequestAccess item ), href "#" ] [ text "request access" ]
+        Decoders.Requesting ->  a [ onClick (ViewGraph item ), href "#" ] [ text "request in progress, try again" ]
 
--- RPC
--- TODO :  move to MetadataClient
-uniqueLocations : MetadataClient.Items -> List String
+-- Helpers 
+
+uniqueLocations : Decoders.Items -> List String
 uniqueLocations items =
     List.map (\x -> x.location.uid) items
         |> List.Extra.unique
 
 
-uniqueTags : MetadataClient.Items -> List String
+uniqueTags : Decoders.Items -> List String
 uniqueTags items =
     List.concatMap (\x -> x.tags) items
         |> List.Extra.unique
 
 
-filterByTag : String -> MetadataClient.Items -> Maybe MetadataClient.Items
+filterByTag : String -> Decoders.Items -> Maybe Decoders.Items
 filterByTag tag data =
     let
         r =

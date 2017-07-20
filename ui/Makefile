@@ -1,7 +1,17 @@
-build: ## builds the elm source code
-	elm make src/Main.elm --output=main.js
+
+build: build-node build-search ## builds all of the elm projects
 
 .PHONY: build
+
+build-search: ## builds the elm source code for the search page
+	elm make src/Search.elm --output=search.js
+
+.PHONY: build-search
+
+build-node: ## builds the elm source code for the node application
+	elm make src/Node.elm --output=node.js
+
+.PHONY: build-node
 
 format: ## formats the elm source code
 	elm-format --yes src
