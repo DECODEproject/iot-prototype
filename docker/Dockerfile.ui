@@ -5,8 +5,11 @@ EXPOSE 8085
 COPY tmp/build/linux-amd64/ui /prototype/
 
 # add static web assets
-COPY ui/index.html /prototype/assets/
-COPY ui/main.js /prototype/assets/
+COPY ui/search.html /prototype/assets/
+COPY ui/search.js /prototype/assets/
+COPY ui/node.html /prototype/assets/
+COPY ui/node.js /prototype/assets/
+COPY ui/static /prototype/assets/static/
 
 ENV ASSETS_PATH=/prototype/assets/
 
