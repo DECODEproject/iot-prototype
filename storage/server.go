@@ -3,6 +3,7 @@ package storage
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/storage/api"
 
@@ -28,15 +29,20 @@ type Options struct {
 
 func Serve(options Options) error {
 
-	redisConnection, err := redis.Dial("tcp", options.RedisNetworkAddress)
-
-	if err != nil {
-		return err
+	// create a connction pool for the redis backend
+	pool := &redis.Pool{
+		MaxIdle:     5,
+		IdleTimeout: 240 * time.Second,
+		Dial: func() (redis.Conn, error) {
+			return redis.Dial("tcp", options.RedisNetworkAddress)
+		},
+		TestOnBorrow: func(c redis.Conn, t time.Time) error {
+			_, err := c.Do("PING")
+			return err
+		},
 	}
 
-	defer redisConnection.Close()
-
-	restful.DefaultContainer.Add(api.NewDataService(redisConnection).WebService())
+	restful.DefaultContainer.Add(api.NewDataService(pool).WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),

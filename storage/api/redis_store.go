@@ -5,31 +5,31 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
-	"sync"
 	"time"
 
 	"github.com/garyburd/redigo/redis"
 )
 
+// ErrNotFound is returned when the store cannot find the key specified
 var ErrNotFound = errors.New("record not found")
 
 // timeSeries is use to save time series data to redis
 type timeSeries struct {
-	sync.Mutex
 	prefix     string
 	timestep   time.Duration
 	expiration time.Duration
-	db         redis.Conn
+	pool       *redis.Pool
 }
 
 // NewTimeSeries create new timeSeries
-func NewTimeSeries(prefix string, timestep time.Duration, exp time.Duration, db redis.Conn) *timeSeries {
+func NewTimeSeries(prefix string, timestep time.Duration, exp time.Duration, pool *redis.Pool) *timeSeries {
 	return &timeSeries{
 		prefix:     prefix,
 		timestep:   timestep,
 		expiration: exp,
-		db:         db,
+		pool:       pool,
 	}
 }
 
@@ -41,16 +41,18 @@ func (t *timeSeries) Add(data interface{}, tm time.Time) (err error) {
 	if dataBytes, err = json.Marshal(data); err != nil {
 		return
 	}
-	t.Lock()
-	t.db.Send("MULTI")
-	t.db.Send("ZADD", t.key(tm), tm.UnixNano(), dataBytes)
+	conn := t.pool.Get()
+	defer conn.Close()
+
+	conn.Send("MULTI")
+	conn.Send("ZADD", t.key(tm), tm.UnixNano(), dataBytes)
+
 	if t.expiration > 0 {
 		sc := redis.NewScript(2, "local ex = redis.pcall('zcard', KEYS[1]) \n if ex == 1 then return redis.call('expire', KEYS[1], KEYS[2]) end")
-		sc.Send(t.db, t.key(tm), int64(t.expiration.Seconds()))
+		sc.Send(conn, t.key(tm), int64(t.expiration.Seconds()))
 	}
-	_, err = t.db.Do("EXEC")
 
-	t.Unlock()
+	_, err = conn.Do("EXEC")
 
 	return
 }
@@ -83,24 +85,26 @@ func (t *timeSeries) FetchRange(begin, end time.Time, dest interface{}) (err err
 
 	numOfKey := (tme - tmb) / int64(t.timestep.Nanoseconds())
 
-	t.Lock()
+	conn := t.pool.Get()
+	defer conn.Close()
+
 	for i := int64(0); i <= numOfKey; i++ {
 		key := t.key(begin.Add(time.Duration(time.Duration(i) * t.timestep)))
-		t.db.Send("ZRANGEBYSCORE", key, tmb, tme)
+		conn.Send("ZRANGEBYSCORE", key, tmb, tme)
 	}
-	t.db.Flush()
+	conn.Flush()
 
 	dumpData := make([][]string, numOfKey+1)
 	rcCount := 0
 	for i := int64(0); i <= numOfKey; i++ {
-		dumpData[i], err = redis.Strings(t.db.Receive())
+		dumpData[i], err = redis.Strings(conn.Receive())
 		if err != nil {
+
+			log.Println(err, conn.Err())
 			return
 		}
 		rcCount += len(dumpData[i])
 	}
-
-	t.Unlock()
 
 	ensureLen(d, rcCount)
 	i := 0

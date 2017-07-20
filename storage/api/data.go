@@ -1,9 +1,7 @@
 package api
 
 import (
-	"log"
 	"net/http"
-	"reflect"
 	"time"
 
 	validator "gopkg.in/validator.v2"
@@ -32,12 +30,13 @@ type DataResponse struct {
 }
 
 type dataResource struct {
-	db redis_client.Conn
+	pool *redis_client.Pool
 }
 
-func NewDataService(db redis_client.Conn) dataResource {
+func NewDataService(pool *redis_client.Pool) dataResource {
+
 	return dataResource{
-		db: db,
+		pool: pool,
 	}
 }
 
@@ -66,7 +65,7 @@ func (e dataResource) WebService() *restful.WebService {
 		Doc("append data to a bucket, will create the bucket if it does not exist.").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Reads(Data{}).
-		Returns(http.StatusCreated, "Data was accepted.", nil).
+		Returns(http.StatusCreated, "Data was accepted", nil).
 		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
 		Returns(http.StatusInternalServerError, "Something went wrong", ErrorResponse{}))
 
@@ -81,7 +80,7 @@ func (e dataResource) getAll(request *restful.Request, response *restful.Respons
 	timestep := time.Second
 	expiry := time.Duration(0)
 
-	ts := NewTimeSeries(prefix, timestep, expiry, e.db)
+	ts := NewTimeSeries(prefix, timestep, expiry, e.pool)
 	var from, to time.Time
 	var err error
 
@@ -117,8 +116,6 @@ func (e dataResource) getAll(request *restful.Request, response *restful.Respons
 
 	err = ts.FetchRange(from, to, &data)
 
-	log.Println("get", data)
-
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
@@ -145,9 +142,7 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 	timestep := time.Second
 	expiry := time.Duration(0)
 
-	log.Println("append :", data)
-	log.Println("type : ", reflect.TypeOf(data.Value))
-	ts := NewTimeSeries(prefix, timestep, expiry, e.db)
+	ts := NewTimeSeries(prefix, timestep, expiry, e.pool)
 
 	// TODO : should this be UTC
 	now := time.Now()
