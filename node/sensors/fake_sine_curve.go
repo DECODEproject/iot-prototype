@@ -15,9 +15,10 @@ type sine_curve struct {
 
 func NewSineCurveEmitterSensor(ctx context.Context, name string, out chan<- SensorMessage) *sine_curve {
 	return &sine_curve{
-		ctx:  ctx,
-		name: name,
-		out:  out,
+		ctx:   ctx,
+		name:  name,
+		out:   out,
+		value: 1,
 	}
 }
 
@@ -43,16 +44,15 @@ func (t *sine_curve) loop() {
 	}
 	ticker := time.Tick(10 * time.Second)
 
+	increase := 90 / (180 * math.Pi)
 	for {
 
 		select {
 		case <-t.ctx.Done():
 			return
 		case <-ticker:
-			increase := 90 / 180 * math.Pi / 9
-			v := 180 - math.Sin(t.value)*120
-			t.value += increase
-
+			v := math.Sin(t.value)
+			t.value = t.value + increase
 			data := map[string]interface{}{
 				"value": v,
 			}

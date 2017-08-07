@@ -72,6 +72,7 @@ func (t *temp_humidity) loop() {
 				Schema:    schema,
 				SensorUID: t.name,
 			}
+
 		}
 	}
 }
