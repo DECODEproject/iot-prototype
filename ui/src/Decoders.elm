@@ -39,10 +39,12 @@ type alias Location =
     , right : Right
     }
 
-type Right 
+
+type Right
     = Unknown
     | RequestAccess
     | Requesting
+
 
 decodeLocation : Json.Decode.Decoder Location
 decodeLocation =
@@ -50,22 +52,29 @@ decodeLocation =
         (Json.Decode.field "ip-address" Json.Decode.string)
         (Json.Decode.field "port" Json.Decode.int)
         (Json.Decode.field "uid" Json.Decode.string)
-        (Json.Decode.succeed Unknown) -- optimistic assumpion is that we can view
+        (Json.Decode.succeed Unknown)
+
+
+
+-- optimistic assumption is that we can view
 
 
 type alias DataResponse =
     { data : List DataItem
     }
 
+
 decodeDataResponse : Decoder DataResponse
 decodeDataResponse =
     Json.Decode.map DataResponse
         (Json.Decode.field "data" (Json.Decode.list decodeDataItem))
 
+
 type alias DataItem =
     { value : JsVal
     , timeStamp : String
     }
+
 
 decodeDataItem : Decoder DataItem
 decodeDataItem =
@@ -94,12 +103,12 @@ jsValDecoder =
         , Json.Decode.null JsNull
         ]
 
+
 type alias Entitlement =
-    {
-    subject: String
-    ,level: String
-    ,uid: String
-    ,status: String
+    { subject : String
+    , level : String
+    , uid : String
+    , status : String
     }
 
 
@@ -111,11 +120,33 @@ decodeEntitlement =
         (Json.Decode.field "uid" Json.Decode.string)
         (Json.Decode.field "status" Json.Decode.string)
 
+
 type alias Entitlements =
-    List Entitlement 
+    List Entitlement
+
 
 decodeEntitlements : Decoder Entitlements
 decodeEntitlements =
     Json.Decode.list decodeEntitlement
 
 
+type alias MetadataItem =
+    { key : String
+    , description : String
+    }
+
+
+decodeMetadataItem : Decoder MetadataItem
+decodeMetadataItem =
+    Json.Decode.map2 MetadataItem
+        (Json.Decode.field "key" Json.Decode.string)
+        (Json.Decode.field "description" Json.Decode.string)
+
+
+type alias Metadata =
+    List MetadataItem
+
+
+decodeMetadata : Decoder Metadata
+decodeMetadata =
+    Json.Decode.list decodeMetadataItem

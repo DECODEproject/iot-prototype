@@ -10465,6 +10465,16 @@ var _user$project$Decoders$decodeEntitlement = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'status', _elm_lang$core$Json_Decode$string));
 var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
+var _user$project$Decoders$MetadataItem = F2(
+	function (a, b) {
+		return {key: a, description: b};
+	});
+var _user$project$Decoders$decodeMetadataItem = A3(
+	_elm_lang$core$Json_Decode$map2,
+	_user$project$Decoders$MetadataItem,
+	A2(_elm_lang$core$Json_Decode$field, 'key', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoders$decodeMetadata = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeMetadataItem);
 var _user$project$Decoders$Requesting = {ctor: 'Requesting'};
 var _user$project$Decoders$RequestAccess = {ctor: 'RequestAccess'};
 var _user$project$Decoders$Unknown = {ctor: 'Unknown'};
@@ -10604,7 +10614,7 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filtered: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing};
+var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filtered: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing, currentItem: _elm_lang$core$Maybe$Nothing};
 var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
 	'unsafeDrawGraph',
@@ -10614,9 +10624,9 @@ var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoi
 				return {value: v.value, date: v.date};
 			});
 	});
-var _user$project$Search$Model = F3(
-	function (a, b, c) {
-		return {all: a, filtered: b, currentGraph: c};
+var _user$project$Search$Model = F4(
+	function (a, b, c, d) {
+		return {all: a, filtered: b, currentGraph: c, currentItem: d};
 	});
 var _user$project$Search$FloatDataItem = F2(
 	function (a, b) {
@@ -10807,24 +10817,23 @@ var _user$project$Search$update = F2(
 			case 'RefreshMetadata':
 				return {ctor: '_Tuple2', _0: model, _1: _user$project$Search$getAllMetadata};
 			case 'RefreshMetadataCompleted':
-				var _p5 = _p4._0;
-				if (_p5.ctor === 'Err') {
-					var _p6 = A2(_elm_lang$core$Debug$log, 'RefreshMetadata error', _p5._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
+				if (_p4._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								all: _elm_lang$core$Maybe$Just(_p5._0)
+								all: _elm_lang$core$Maybe$Just(_p4._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
+				} else {
+					var _p5 = A2(_elm_lang$core$Debug$log, 'RefreshMetadata error', _p4._0._0);
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			case 'ShowLocations':
-				var _p7 = model.all;
-				if (_p7.ctor === 'Nothing') {
+				var _p6 = model.all;
+				if (_p6.ctor === 'Nothing') {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return {
@@ -10832,36 +10841,39 @@ var _user$project$Search$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								filtered: A2(_user$project$Search$filterByTag, _p4._0, _p7._0),
+								filtered: A2(_user$project$Search$filterByTag, _p4._0, _p6._0),
 								currentGraph: _elm_lang$core$Maybe$Nothing
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
 			case 'ViewGraph':
+				var _p7 = _p4._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{currentGraph: _elm_lang$core$Maybe$Nothing}),
-					_1: _user$project$Search$getTimeSeriesData(_p4._0)
+						{
+							currentGraph: _elm_lang$core$Maybe$Nothing,
+							currentItem: _elm_lang$core$Maybe$Just(_p7)
+						}),
+					_1: _user$project$Search$getTimeSeriesData(_p7)
 				};
 			case 'ViewGraphCompleted':
-				var _p8 = _p4._0;
-				if (_p8.ctor === 'Err') {
-					var _p9 = A2(_elm_lang$core$Debug$log, 'ViewGraph error', _p8._0);
+				if (_p4._0.ctor === 'Err') {
+					var _p8 = A2(_elm_lang$core$Debug$log, 'ViewGraph error', _p4._0._0);
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
-					var _p10 = _p8._0;
+					var _p9 = _p4._0._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								currentGraph: _elm_lang$core$Maybe$Just(_p10)
+								currentGraph: _elm_lang$core$Maybe$Just(_p9)
 							}),
 						_1: _user$project$Search$unsafeDrawGraph(
-							_user$project$Search$prepareGraphData(_p10.data))
+							_user$project$Search$prepareGraphData(_p9.data))
 					};
 				}
 			default:
@@ -10870,8 +10882,8 @@ var _user$project$Search$update = F2(
 	});
 var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
 var _user$project$Search$view = function (model) {
-	var _p11 = model.all;
-	if (_p11.ctor === 'Nothing') {
+	var _p10 = model.all;
+	if (_p10.ctor === 'Nothing') {
 		return A2(
 			_elm_lang$html$Html$button,
 			{
@@ -10900,7 +10912,7 @@ var _user$project$Search$view = function (model) {
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Search$drawData(_p11._0),
+					_0: _user$project$Search$drawData(_p10._0),
 					_1: {
 						ctor: '::',
 						_0: _user$project$Search$drawFiltered(model.filtered),

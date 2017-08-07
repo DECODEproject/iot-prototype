@@ -29,16 +29,18 @@ port unsafeDrawGraph : List FloatDataItem -> Cmd msg
 
 type alias Model =
     { all : Maybe Decoders.Items
-    , filtered : Maybe Decoders.Items
+    , filter : Maybe String
     , currentGraph : Maybe Decoders.DataResponse
+    , currentItem : Maybe Decoders.Item
     }
 
 
 initialModel : Model
 initialModel =
     { all = Nothing
-    , filtered = Nothing
+    , filter = Nothing
     , currentGraph = Nothing
+    , currentItem = Nothing
     }
 
 
@@ -59,6 +61,7 @@ type Msg
     | ViewGraph Decoders.Item
     | ViewGraphCompleted (Result Http.Error Decoders.DataResponse)
     | RequestAccess Decoders.Item
+    | RequestAccessCompleted (Result Http.Error Decoders.Entitlement)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,17 +73,15 @@ update msg model =
         RefreshMetadata ->
             ( model, getAllMetadata )
 
-        RefreshMetadataCompleted result ->
-            case result of
-                Err httpError ->
-                    let
-                        _ =
-                            Debug.log "RefreshMetadata error" httpError
-                    in
-                        ( model, Cmd.none )
+        RefreshMetadataCompleted (Ok items) ->
+            ( { model | all = Just items }, Cmd.none )
 
-                Ok items ->
-                    ( { model | all = Just items }, Cmd.none )
+        RefreshMetadataCompleted (Err httpError) ->
+            let
+                _ =
+                    Debug.log "RefreshMetadata error" httpError
+            in
+                ( model, Cmd.none )
 
         ShowLocations tag ->
             case model.all of
@@ -88,26 +89,46 @@ update msg model =
                     ( model, Cmd.none )
 
                 Just r ->
-                    ( { model | filtered = (filterByTag tag r), currentGraph = Nothing }, Cmd.none )
+                    ( { model | filter = Just tag , currentGraph = Nothing }, Cmd.none )
 
         ViewGraph item ->
-            ( { model | currentGraph = Nothing }, getTimeSeriesData item )
+            ( { model | currentGraph = Nothing, currentItem = Just item }, getTimeSeriesData item )
 
-        ViewGraphCompleted result ->
-            case result of
-                Err httpError ->
-                    let
-                        _ =
-                            Debug.log "ViewGraph error" httpError
-                    in
-                        ( model, Cmd.none )
+        ViewGraphCompleted (Err (Http.BadStatus response)) ->
+            let
+                _= Debug.log "xxx" response
+                items = updateRight model.all model.currentItem Decoders.RequestAccess
 
-                Ok items ->
-                    ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
+            in
+               ({ model | all = items }, Cmd.none)
+
+        ViewGraphCompleted (Err httpError) ->
+            let
+                _ =
+                    Debug.log "ViewGraph error" httpError
+            in
+                ( model, Cmd.none )
+
+        ViewGraphCompleted (Ok items) ->
+            ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
+
         RequestAccess item ->
-                -- make entitlement request
-                -- update model 
-            (model, Cmd.none )
+            -- make entitlement request
+            -- update model
+            ( model, requestAccess item )
+
+        RequestAccessCompleted (Err httpError) ->
+            let
+                _ =
+                    Debug.log "RequestAccess error" httpError
+            in
+                ( model, Cmd.none )
+
+        RequestAccessCompleted (Ok items) ->
+            ( model ,Cmd.none)
+
+
+
 
 type alias FloatDataItem =
     { value : Float
@@ -161,6 +182,31 @@ getTimeSeriesData item =
         Http.send ViewGraphCompleted request
 
 
+entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
+entitlementRequestEncoder item =
+    Json.Encode.object [
+        ( "level", Json.Encode.string "can-read")
+        , ( "subject", Json.Encode.string item.key  )
+        ]
+
+requestAccess : Decoders.Item -> Cmd Msg 
+requestAccess item =
+    let
+        url =
+            "http://localhost:8080/entitlements/requests/"
+
+        request =
+            Http.request { 
+                method = "PUT"
+                , headers = []
+                , url =  url 
+                , body = Http.jsonBody (entitlementRequestEncoder item)
+                , expect = Http.expectJson Decoders.decodeEntitlement 
+                , timeout = Nothing 
+                , withCredentials = False
+        }
+    in
+        Http.send RequestAccessCompleted request
 
 -- SUBSCRIPTIONS
 
@@ -184,7 +230,7 @@ view model =
             div []
                 [ div [] [ text "Metadata" ]
                 , drawData d
-                , drawFiltered model.filtered
+                , drawFiltered model.filter d
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
 
                 --                , div [] [ text (toString model) ]
@@ -196,24 +242,48 @@ drawData items =
     div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
 
-drawFiltered : Maybe Decoders.Items -> Html Msg
-drawFiltered items =
-    case items of
+drawFiltered : Maybe String -> Decoders.Items -> Html Msg
+drawFiltered tag items =
+    case tag of
         Nothing ->
             text ("")
 
-        Just items ->
-            div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) items
+        Just t ->
+                    let 
+                        filtered = items 
+                    in 
+                        div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) filtered
 
 
 drawViewerWidget : Decoders.Item -> Html Msg
 drawViewerWidget item =
     case item.location.right of
-        Decoders.Unknown -> a [ onClick (ViewGraph item ), href "#" ] [ text "view" ]
-        Decoders.RequestAccess -> a [ onClick (RequestAccess item ), href "#" ] [ text "request access" ]
-        Decoders.Requesting ->  a [ onClick (ViewGraph item ), href "#" ] [ text "request in progress, try again" ]
+        Decoders.Unknown ->
+            a [ onClick (ViewGraph item), href "#" ] [ text "view" ]
 
--- Helpers 
+        Decoders.RequestAccess ->
+            a [ onClick (RequestAccess item), href "#" ] [ text "request access" ]
+
+        Decoders.Requesting ->
+            a [ onClick (ViewGraph item), href "#" ] [ text "request in progress, try again" ]
+
+
+
+-- Helpers
+
+updateRight : Maybe Decoders.Items -> Maybe Decoders.Item ->  Decoders.Right ->  Maybe Decoders.Items 
+updateRight items item right =
+    case items of
+        Nothing -> items
+        Just all ->
+            case item of
+                Nothing -> items
+                Just i ->
+                    let
+                        location1 = i.location
+                        location2 = { location1 | right = right  }
+                    in
+                    Just ( List.Extra.updateIf (\n -> n.uid == i.uid) (\t -> { t | location = location2 }) all )
 
 uniqueLocations : Decoders.Items -> List String
 uniqueLocations items =
