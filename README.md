@@ -42,7 +42,7 @@ To build the software ensure you have installed the following software :
 Once you have a working installation download the code using the go get
 
 ```
-go get {####}
+go get gogs.dyne.org/DECODE/decode-prototype-da
 ```
 
 The makefile contains helpers to build the environment plus some helpers for development.
