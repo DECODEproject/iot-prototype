@@ -73,7 +73,7 @@ func Serve(options Options) error {
 	// Add container filter to enable CORS
 	cors := restful.CrossOriginResourceSharing{
 		AllowedHeaders: []string{"Content-Type", "Accept"},
-		AllowedMethods: []string{"GET", "POST"},
+		AllowedMethods: []string{"GET", "POST", "PUT"},
 	}
 
 	// install the cors filter
