@@ -3,12 +3,16 @@ services:
   ## metadata service is a global service for node discovery
   metadata:
     image: prototype/metadata
+    ports:
+        - "8081:8081"
   ##
   ## decode node
   ##
   ## node_one is the api server for the logical decode node
   node_one:
     image : prototype/node
+    ports: 
+        - "8080:8080"
     links :
         - "metadata:metadata"
         - "node_one_storage:storage"
@@ -22,10 +26,12 @@ services:
         - STORAGE_SERVICE_ADDRESS=http://node_one_storage:8083
         # address of the node
         # TODO : resolve this to be the external address
-        - WEBSERVICES_URL=http://node_one:8080
+        #- WEBSERVICES_URL=http://node_one:8080
   ## node_one_ui is the user interface for the decode node
   node_one_ui:
     image : prototype/ui
+    ports:
+        - "8085:8085"
     links :
         - "metadata:metadata"
         - "node_one:node"
@@ -37,7 +43,7 @@ services:
         - METADATA_SERVICE_ADDRESS=http://metadata:8081
         # address of the node service
         - NODE_SERVICE_ADDRESS=http://node:8080
-  ## node_one_device_hub is an instance of device hub fro IOT integration
+  ## node_one_device_hub is an instance of device hub for IOT integration
   node_one_device_hub:
     image: thingful/device-hub
     links:
@@ -46,6 +52,8 @@ services:
   ## storage on the node - fronts a redis server for persistence
   node_one_storage:
     image: prototype/storage
+    ports:
+        - "8083:8083"
     depends_on:
         - "node_one_storage_redis"
     links:
