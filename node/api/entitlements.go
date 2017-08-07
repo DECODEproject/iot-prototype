@@ -150,14 +150,12 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Returns(http.StatusOK, "OK", Entitlement{}).
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
-	// TODO : add isEntitled method
-
 	return ws
 }
 
 func (e entitlementResource) createRequest(request *restful.Request, response *restful.Response) {
 
-	req := Entitlement{}
+	req := EntitlementRequest{}
 	if err := request.ReadEntity(&req); err != nil {
 		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
@@ -170,11 +168,14 @@ func (e entitlementResource) createRequest(request *restful.Request, response *r
 
 	// TODO: Validate that I have data at that path
 	// TODO : Need to validate AccessLevel
-	req.UID = uuid.NewV4().String()
-	req.Status = Requested
+	entitlement := Entitlement{
+		EntitlementRequest: req,
+		UID:                uuid.NewV4().String(),
+		Status:             Requested,
+	}
 
-	e.store.Requested.Add(req)
-	response.WriteEntity(req)
+	e.store.Requested.Add(entitlement)
+	response.WriteEntity(entitlement)
 
 }
 
