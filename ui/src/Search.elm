@@ -89,18 +89,20 @@ update msg model =
                     ( model, Cmd.none )
 
                 Just r ->
-                    ( { model | filter = Just tag , currentGraph = Nothing }, Cmd.none )
+                    ( { model | filter = Just tag, currentGraph = Nothing }, Cmd.none )
 
         ViewGraph item ->
             ( { model | currentGraph = Nothing, currentItem = Just item }, getTimeSeriesData item )
 
         ViewGraphCompleted (Err (Http.BadStatus response)) ->
             let
-                _= Debug.log "xxx" response
-                items = updateRight model.all model.currentItem Decoders.RequestAccess
+                _ =
+                    Debug.log "xxx" response
 
+                items =
+                    updateRight model.all model.currentItem Decoders.RequestAccess
             in
-               ({ model | all = items }, Cmd.none)
+                ( { model | all = items }, Cmd.none )
 
         ViewGraphCompleted (Err httpError) ->
             let
@@ -125,9 +127,7 @@ update msg model =
                 ( model, Cmd.none )
 
         RequestAccessCompleted (Ok items) ->
-            ( model ,Cmd.none)
-
-
+            ( model, Cmd.none )
 
 
 type alias FloatDataItem =
@@ -184,29 +184,32 @@ getTimeSeriesData item =
 
 entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
 entitlementRequestEncoder item =
-    Json.Encode.object [
-        ( "level", Json.Encode.string "can-read")
-        , ( "subject", Json.Encode.string item.key  )
+    Json.Encode.object
+        [ ( "level", Json.Encode.string "can-read" )
+        , ( "subject", Json.Encode.string item.key )
         ]
 
-requestAccess : Decoders.Item -> Cmd Msg 
+
+requestAccess : Decoders.Item -> Cmd Msg
 requestAccess item =
     let
         url =
             "http://localhost:8080/entitlements/requests/"
 
         request =
-            Http.request { 
-                method = "PUT"
+            Http.request
+                { method = "PUT"
                 , headers = []
-                , url =  url 
+                , url = url
                 , body = Http.jsonBody (entitlementRequestEncoder item)
-                , expect = Http.expectJson Decoders.decodeEntitlement 
-                , timeout = Nothing 
+                , expect = Http.expectJson Decoders.decodeEntitlement
+                , timeout = Nothing
                 , withCredentials = False
-        }
+                }
     in
         Http.send RequestAccessCompleted request
+
+
 
 -- SUBSCRIPTIONS
 
@@ -249,10 +252,11 @@ drawFiltered tag items =
             text ("")
 
         Just t ->
-                    let 
-                        filtered = items 
-                    in 
-                        div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) filtered
+            let
+                filtered =
+                    items
+            in
+                div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) filtered
 
 
 drawViewerWidget : Decoders.Item -> Html Msg
@@ -271,19 +275,28 @@ drawViewerWidget item =
 
 -- Helpers
 
-updateRight : Maybe Decoders.Items -> Maybe Decoders.Item ->  Decoders.Right ->  Maybe Decoders.Items 
+
+updateRight : Maybe Decoders.Items -> Maybe Decoders.Item -> Decoders.Right -> Maybe Decoders.Items
 updateRight items item right =
     case items of
-        Nothing -> items
+        Nothing ->
+            items
+
         Just all ->
             case item of
-                Nothing -> items
+                Nothing ->
+                    items
+
                 Just i ->
                     let
-                        location1 = i.location
-                        location2 = { location1 | right = right  }
+                        location1 =
+                            i.location
+
+                        location2 =
+                            { location1 | right = right }
                     in
-                    Just ( List.Extra.updateIf (\n -> n.uid == i.uid) (\t -> { t | location = location2 }) all )
+                        Just (List.Extra.updateIf (\n -> n.uid == i.uid) (\t -> { t | location = location2 }) all)
+
 
 uniqueLocations : Decoders.Items -> List String
 uniqueLocations items =
