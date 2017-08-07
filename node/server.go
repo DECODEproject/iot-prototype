@@ -41,7 +41,6 @@ func Serve(options Options) error {
 	metadataClient := metadataclient.NewMetadataApiWithBasePath(options.MetadataServiceAddress)
 	storageClient := storageclient.NewDataApiWithBasePath(options.StorageServiceAddress)
 
-	log.Print(options.StorageServiceAddress)
 	log.Printf("registering %s with metadata service %s", options.WebServicesURL, options.MetadataServiceAddress)
 
 	// TODO : reuse existing token
@@ -55,12 +54,14 @@ func Serve(options Options) error {
 
 	log.Printf("registered with metadata service : %s", token)
 
-	store := api.NewEntitlementStore()
+	// entitlementStore holds an in-memory cache of entitlement data
+	entitlementStore := api.NewEntitlementStore()
+	// metaStore holds additional information about the data stored
+	metaStore := map[string]api.Metadata{}
 
 	// TODO : add service to receive data from the device hub and/or any other service
-	restful.DefaultContainer.Add(api.NewEntitlementService(store).WebService())
-	restful.DefaultContainer.Add(api.NewDataService(store, storageClient).WebService())
-	//	restful.DefaultContainer.Add(api.NewFunctionService().WebService())
+	restful.DefaultContainer.Add(api.NewEntitlementService(entitlementStore).WebService())
+	restful.DefaultContainer.Add(api.NewDataService(entitlementStore, storageClient, metaStore).WebService())
 
 	config := restfulspec.Config{
 		WebServices:    restful.RegisteredWebServices(),
@@ -86,7 +87,7 @@ func Serve(options Options) error {
 
 	// start up a pretend device-hub input
 	func() {
-		go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, store)
+		go pretendToBeADeviceHubEndpoint(token, metadataClient, storageClient, entitlementStore, metaStore)
 	}()
 
 	return http.ListenAndServe(options.Binding, nil)
@@ -124,7 +125,7 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 	return token, err
 }
 
-func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore) {
+func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore, metaStore map[string]api.Metadata) {
 
 	sensorMessages := make(chan sensors.SensorMessage)
 	ctx := context.Background()
@@ -145,34 +146,51 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey("sensor-1", "temp"),
 			AccessLevel: api.CanDiscover},
-		UID: "abc",
+		UID:    "abc",
+		Status: api.Accepted,
 	})
+
+	metaStore["abc"] = api.Metadata{Description: "living room temperature"}
+
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey("sensor-1", "humidity"),
-			AccessLevel: api.CanAccess},
-		UID: "def",
+			AccessLevel: api.CanDiscover},
+		UID:    "def",
+		Status: api.Accepted,
 	})
+
+	metaStore["def"] = api.Metadata{Description: "living room humidity "}
 
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey("sensor-2", "temp"),
 			AccessLevel: api.CanDiscover},
-		UID: "ghi",
+		UID:    "ghi",
+		Status: api.Accepted,
 	})
+
+	metaStore["ghi"] = api.Metadata{Description: "balcony temperature"}
+
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey("sensor-2", "humidity"),
 			AccessLevel: api.CanAccess},
-		UID: "klm",
+		UID:    "klm",
+		Status: api.Accepted,
 	})
+
+	metaStore["klm"] = api.Metadata{Description: "balcony humidity "}
 
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
 			Subject:     buildSubjectKey("sine", "value"),
-			AccessLevel: api.CanDiscover},
-		UID: "nop",
+			AccessLevel: api.CanAccess},
+		UID:    "nop",
+		Status: api.Accepted,
 	})
+
+	metaStore["nop"] = api.Metadata{Description: "sine curve sensor (fake but pretty)"}
 
 	for {
 		select {
