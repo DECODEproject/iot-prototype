@@ -80,7 +80,8 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 		return
 	}
 
-	// go and get it
+	// go and get the data
+	// TODO : specify beginning and end dates
 	data, _, err := e.sClient.GetAll("", "", req.Key)
 
 	if err != nil {
