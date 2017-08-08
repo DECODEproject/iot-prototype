@@ -11,16 +11,9 @@ import (
 )
 
 type Options struct {
-	Binding           string
-	SwaggerUIPath     string
-	WebServicesURL    string
-	UseTLS            bool
-	CertFilePath      string
-	KeyFilePath       string
-	TrustedCAFilePath string
-	LogFile           bool
-	LogPath           string
-	Syslog            bool
+	Binding        string
+	SwaggerUIPath  string
+	WebServicesURL string
 }
 
 func Serve(options Options) error {
