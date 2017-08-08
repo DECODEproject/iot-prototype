@@ -17,14 +17,6 @@ type Options struct {
 	SwaggerUIPath       string
 	WebServicesURL      string
 	RedisNetworkAddress string
-
-	UseTLS            bool
-	CertFilePath      string
-	KeyFilePath       string
-	TrustedCAFilePath string
-	LogFile           bool
-	LogPath           string
-	Syslog            bool
 }
 
 func Serve(options Options) error {

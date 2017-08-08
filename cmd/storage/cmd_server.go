@@ -15,13 +15,6 @@ var serverCommand = &cobra.Command{
 			SwaggerUIPath:       _config.SwaggerUIPath,
 			WebServicesURL:      _config.WebServicesURL,
 			RedisNetworkAddress: _config.RedisNetworkAddress,
-			UseTLS:              _config.TLS,
-			CertFilePath:        _config.CertFile,
-			KeyFilePath:         _config.KeyFile,
-			TrustedCAFilePath:   _config.CACertFile,
-			LogFile:             _config.LogFile,
-			LogPath:             _config.LogPath,
-			Syslog:              _config.Syslog,
 		})
 
 	},
