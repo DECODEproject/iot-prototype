@@ -10599,12 +10599,11 @@ var _user$project$Node$AcceptEntitlement = function (a) {
 	return {ctor: 'AcceptEntitlement', _0: a};
 };
 var _user$project$Node$drawRequested = function (ent) {
-	var _p2 = A2(_elm_lang$core$Debug$log, 'requested', ent);
-	var _p3 = ent;
-	if (_p3.ctor === 'Nothing') {
+	var _p2 = ent;
+	if (_p2.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('');
 	} else {
-		var _p4 = _p3._0;
+		var _p3 = _p2._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -10613,7 +10612,7 @@ var _user$project$Node$drawRequested = function (ent) {
 				_0: _elm_lang$html$Html$text(' requested : '),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p4.level),
+					_0: _elm_lang$html$Html$text(_p3.level),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -10621,7 +10620,7 @@ var _user$project$Node$drawRequested = function (ent) {
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Node$AcceptEntitlement(_p4)),
+									_user$project$Node$AcceptEntitlement(_p3)),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -10643,7 +10642,7 @@ var _user$project$Node$drawRequested = function (ent) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html_Events$onClick(
-											_user$project$Node$DeclineEntitlement(_p4)),
+											_user$project$Node$DeclineEntitlement(_p3)),
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -10667,7 +10666,6 @@ var _user$project$Node$drawEntitlementSelector = F2(
 	function (m, model) {
 		var requested = A2(_user$project$Node$findEntitlement, m.subject, model.requested);
 		var accepted = A2(_user$project$Node$findEntitlement, m.subject, model.accepted);
-		var _p5 = A2(_elm_lang$core$Debug$log, 'subject', m);
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -10713,8 +10711,8 @@ var _user$project$Node$drawMetadata = F2(
 				e));
 	});
 var _user$project$Node$view = function (model) {
-	var _p6 = model.metadata;
-	if (_p6.ctor === 'Nothing') {
+	var _p4 = model.metadata;
+	if (_p4.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('no data exists.');
 	} else {
 		return A2(
@@ -10733,32 +10731,8 @@ var _user$project$Node$view = function (model) {
 							_0: _elm_lang$html$Html$text('Data'),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$Node$drawMetadata, _p6._0, model),
-								_1: {
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$div,
-										{ctor: '[]'},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text(
-												_elm_lang$core$Basics$toString(model.accepted)),
-											_1: {ctor: '[]'}
-										}),
-									_1: {
-										ctor: '::',
-										_0: A2(
-											_elm_lang$html$Html$div,
-											{ctor: '[]'},
-											{
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(
-													_elm_lang$core$Basics$toString(model.requested)),
-												_1: {ctor: '[]'}
-											}),
-										_1: {ctor: '[]'}
-									}
-								}
+								_0: A2(_user$project$Node$drawMetadata, _p4._0, model),
+								_1: {ctor: '[]'}
 							}
 						}),
 					_1: {ctor: '[]'}
@@ -10788,18 +10762,18 @@ var _user$project$Node$getAcceptedEntitlements = function () {
 }();
 var _user$project$Node$update = F2(
 	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
+		var _p5 = msg;
+		switch (_p5.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'GetAcceptedEntitlementsCompleted':
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								accepted: _elm_lang$core$Maybe$Just(_p7._0._0)
+								accepted: _elm_lang$core$Maybe$Just(_p5._0._0)
 							}),
 						_1: _user$project$Node$getRequestedEntitlements
 					};
@@ -10810,17 +10784,17 @@ var _user$project$Node$update = F2(
 							start: {line: 54, column: 5},
 							end: {line: 92, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 			case 'GetRequestedEntitlementsCompleted':
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								requested: _elm_lang$core$Maybe$Just(_p7._0._0)
+								requested: _elm_lang$core$Maybe$Just(_p5._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10831,17 +10805,17 @@ var _user$project$Node$update = F2(
 							start: {line: 54, column: 5},
 							end: {line: 92, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 			case 'GetMetadataCompleted':
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								metadata: _elm_lang$core$Maybe$Just(_p7._0._0)
+								metadata: _elm_lang$core$Maybe$Just(_p5._0._0)
 							}),
 						_1: _user$project$Node$getAcceptedEntitlements
 					};
@@ -10852,17 +10826,17 @@ var _user$project$Node$update = F2(
 							start: {line: 54, column: 5},
 							end: {line: 92, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 			case 'AcceptEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$acceptEntitlement(_p7._0)
+					_1: _user$project$Node$acceptEntitlement(_p5._0)
 				};
 			case 'AcceptEntitlementCompleted':
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
@@ -10871,17 +10845,17 @@ var _user$project$Node$update = F2(
 							start: {line: 54, column: 5},
 							end: {line: 92, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 			case 'DeclineEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$declineEntitlement(_p7._0)
+					_1: _user$project$Node$declineEntitlement(_p5._0)
 				};
 			default:
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
@@ -10890,8 +10864,8 @@ var _user$project$Node$update = F2(
 							start: {line: 54, column: 5},
 							end: {line: 92, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 		}
 	});

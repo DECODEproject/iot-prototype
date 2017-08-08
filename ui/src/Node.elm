@@ -171,8 +171,6 @@ view model =
                 , div []
                     [ text ("Data")
                     , drawMetadata e model
-                    , div [] [ text (toString model.accepted) ]
-                    , div [] [ text (toString model.requested) ]
                     ]
                 ]
 
@@ -200,9 +198,6 @@ drawMetadataItem m model =
 drawEntitlementSelector : Decoders.MetadataItem -> Model -> Html Msg
 drawEntitlementSelector m model =
     let
-        _ =
-            Debug.log "subject" m
-
         accepted =
             findEntitlement m.subject model.accepted
 
@@ -224,22 +219,18 @@ drawAccepted ent =
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg
 drawRequested ent =
-    let
-        _ =
-            Debug.log "requested" ent
-    in
-        case ent of
-            Nothing ->
-                text ("")
+    case ent of
+        Nothing ->
+            text ("")
 
-            Just e ->
-                div []
-                    [ text (" requested : ")
-                    , text (e.level)
-                    , a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
-                    , text (" ")
-                    , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
-                    ]
+        Just e ->
+            div []
+                [ text (" requested : ")
+                , text (e.level)
+                , a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
+                , text (" ")
+                , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
+                ]
 
 
 findEntitlement : String -> Maybe Decoders.Entitlements -> Maybe Decoders.Entitlement
