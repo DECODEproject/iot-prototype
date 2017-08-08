@@ -182,7 +182,7 @@ getTimeSeriesData item =
 entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
 entitlementRequestEncoder item =
     Json.Encode.object
-        [ ( "level", Json.Encode.string "can-read" )
+        [ ( "level", Json.Encode.string "can-access")
         , ( "subject", Json.Encode.string item.key )
         ]
 
