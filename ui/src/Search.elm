@@ -30,8 +30,6 @@ port unsafeDrawGraph : List FloatDataItem -> Cmd msg
 type alias Model =
     { all : Maybe Decoders.Items
     , filter : Maybe String
-    , currentGraph : Maybe Decoders.DataResponse
-    , currentItem : Maybe Decoders.Item
     }
 
 
@@ -39,8 +37,6 @@ initialModel : Model
 initialModel =
     { all = Nothing
     , filter = Nothing
-    , currentGraph = Nothing
-    , currentItem = Nothing
     }
 
 
@@ -59,7 +55,7 @@ type Msg
     | RefreshMetadataCompleted (Result Http.Error Decoders.Items)
     | ShowLocations String
     | ViewGraph Decoders.Item
-    | ViewGraphCompleted (Result Http.Error Decoders.DataResponse)
+    | ViewGraphCompleted Decoders.Item (Result Http.Error Decoders.DataResponse)
     | RequestAccess Decoders.Item
     | RequestAccessCompleted (Result Http.Error Decoders.Entitlement)
 
@@ -85,28 +81,34 @@ update msg model =
                     ( model, Cmd.none )
 
                 Just r ->
-                    ( { model | filter = Just tag, currentGraph = Nothing }, Cmd.none )
+                    ( { model | filter = Just tag }, Cmd.none )
 
         ViewGraph item ->
-            ( { model | currentGraph = Nothing, currentItem = Just item }, getTimeSeriesData item )
+            ( model, getTimeSeriesData item )
 
-        ViewGraphCompleted (Ok items) ->
-            ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
-
-        ViewGraphCompleted (Err (Http.BadStatus response)) ->
+        ViewGraphCompleted requested (Ok graphData) ->
             let
                 items =
-                    updateRight model.all model.currentItem Decoders.RequestAccess
+                    updateRight model.all requested Decoders.Unknown
+            in
+                ( { model | all = items }, unsafeDrawGraph (prepareGraphData (graphData.data)) )
+
+        ViewGraphCompleted requested (Err (Http.BadStatus response)) ->
+            let
+                items =
+                    updateRight model.all requested Decoders.RequestAccess
             in
                 ( { model | all = items }, Cmd.none )
 
-        ViewGraphCompleted (Err httpError) ->
+        ViewGraphCompleted requested (Err httpError) ->
             Debug.crash (toString httpError)
 
         RequestAccess item ->
-            -- make entitlement request
-            -- update model
-            ( model, requestAccess item )
+            let
+                items =
+                    updateRight model.all item Decoders.Requesting
+            in
+                ( { model | all = items }, requestAccess item )
 
         RequestAccessCompleted (Ok items) ->
             ( model, Cmd.none )
@@ -172,7 +174,7 @@ getTimeSeriesData item =
         request =
             Http.post (nodeURL ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
     in
-        Http.send ViewGraphCompleted request
+        Http.send (ViewGraphCompleted item) request
 
 
 entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
@@ -225,8 +227,6 @@ view model =
                 , drawData d
                 , drawFiltered model.filter d
                 , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
-
-                --                , div [] [ text (toString model) ]
                 ]
 
 
@@ -266,26 +266,21 @@ drawViewerWidget item =
 -- Helpers
 
 
-updateRight : Maybe Decoders.Items -> Maybe Decoders.Item -> Decoders.Right -> Maybe Decoders.Items
+updateRight : Maybe Decoders.Items -> Decoders.Item -> Decoders.Right -> Maybe Decoders.Items
 updateRight items item right =
     case items of
         Nothing ->
             items
 
         Just all ->
-            case item of
-                Nothing ->
-                    items
+            let
+                location1 =
+                    item.location
 
-                Just i ->
-                    let
-                        location1 =
-                            i.location
-
-                        location2 =
-                            { location1 | right = right }
-                    in
-                        Just (List.Extra.updateIf (\n -> n.uid == i.uid) (\t -> { t | location = location2 }) all)
+                location2 =
+                    { location1 | right = right }
+            in
+                Just (List.Extra.updateIf (\n -> n.uid == item.uid) (\t -> { t | location = location2 }) all)
 
 
 uniqueLocations : Decoders.Items -> List String
