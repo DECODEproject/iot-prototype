@@ -131,7 +131,7 @@ decodeEntitlements =
 
 
 type alias MetadataItem =
-    { key : String
+    { subject : String
     , description : String
     }
 
@@ -139,7 +139,7 @@ type alias MetadataItem =
 decodeMetadataItem : Decoder MetadataItem
 decodeMetadataItem =
     Json.Decode.map2 MetadataItem
-        (Json.Decode.field "key" Json.Decode.string)
+        (Json.Decode.field "subject" Json.Decode.string)
         (Json.Decode.field "description" Json.Decode.string)
 
 

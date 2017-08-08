@@ -10721,52 +10721,49 @@ var _user$project$Node$update = F2(
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'GetAcceptedEntitlementsCompleted':
-				var _p5 = _p4._0;
-				if (_p5.ctor === 'Err') {
-					var _p6 = A2(_elm_lang$core$Debug$log, 'GetAcceptedEntitlementsCompleted error', _p5._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
+				if (_p4._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								accepted: _elm_lang$core$Maybe$Just(_p5._0)
+								accepted: _elm_lang$core$Maybe$Just(_p4._0._0)
 							}),
 						_1: _user$project$Node$getRequestedEntitlements
 					};
+				} else {
+					var _p5 = A2(_elm_lang$core$Debug$log, 'GetAcceptedEntitlementsCompleted error', _p4._0._0);
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			case 'GetRequestedEntitlementsCompleted':
-				var _p7 = _p4._0;
-				if (_p7.ctor === 'Err') {
-					var _p8 = A2(_elm_lang$core$Debug$log, 'GetRequestedEntitlementsCompleted error', _p7._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
+				if (_p4._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								requested: _elm_lang$core$Maybe$Just(_p7._0)
+								requested: _elm_lang$core$Maybe$Just(_p4._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
+				} else {
+					var _p6 = A2(_elm_lang$core$Debug$log, 'GetRequestedEntitlementsCompleted error', _p4._0._0);
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			default:
-				var _p9 = _p4._0;
-				if (_p9.ctor === 'Err') {
-					var _p10 = A2(_elm_lang$core$Debug$log, 'GetMetadataCompleted error', _p9._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
+				if (_p4._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								metadata: _elm_lang$core$Maybe$Just(_p9._0)
+								metadata: _elm_lang$core$Maybe$Just(_p4._0._0)
 							}),
 						_1: _user$project$Node$getAcceptedEntitlements
 					};
+				} else {
+					var _p7 = A2(_elm_lang$core$Debug$log, 'GetMetadataCompleted error', _p4._0._0);
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 		}
 	});

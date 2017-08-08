@@ -10599,8 +10599,58 @@ var _user$project$Search$uniqueLocations = function (items) {
 			},
 			items));
 };
+var _user$project$Search$updateRight = F3(
+	function (items, item, right) {
+		var _p1 = items;
+		if (_p1.ctor === 'Nothing') {
+			return items;
+		} else {
+			var _p2 = item;
+			if (_p2.ctor === 'Nothing') {
+				return items;
+			} else {
+				var _p3 = _p2._0;
+				var location1 = _p3.location;
+				var location2 = _elm_lang$core$Native_Utils.update(
+					location1,
+					{right: right});
+				return _elm_lang$core$Maybe$Just(
+					A3(
+						_elm_community$list_extra$List_Extra$updateIf,
+						function (n) {
+							return _elm_lang$core$Native_Utils.eq(n.uid, _p3.uid);
+						},
+						function (t) {
+							return _elm_lang$core$Native_Utils.update(
+								t,
+								{location: location2});
+						},
+						_p1._0));
+			}
+		}
+	});
 var _user$project$Search$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Search$entitlementRequestEncoder = function (item) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'level',
+				_1: _elm_lang$core$Json_Encode$string('can-read')
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'subject',
+					_1: _elm_lang$core$Json_Encode$string(item.key)
+				},
+				_1: {ctor: '[]'}
+			}
+		});
 };
 var _user$project$Search$getTimeSeriesEncoder = function (key) {
 	return _elm_lang$core$Json_Encode$object(
@@ -10614,7 +10664,7 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filtered: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing, currentItem: _elm_lang$core$Maybe$Nothing};
+var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing, currentItem: _elm_lang$core$Maybe$Nothing};
 var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
 	'unsafeDrawGraph',
@@ -10626,7 +10676,7 @@ var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoi
 	});
 var _user$project$Search$Model = F4(
 	function (a, b, c, d) {
-		return {all: a, filtered: b, currentGraph: c, currentItem: d};
+		return {all: a, filter: b, currentGraph: c, currentItem: d};
 	});
 var _user$project$Search$FloatDataItem = F2(
 	function (a, b) {
@@ -10636,22 +10686,40 @@ var _user$project$Search$prepareGraphData = function (items) {
 	return A2(
 		_elm_lang$core$List$filterMap,
 		function (item) {
-			var _p1 = item.value;
-			switch (_p1.ctor) {
+			var _p4 = item.value;
+			switch (_p4.ctor) {
 				case 'JsFloat':
 					return _elm_lang$core$Maybe$Just(
-						A2(_user$project$Search$FloatDataItem, _p1._0, item.timeStamp));
+						A2(_user$project$Search$FloatDataItem, _p4._0, item.timeStamp));
 				case 'JsInt':
 					return _elm_lang$core$Maybe$Just(
 						A2(
 							_user$project$Search$FloatDataItem,
-							_elm_lang$core$Basics$toFloat(_p1._0),
+							_elm_lang$core$Basics$toFloat(_p4._0),
 							item.timeStamp));
 				default:
 					return _elm_lang$core$Maybe$Nothing;
 			}
 		},
 		items);
+};
+var _user$project$Search$RequestAccessCompleted = function (a) {
+	return {ctor: 'RequestAccessCompleted', _0: a};
+};
+var _user$project$Search$requestAccess = function (item) {
+	var url = 'http://localhost:8080/entitlements/requests/';
+	var request = _elm_lang$http$Http$request(
+		{
+			method: 'PUT',
+			headers: {ctor: '[]'},
+			url: url,
+			body: _elm_lang$http$Http$jsonBody(
+				_user$project$Search$entitlementRequestEncoder(item)),
+			expect: _elm_lang$http$Http$expectJson(_user$project$Decoders$decodeEntitlement),
+			timeout: _elm_lang$core$Maybe$Nothing,
+			withCredentials: false
+		});
+	return A2(_elm_lang$http$Http$send, _user$project$Search$RequestAccessCompleted, request);
 };
 var _user$project$Search$RequestAccess = function (a) {
 	return {ctor: 'RequestAccess', _0: a};
@@ -10673,8 +10741,8 @@ var _user$project$Search$ViewGraph = function (a) {
 	return {ctor: 'ViewGraph', _0: a};
 };
 var _user$project$Search$drawViewerWidget = function (item) {
-	var _p2 = item.location.right;
-	switch (_p2.ctor) {
+	var _p5 = item.location.right;
+	switch (_p5.ctor) {
 		case 'Unknown':
 			return A2(
 				_elm_lang$html$Html$a,
@@ -10731,38 +10799,40 @@ var _user$project$Search$drawViewerWidget = function (item) {
 				});
 	}
 };
-var _user$project$Search$drawFiltered = function (items) {
-	var _p3 = items;
-	if (_p3.ctor === 'Nothing') {
-		return _elm_lang$html$Html$text('');
-	} else {
-		return A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			A2(
-				_elm_lang$core$List$map,
-				function (item) {
-					return A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text(item.key),
-							_1: {
+var _user$project$Search$drawFiltered = F2(
+	function (tag, items) {
+		var _p6 = tag;
+		if (_p6.ctor === 'Nothing') {
+			return _elm_lang$html$Html$text('');
+		} else {
+			var filtered = items;
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				A2(
+					_elm_lang$core$List$map,
+					function (item) {
+						return A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(
-									_elm_lang$core$Basics$toString(item.location)),
+								_0: _elm_lang$html$Html$text(item.key),
 								_1: {
 									ctor: '::',
-									_0: _user$project$Search$drawViewerWidget(item),
-									_1: {ctor: '[]'}
+									_0: _elm_lang$html$Html$text(
+										_elm_lang$core$Basics$toString(item.location)),
+									_1: {
+										ctor: '::',
+										_0: _user$project$Search$drawViewerWidget(item),
+										_1: {ctor: '[]'}
+									}
 								}
-							}
-						});
-				},
-				_p3._0));
-	}
-};
+							});
+					},
+					filtered));
+		}
+	});
 var _user$project$Search$ShowLocations = function (a) {
 	return {ctor: 'ShowLocations', _0: a};
 };
@@ -10810,30 +10880,30 @@ var _user$project$Search$getAllMetadata = function () {
 }();
 var _user$project$Search$update = F2(
 	function (msg, model) {
-		var _p4 = msg;
-		switch (_p4.ctor) {
+		var _p7 = msg;
+		switch (_p7.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'RefreshMetadata':
 				return {ctor: '_Tuple2', _0: model, _1: _user$project$Search$getAllMetadata};
 			case 'RefreshMetadataCompleted':
-				if (_p4._0.ctor === 'Ok') {
+				if (_p7._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								all: _elm_lang$core$Maybe$Just(_p4._0._0)
+								all: _elm_lang$core$Maybe$Just(_p7._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					var _p5 = A2(_elm_lang$core$Debug$log, 'RefreshMetadata error', _p4._0._0);
+					var _p8 = A2(_elm_lang$core$Debug$log, 'RefreshMetadata error', _p7._0._0);
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				}
 			case 'ShowLocations':
-				var _p6 = model.all;
-				if (_p6.ctor === 'Nothing') {
+				var _p9 = model.all;
+				if (_p9.ctor === 'Nothing') {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return {
@@ -10841,49 +10911,71 @@ var _user$project$Search$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								filtered: A2(_user$project$Search$filterByTag, _p4._0, _p6._0),
+								filter: _elm_lang$core$Maybe$Just(_p7._0),
 								currentGraph: _elm_lang$core$Maybe$Nothing
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
 			case 'ViewGraph':
-				var _p7 = _p4._0;
+				var _p10 = _p7._0;
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
 						{
 							currentGraph: _elm_lang$core$Maybe$Nothing,
-							currentItem: _elm_lang$core$Maybe$Just(_p7)
+							currentItem: _elm_lang$core$Maybe$Just(_p10)
 						}),
-					_1: _user$project$Search$getTimeSeriesData(_p7)
+					_1: _user$project$Search$getTimeSeriesData(_p10)
 				};
 			case 'ViewGraphCompleted':
-				if (_p4._0.ctor === 'Err') {
-					var _p8 = A2(_elm_lang$core$Debug$log, 'ViewGraph error', _p4._0._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
-					var _p9 = _p4._0._0;
+				if (_p7._0.ctor === 'Ok') {
+					var _p11 = _p7._0._0;
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								currentGraph: _elm_lang$core$Maybe$Just(_p9)
+								currentGraph: _elm_lang$core$Maybe$Just(_p11)
 							}),
 						_1: _user$project$Search$unsafeDrawGraph(
-							_user$project$Search$prepareGraphData(_p9.data))
+							_user$project$Search$prepareGraphData(_p11.data))
 					};
+				} else {
+					if (_p7._0._0.ctor === 'BadStatus') {
+						var items = A3(_user$project$Search$updateRight, model.all, model.currentItem, _user$project$Decoders$RequestAccess);
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{all: items}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					} else {
+						var _p12 = A2(_elm_lang$core$Debug$log, 'ViewGraph error', _p7._0._0);
+						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					}
 				}
+			case 'RequestAccess':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Search$requestAccess(_p7._0)
+				};
 			default:
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				if (_p7._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					var _p13 = A2(_elm_lang$core$Debug$log, 'RequestAccess error', _p7._0._0);
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				}
 		}
 	});
 var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
 var _user$project$Search$view = function (model) {
-	var _p10 = model.all;
-	if (_p10.ctor === 'Nothing') {
+	var _p14 = model.all;
+	if (_p14.ctor === 'Nothing') {
 		return A2(
 			_elm_lang$html$Html$button,
 			{
@@ -10897,6 +10989,7 @@ var _user$project$Search$view = function (model) {
 				_1: {ctor: '[]'}
 			});
 	} else {
+		var _p15 = _p14._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -10912,10 +11005,10 @@ var _user$project$Search$view = function (model) {
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Search$drawData(_p10._0),
+					_0: _user$project$Search$drawData(_p15),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Search$drawFiltered(model.filtered),
+						_0: A2(_user$project$Search$drawFiltered, model.filter, _p15),
 						_1: {
 							ctor: '::',
 							_0: A2(

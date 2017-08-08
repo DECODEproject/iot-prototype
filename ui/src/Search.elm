@@ -94,11 +94,11 @@ update msg model =
         ViewGraph item ->
             ( { model | currentGraph = Nothing, currentItem = Just item }, getTimeSeriesData item )
 
+        ViewGraphCompleted (Ok items) ->
+            ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
+
         ViewGraphCompleted (Err (Http.BadStatus response)) ->
             let
-                _ =
-                    Debug.log "xxx" response
-
                 items =
                     updateRight model.all model.currentItem Decoders.RequestAccess
             in
@@ -111,13 +111,13 @@ update msg model =
             in
                 ( model, Cmd.none )
 
-        ViewGraphCompleted (Ok items) ->
-            ( { model | currentGraph = Just items }, unsafeDrawGraph (prepareGraphData (items.data)) )
-
         RequestAccess item ->
             -- make entitlement request
             -- update model
             ( model, requestAccess item )
+
+        RequestAccessCompleted (Ok items) ->
+            ( model, Cmd.none )
 
         RequestAccessCompleted (Err httpError) ->
             let
@@ -125,9 +125,6 @@ update msg model =
                     Debug.log "RequestAccess error" httpError
             in
                 ( model, Cmd.none )
-
-        RequestAccessCompleted (Ok items) ->
-            ( model, Cmd.none )
 
 
 type alias FloatDataItem =

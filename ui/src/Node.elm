@@ -43,6 +43,10 @@ type Msg
     | GetMetadataCompleted (Result Http.Error Decoders.Metadata)
     | GetAcceptedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
     | GetRequestedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
+    | AcceptEntitlement Decoders.Entitlement
+    | AcceptEntitlementCompleted (Result Http.Error Decoders.Entitlement)
+    | DeclineEntitlement Decoders.Entitlement
+    | DeclineEntitlementCompleted (Result Http.Error Decoders.Entitlement)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -51,55 +55,57 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        GetAcceptedEntitlementsCompleted result ->
-            case result of
-                Err httpError ->
-                    let
-                        _ =
-                            Debug.log "GetAcceptedEntitlementsCompleted error" httpError
-                    in
-                        ( model, Cmd.none )
+        GetAcceptedEntitlementsCompleted (Ok items) ->
+            ( { model | accepted = Just items }, getRequestedEntitlements )
 
-                Ok items ->
-                    ( { model | accepted = Just items }, getRequestedEntitlements )
+        GetAcceptedEntitlementsCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
 
-        GetRequestedEntitlementsCompleted result ->
-            case result of
-                Err httpError ->
-                    let
-                        _ =
-                            Debug.log "GetRequestedEntitlementsCompleted error" httpError
-                    in
-                        ( model, Cmd.none )
+        GetRequestedEntitlementsCompleted (Ok items) ->
+            ( { model | requested = Just items }, Cmd.none )
 
-                Ok items ->
-                    ( { model | requested = Just items }, Cmd.none )
+        GetRequestedEntitlementsCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
 
-        GetMetadataCompleted result ->
-            case result of
-                Err httpError ->
-                    let
-                        _ =
-                            Debug.log "GetMetadataCompleted error" httpError
-                    in
-                        ( model, Cmd.none )
+        GetMetadataCompleted (Ok items) ->
+            ( { model | metadata = Just items }, getAcceptedEntitlements )
 
-                Ok items ->
-                    ( { model | metadata = Just items }, getAcceptedEntitlements )
+        GetMetadataCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
+
+        AcceptEntitlement ent ->
+            ( model, acceptEntitlement ent )
+
+        AcceptEntitlementCompleted (Ok ent) ->
+            ( model, getAcceptedEntitlements )
+
+        AcceptEntitlementCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
+
+        DeclineEntitlement ent ->
+            ( model, declineEntitlement ent )
+
+        DeclineEntitlementCompleted (Ok ent) ->
+            ( model, getAcceptedEntitlements )
+
+        DeclineEntitlementCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
 
 
 
 --RPC
 
 
+nodeURL : String
+nodeURL =
+    "http://localhost:8080"
+
+
 getMetadata : Cmd Msg
 getMetadata =
     let
-        url =
-            "http://localhost:8080/data/meta"
-
         request =
-            Http.get url Decoders.decodeMetadata
+            Http.get (nodeURL ++ "/data/meta") Decoders.decodeMetadata
     in
         Http.send GetMetadataCompleted request
 
@@ -107,11 +113,8 @@ getMetadata =
 getAcceptedEntitlements : Cmd Msg
 getAcceptedEntitlements =
     let
-        url =
-            "http://localhost:8080/entitlements/accepted/"
-
         request =
-            Http.get url Decoders.decodeEntitlements
+            Http.get (nodeURL ++ "/entitlements/accepted/") Decoders.decodeEntitlements
     in
         Http.send GetAcceptedEntitlementsCompleted request
 
@@ -119,13 +122,28 @@ getAcceptedEntitlements =
 getRequestedEntitlements : Cmd Msg
 getRequestedEntitlements =
     let
-        url =
-            "http://localhost:8080/entitlements/requests/"
-
         request =
-            Http.get url Decoders.decodeEntitlements
+            Http.get (nodeURL ++ "/entitlements/requests") Decoders.decodeEntitlements
     in
         Http.send GetRequestedEntitlementsCompleted request
+
+
+acceptEntitlement : Decoders.Entitlement -> Cmd Msg
+acceptEntitlement ent =
+    let
+        request =
+            Http.get (nodeURL ++ "/entitlements/requests/" ++ ent.uid ++ "/accept") Decoders.decodeEntitlement
+    in
+        Http.send AcceptEntitlementCompleted request
+
+
+declineEntitlement : Decoders.Entitlement -> Cmd Msg
+declineEntitlement ent =
+    let
+        request =
+            Http.get (nodeURL ++ "/entitlements/requests/" ++ ent.uid ++ "/decline") Decoders.decodeEntitlement
+    in
+        Http.send DeclineEntitlementCompleted request
 
 
 
@@ -153,7 +171,8 @@ view model =
                 , div []
                     [ text ("Data")
                     , drawMetadata e model
-                    , div [] [ text (toString model) ]
+                    , div [] [ text (toString model.accepted) ]
+                    , div [] [ text (toString model.requested) ]
                     ]
                 ]
 
@@ -181,11 +200,14 @@ drawMetadataItem m model =
 drawEntitlementSelector : Decoders.MetadataItem -> Model -> Html Msg
 drawEntitlementSelector m model =
     let
+        _ =
+            Debug.log "subject" m
+
         accepted =
-            findEntitlement m.key model.accepted
+            findEntitlement m.subject model.accepted
 
         requested =
-            findEntitlement m.key model.requested
+            findEntitlement m.subject model.requested
     in
         div [] [ text (" current : "), (drawAccepted accepted), drawRequested (requested) ]
 
@@ -202,12 +224,22 @@ drawAccepted ent =
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg
 drawRequested ent =
-    case ent of
-        Nothing ->
-            text ("")
+    let
+        _ =
+            Debug.log "requested" ent
+    in
+        case ent of
+            Nothing ->
+                text ("")
 
-        Just e ->
-            div [] [ text (" request : "), text (e.level), a [ href "#" ] [ text ("accept") ], a [ href "#" ] [ text ("decline") ] ]
+            Just e ->
+                div []
+                    [ text (" requested : ")
+                    , text (e.level)
+                    , a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
+                    , text (" ")
+                    , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
+                    ]
 
 
 findEntitlement : String -> Maybe Decoders.Entitlements -> Maybe Decoders.Entitlement
@@ -217,4 +249,4 @@ findEntitlement key entitlements =
             Nothing
 
         Just ents ->
-            List.Extra.find (\e -> e.uid == key) ents
+            List.Extra.find (\e -> e.subject == key) ents
