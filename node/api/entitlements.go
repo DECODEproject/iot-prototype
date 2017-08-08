@@ -120,6 +120,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("accept an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusNotFound, "Not found", nil).
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// decline request
@@ -129,6 +130,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Doc("decline an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusNotFound, "Not found", nil).
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// entitlements
@@ -148,6 +150,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Param(entitlementUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusNotFound, "Not found", nil).
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	return ws
@@ -213,9 +216,11 @@ func (e entitlementResource) acceptRequest(request *restful.Request, response *r
 		return
 
 	}
+
 	e.store.Requested.Delete(requestUID)
 	req.Status = Accepted
-	e.store.Accepted.Add(req)
+	// replace current one with the accepted entitlement
+	e.store.Accepted.AppendOrReplaceOnSubject(req)
 
 	response.WriteEntity(req)
 }
@@ -233,6 +238,7 @@ func (e entitlementResource) declineRequest(request *restful.Request, response *
 
 	e.store.Requested.Delete(requestUID)
 	req.Status = Declined
+	// add to the list of declined entitlements
 	e.store.Declined.Add(req)
 
 	response.WriteEntity(req)
@@ -275,6 +281,7 @@ func (e entitlementResource) revokeEntitlement(request *restful.Request, respons
 
 	e.store.Accepted.Delete(uid)
 	req.Status = Revoked
+	// add to the list of revoked entitlements
 	e.store.Revoked.Add(req)
 
 	response.WriteEntity(req)
