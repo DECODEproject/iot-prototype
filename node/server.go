@@ -141,56 +141,56 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 	two.Start()
 	three.Start()
 
-	// set up the entitlements we will use in the hard coded example
+	// set up the entitlements and metadata we will use in the hard coded example
+	key1 := buildSubjectKey("sensor-1", "temp")
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey("sensor-1", "temp"),
+			Subject:     key1,
 			AccessLevel: api.CanDiscover},
 		UID:    "abc",
 		Status: api.Accepted,
 	})
+	metaStore[key1] = api.Metadata{Description: "living room temperature"}
 
-	metaStore["abc"] = api.Metadata{Description: "living room temperature"}
-
+	key2 := buildSubjectKey("sensor-1", "humidity")
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey("sensor-1", "humidity"),
+			Subject:     key2,
 			AccessLevel: api.CanDiscover},
 		UID:    "def",
 		Status: api.Accepted,
 	})
+	metaStore[key2] = api.Metadata{Description: "living room humidity "}
 
-	metaStore["def"] = api.Metadata{Description: "living room humidity "}
-
+	key3 := buildSubjectKey("sensor-2", "temp")
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey("sensor-2", "temp"),
+			Subject:     key3,
 			AccessLevel: api.CanDiscover},
 		UID:    "ghi",
 		Status: api.Accepted,
 	})
+	metaStore[key3] = api.Metadata{Description: "balcony temperature"}
 
-	metaStore["ghi"] = api.Metadata{Description: "balcony temperature"}
-
+	key4 := buildSubjectKey("sensor-2", "humidity")
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey("sensor-2", "humidity"),
+			Subject:     key4,
 			AccessLevel: api.CanAccess},
 		UID:    "klm",
 		Status: api.Accepted,
 	})
+	metaStore[key4] = api.Metadata{Description: "balcony humidity "}
 
-	metaStore["klm"] = api.Metadata{Description: "balcony humidity "}
-
+	key5 := buildSubjectKey("sine", "value")
 	entitlements.Accepted.Add(api.Entitlement{
 		EntitlementRequest: api.EntitlementRequest{
-			Subject:     buildSubjectKey("sine", "value"),
+			Subject:     key5,
 			AccessLevel: api.CanAccess},
 		UID:    "nop",
 		Status: api.Accepted,
 	})
-
-	metaStore["nop"] = api.Metadata{Description: "sine curve sensor (fake but pretty)"}
+	metaStore[key5] = api.Metadata{Description: "sine curve sensor (fake but pretty)"}
 
 	for {
 		select {

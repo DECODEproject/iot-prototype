@@ -31,7 +31,7 @@ type Metadata struct {
 
 type MetadataResponse struct {
 	Description string `json:"description" description:"human readable description of the data"`
-	Key         string `json:"key" description:"unique name for the data"`
+	Subject     string `json:"subject" description:"unique name for the data"`
 }
 
 func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi, metaStore map[string]Metadata) dataResource {
@@ -78,7 +78,7 @@ func (e dataResource) getMetaData(request *restful.Request, response *restful.Re
 	resp := []MetadataResponse{}
 
 	for k, v := range e.metaStore {
-		resp = append(resp, MetadataResponse{Key: k, Description: v.Description})
+		resp = append(resp, MetadataResponse{Subject: k, Description: v.Description})
 	}
 
 	response.WriteEntity(resp)
