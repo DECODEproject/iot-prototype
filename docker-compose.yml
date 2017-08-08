@@ -44,10 +44,10 @@ services:
         # address of the node service
         - NODE_SERVICE_ADDRESS=http://node:8080
   ## node_one_device_hub is an instance of device hub for IOT integration
-  node_one_device_hub:
-    image: thingful/device-hub
-    links:
-        - "node_one:node"
+  ##node_one_device_hub:
+  ##  image: thingful/device-hub
+  ##  links:
+  ##      - "node_one:node"
   ## node_one_storage is a server responsible for managing the local
   ## storage on the node - fronts a redis server for persistence
   node_one_storage:
