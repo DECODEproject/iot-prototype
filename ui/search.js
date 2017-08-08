@@ -10605,28 +10605,22 @@ var _user$project$Search$updateRight = F3(
 		if (_p1.ctor === 'Nothing') {
 			return items;
 		} else {
-			var _p2 = item;
-			if (_p2.ctor === 'Nothing') {
-				return items;
-			} else {
-				var _p3 = _p2._0;
-				var location1 = _p3.location;
-				var location2 = _elm_lang$core$Native_Utils.update(
-					location1,
-					{right: right});
-				return _elm_lang$core$Maybe$Just(
-					A3(
-						_elm_community$list_extra$List_Extra$updateIf,
-						function (n) {
-							return _elm_lang$core$Native_Utils.eq(n.uid, _p3.uid);
-						},
-						function (t) {
-							return _elm_lang$core$Native_Utils.update(
-								t,
-								{location: location2});
-						},
-						_p1._0));
-			}
+			var location1 = item.location;
+			var location2 = _elm_lang$core$Native_Utils.update(
+				location1,
+				{right: right});
+			return _elm_lang$core$Maybe$Just(
+				A3(
+					_elm_community$list_extra$List_Extra$updateIf,
+					function (n) {
+						return _elm_lang$core$Native_Utils.eq(n.uid, item.uid);
+					},
+					function (t) {
+						return _elm_lang$core$Native_Utils.update(
+							t,
+							{location: location2});
+					},
+					_p1._0));
 		}
 	});
 var _user$project$Search$subscriptions = function (model) {
@@ -10666,7 +10660,7 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 };
 var _user$project$Search$metadataURL = 'http://localhost:8081';
 var _user$project$Search$nodeURL = 'http://localhost:8080';
-var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing, currentItem: _elm_lang$core$Maybe$Nothing};
+var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing};
 var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
 	'unsafeDrawGraph',
@@ -10676,9 +10670,9 @@ var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoi
 				return {value: v.value, date: v.date};
 			});
 	});
-var _user$project$Search$Model = F4(
-	function (a, b, c, d) {
-		return {all: a, filter: b, currentGraph: c, currentItem: d};
+var _user$project$Search$Model = F2(
+	function (a, b) {
+		return {all: a, filter: b};
 	});
 var _user$project$Search$FloatDataItem = F2(
 	function (a, b) {
@@ -10688,16 +10682,16 @@ var _user$project$Search$prepareGraphData = function (items) {
 	return A2(
 		_elm_lang$core$List$filterMap,
 		function (item) {
-			var _p4 = item.value;
-			switch (_p4.ctor) {
+			var _p2 = item.value;
+			switch (_p2.ctor) {
 				case 'JsFloat':
 					return _elm_lang$core$Maybe$Just(
-						A2(_user$project$Search$FloatDataItem, _p4._0, item.timeStamp));
+						A2(_user$project$Search$FloatDataItem, _p2._0, item.timeStamp));
 				case 'JsInt':
 					return _elm_lang$core$Maybe$Just(
 						A2(
 							_user$project$Search$FloatDataItem,
-							_elm_lang$core$Basics$toFloat(_p4._0),
+							_elm_lang$core$Basics$toFloat(_p2._0),
 							item.timeStamp));
 				default:
 					return _elm_lang$core$Maybe$Nothing;
@@ -10725,9 +10719,10 @@ var _user$project$Search$requestAccess = function (item) {
 var _user$project$Search$RequestAccess = function (a) {
 	return {ctor: 'RequestAccess', _0: a};
 };
-var _user$project$Search$ViewGraphCompleted = function (a) {
-	return {ctor: 'ViewGraphCompleted', _0: a};
-};
+var _user$project$Search$ViewGraphCompleted = F2(
+	function (a, b) {
+		return {ctor: 'ViewGraphCompleted', _0: a, _1: b};
+	});
 var _user$project$Search$getTimeSeriesData = function (item) {
 	var request = A3(
 		_elm_lang$http$Http$post,
@@ -10735,14 +10730,17 @@ var _user$project$Search$getTimeSeriesData = function (item) {
 		_elm_lang$http$Http$jsonBody(
 			_user$project$Search$getTimeSeriesEncoder(item.key)),
 		_user$project$Decoders$decodeDataResponse);
-	return A2(_elm_lang$http$Http$send, _user$project$Search$ViewGraphCompleted, request);
+	return A2(
+		_elm_lang$http$Http$send,
+		_user$project$Search$ViewGraphCompleted(item),
+		request);
 };
 var _user$project$Search$ViewGraph = function (a) {
 	return {ctor: 'ViewGraph', _0: a};
 };
 var _user$project$Search$drawViewerWidget = function (item) {
-	var _p5 = item.location.right;
-	switch (_p5.ctor) {
+	var _p3 = item.location.right;
+	switch (_p3.ctor) {
 		case 'Unknown':
 			return A2(
 				_elm_lang$html$Html$a,
@@ -10801,8 +10799,8 @@ var _user$project$Search$drawViewerWidget = function (item) {
 };
 var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
-		var _p6 = tag;
-		if (_p6.ctor === 'Nothing') {
+		var _p4 = tag;
+		if (_p4.ctor === 'Nothing') {
 			return _elm_lang$html$Html$text('');
 		} else {
 			var filtered = items;
@@ -10882,20 +10880,20 @@ var _user$project$Search$getAllMetadata = function () {
 }();
 var _user$project$Search$update = F2(
 	function (msg, model) {
-		var _p7 = msg;
-		switch (_p7.ctor) {
+		var _p5 = msg;
+		switch (_p5.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'RefreshMetadata':
 				return {ctor: '_Tuple2', _0: model, _1: _user$project$Search$getAllMetadata};
 			case 'RefreshMetadataCompleted':
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								all: _elm_lang$core$Maybe$Just(_p7._0._0)
+								all: _elm_lang$core$Maybe$Just(_p5._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10903,15 +10901,15 @@ var _user$project$Search$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 69, column: 5},
-							end: {line: 115, column: 45}
+							start: {line: 65, column: 5},
+							end: {line: 117, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 			case 'ShowLocations':
-				var _p9 = model.all;
-				if (_p9.ctor === 'Nothing') {
+				var _p7 = model.all;
+				if (_p7.ctor === 'Nothing') {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return {
@@ -10919,40 +10917,31 @@ var _user$project$Search$update = F2(
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								filter: _elm_lang$core$Maybe$Just(_p7._0),
-								currentGraph: _elm_lang$core$Maybe$Nothing
+								filter: _elm_lang$core$Maybe$Just(_p5._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				}
 			case 'ViewGraph':
-				var _p10 = _p7._0;
 				return {
 					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{
-							currentGraph: _elm_lang$core$Maybe$Nothing,
-							currentItem: _elm_lang$core$Maybe$Just(_p10)
-						}),
-					_1: _user$project$Search$getTimeSeriesData(_p10)
+					_0: model,
+					_1: _user$project$Search$getTimeSeriesData(_p5._0)
 				};
 			case 'ViewGraphCompleted':
-				if (_p7._0.ctor === 'Ok') {
-					var _p11 = _p7._0._0;
+				if (_p5._1.ctor === 'Ok') {
+					var items = A3(_user$project$Search$updateRight, model.all, _p5._0, _user$project$Decoders$Unknown);
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
-							{
-								currentGraph: _elm_lang$core$Maybe$Just(_p11)
-							}),
+							{all: items}),
 						_1: _user$project$Search$unsafeDrawGraph(
-							_user$project$Search$prepareGraphData(_p11.data))
+							_user$project$Search$prepareGraphData(_p5._1._0.data))
 					};
 				} else {
-					if (_p7._0._0.ctor === 'BadStatus') {
-						var items = A3(_user$project$Search$updateRight, model.all, model.currentItem, _user$project$Decoders$RequestAccess);
+					if (_p5._1._0.ctor === 'BadStatus') {
+						var items = A3(_user$project$Search$updateRight, model.all, _p5._0, _user$project$Decoders$RequestAccess);
 						return {
 							ctor: '_Tuple2',
 							_0: _elm_lang$core$Native_Utils.update(
@@ -10964,38 +10953,42 @@ var _user$project$Search$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'Search',
 							{
-								start: {line: 69, column: 5},
-								end: {line: 115, column: 45}
+								start: {line: 65, column: 5},
+								end: {line: 117, column: 45}
 							},
-							_p7)(
-							_elm_lang$core$Basics$toString(_p7._0._0));
+							_p5)(
+							_elm_lang$core$Basics$toString(_p5._1._0));
 					}
 				}
 			case 'RequestAccess':
+				var _p9 = _p5._0;
+				var items = A3(_user$project$Search$updateRight, model.all, _p9, _user$project$Decoders$Requesting);
 				return {
 					ctor: '_Tuple2',
-					_0: model,
-					_1: _user$project$Search$requestAccess(_p7._0)
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{all: items}),
+					_1: _user$project$Search$requestAccess(_p9)
 				};
 			default:
-				if (_p7._0.ctor === 'Ok') {
+				if (_p5._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 69, column: 5},
-							end: {line: 115, column: 45}
+							start: {line: 65, column: 5},
+							end: {line: 117, column: 45}
 						},
-						_p7)(
-						_elm_lang$core$Basics$toString(_p7._0._0));
+						_p5)(
+						_elm_lang$core$Basics$toString(_p5._0._0));
 				}
 		}
 	});
 var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
 var _user$project$Search$view = function (model) {
-	var _p14 = model.all;
-	if (_p14.ctor === 'Nothing') {
+	var _p11 = model.all;
+	if (_p11.ctor === 'Nothing') {
 		return A2(
 			_elm_lang$html$Html$button,
 			{
@@ -11009,7 +11002,7 @@ var _user$project$Search$view = function (model) {
 				_1: {ctor: '[]'}
 			});
 	} else {
-		var _p15 = _p14._0;
+		var _p12 = _p11._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -11025,10 +11018,10 @@ var _user$project$Search$view = function (model) {
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Search$drawData(_p15),
+					_0: _user$project$Search$drawData(_p12),
 					_1: {
 						ctor: '::',
-						_0: A2(_user$project$Search$drawFiltered, model.filter, _p15),
+						_0: A2(_user$project$Search$drawFiltered, model.filter, _p12),
 						_1: {
 							ctor: '::',
 							_0: A2(
