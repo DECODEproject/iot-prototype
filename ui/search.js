@@ -10797,77 +10797,91 @@ var _user$project$Search$drawViewerWidget = function (item) {
 				});
 	}
 };
+var _user$project$Search$ShowLocations = function (a) {
+	return {ctor: 'ShowLocations', _0: a};
+};
 var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
 		var _p4 = tag;
 		if (_p4.ctor === 'Nothing') {
-			return _elm_lang$html$Html$text('');
-		} else {
-			var filtered = items;
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
 				A2(
 					_elm_lang$core$List$map,
-					function (item) {
+					function (x) {
 						return A2(
 							_elm_lang$html$Html$div,
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text(item.key),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html$text(
-										_elm_lang$core$Basics$toString(item.location)),
-									_1: {
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{
 										ctor: '::',
-										_0: _user$project$Search$drawViewerWidget(item),
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Search$ShowLocations(x)),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$href('#'),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(x),
 										_1: {ctor: '[]'}
-									}
-								}
+									}),
+								_1: {ctor: '[]'}
 							});
 					},
-					filtered));
-		}
-	});
-var _user$project$Search$ShowLocations = function (a) {
-	return {ctor: 'ShowLocations', _0: a};
-};
-var _user$project$Search$drawData = function (items) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$List$map,
-			function (x) {
-				return A2(
-					_elm_lang$html$Html$div,
-					{ctor: '[]'},
-					{
+					_user$project$Search$uniqueTags(items)));
+		} else {
+			var filtered = items;
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(_p4._0),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$a,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Search$ShowLocations(x)),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$href('#'),
-									_1: {ctor: '[]'}
-								}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(x),
-								_1: {ctor: '[]'}
-							}),
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							A2(
+								_elm_lang$core$List$map,
+								function (item) {
+									return A2(
+										_elm_lang$html$Html$div,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text(item.key),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html$text(' '),
+												_1: {
+													ctor: '::',
+													_0: _user$project$Search$drawViewerWidget(item),
+													_1: {ctor: '[]'}
+												}
+											}
+										});
+								},
+								filtered)),
 						_1: {ctor: '[]'}
-					});
-			},
-			_user$project$Search$uniqueTags(items)));
-};
+					}
+				});
+		}
+	});
 var _user$project$Search$RefreshMetadataCompleted = function (a) {
 	return {ctor: 'RefreshMetadataCompleted', _0: a};
 };
@@ -10885,7 +10899,13 @@ var _user$project$Search$update = F2(
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'RefreshMetadata':
-				return {ctor: '_Tuple2', _0: model, _1: _user$project$Search$getAllMetadata};
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{filter: _elm_lang$core$Maybe$Nothing}),
+					_1: _user$project$Search$getAllMetadata
+				};
 			case 'RefreshMetadataCompleted':
 				if (_p5._0.ctor === 'Ok') {
 					return {
@@ -11002,7 +11022,6 @@ var _user$project$Search$view = function (model) {
 				_1: {ctor: '[]'}
 			});
 	} else {
-		var _p12 = _p11._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -11018,33 +11037,29 @@ var _user$project$Search$view = function (model) {
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Search$drawData(_p12),
+					_0: A2(_user$project$Search$drawFiltered, model.filter, _p11._0),
 					_1: {
 						ctor: '::',
-						_0: A2(_user$project$Search$drawFiltered, model.filter, _p12),
-						_1: {
-							ctor: '::',
-							_0: A2(
-								_elm_lang$html$Html$div,
-								{ctor: '[]'},
-								{
-									ctor: '::',
-									_0: A2(
-										_elm_lang$html$Html$button,
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
-											_1: {ctor: '[]'}
-										},
-										{
-											ctor: '::',
-											_0: _elm_lang$html$Html$text('refresh'),
-											_1: {ctor: '[]'}
-										}),
-									_1: {ctor: '[]'}
-								}),
-							_1: {ctor: '[]'}
-						}
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$button,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
+										_1: {ctor: '[]'}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('reset'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
 					}
 				}
 			});

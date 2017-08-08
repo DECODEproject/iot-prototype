@@ -67,7 +67,7 @@ update msg model =
             ( model, Cmd.none )
 
         RefreshMetadata ->
-            ( model, getAllMetadata )
+            ( { model | filter = Nothing }, getAllMetadata )
 
         RefreshMetadataCompleted (Ok items) ->
             ( { model | all = Just items }, Cmd.none )
@@ -224,29 +224,26 @@ view model =
         Just d ->
             div []
                 [ div [] [ text "Metadata" ]
-                , drawData d
                 , drawFiltered model.filter d
-                , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
+                , div [] [ button [ onClick RefreshMetadata ] [ text "reset" ] ]
                 ]
-
-
-drawData : Decoders.Items -> Html Msg
-drawData items =
-    div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
 
 drawFiltered : Maybe String -> Decoders.Items -> Html Msg
 drawFiltered tag items =
     case tag of
         Nothing ->
-            text ("")
+            div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
         Just t ->
             let
                 filtered =
                     items
             in
-                div [] <| List.map (\item -> div [] [ text item.key, text (toString item.location), drawViewerWidget (item) ]) filtered
+                div []
+                    [ div [] [ text (t) ]
+                    , div [] <| List.map (\item -> div [] [ text item.key, text " ", drawViewerWidget (item) ]) filtered
+                    ]
 
 
 drawViewerWidget : Decoders.Item -> Html Msg
