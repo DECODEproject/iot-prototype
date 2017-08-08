@@ -49,7 +49,7 @@ func Serve(options Options) error {
 	// entitlementStore holds an in-memory cache of entitlement data
 	entitlementStore := api.NewEntitlementStore()
 	// metaStore holds additional information about the data stored
-	metaStore := map[string]api.Metadata{}
+	metaStore := api.NewMetadataStore()
 
 	// TODO : add service to receive data from the device hub and/or any other service
 	restful.DefaultContainer.Add(api.NewEntitlementService(entitlementStore).WebService())
@@ -117,7 +117,7 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 	return token, err
 }
 
-func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore, metaStore map[string]api.Metadata) {
+func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient.MetadataApi, sClient *storageclient.DataApi, entitlements *api.EntitlementStore, metaStore *api.MetadataStore) {
 
 	sensorMessages := make(chan sensors.SensorMessage)
 	ctx := context.Background()
@@ -142,7 +142,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "abc",
 		Status: api.Accepted,
 	})
-	metaStore[key1] = api.Metadata{Description: "living room temperature"}
+	metaStore.Add(api.Metadata{Subject: key1, Description: "living room temperature"})
 
 	key2 := buildSubjectKey("sensor-1", "humidity")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -152,7 +152,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "def",
 		Status: api.Accepted,
 	})
-	metaStore[key2] = api.Metadata{Description: "living room humidity"}
+	metaStore.Add(api.Metadata{Subject: key2, Description: "living room humidity"})
 
 	key3 := buildSubjectKey("sensor-2", "temp")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -162,7 +162,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "ghi",
 		Status: api.Accepted,
 	})
-	metaStore[key3] = api.Metadata{Description: "balcony temperature"}
+	metaStore.Add(api.Metadata{Subject: key3, Description: "balcony temperature"})
 
 	key4 := buildSubjectKey("sensor-2", "humidity")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -172,7 +172,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "klm",
 		Status: api.Accepted,
 	})
-	metaStore[key4] = api.Metadata{Description: "balcony humidity"}
+	metaStore.Add(api.Metadata{Subject: key4, Description: "balcony humidity"})
 
 	key5 := buildSubjectKey("sine", "value")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -182,7 +182,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "nop",
 		Status: api.Accepted,
 	})
-	metaStore[key5] = api.Metadata{Description: "sine curve sensor"}
+	metaStore.Add(api.Metadata{Subject: key5, Description: "sine curve sensor"})
 
 	for {
 		select {

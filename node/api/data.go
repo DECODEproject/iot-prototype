@@ -12,7 +12,7 @@ import (
 
 type dataResource struct {
 	store     *EntitlementStore
-	metaStore map[string]Metadata
+	metaStore *MetadataStore
 	sClient   *storageclient.DataApi
 }
 
@@ -25,16 +25,16 @@ type DataResponse struct {
 	Metadata Metadata    `json:"metadata" description:"metadata for the data e.g. description"`
 }
 
-type Metadata struct {
+type MetadataRequest struct {
 	Description string `json:"description" description:"human readable description of the data"`
 }
 
-type MetadataResponse struct {
+type Metadata struct {
 	Description string `json:"description" description:"human readable description of the data"`
 	Subject     string `json:"subject" description:"unique name for the data"`
 }
 
-func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi, metaStore map[string]Metadata) dataResource {
+func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi, metaStore *MetadataStore) dataResource {
 
 	return dataResource{
 		store:     store,
@@ -66,23 +66,15 @@ func (e dataResource) WebService() *restful.WebService {
 	ws.Route(ws.GET("/meta").To(e.getMetaData).
 		Doc("retrieve some data").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Writes([]MetadataResponse{}).
-		Returns(http.StatusOK, "OK", []MetadataResponse{}).
+		Writes([]Metadata{}).
+		Returns(http.StatusOK, "OK", []Metadata{}).
 		Returns(http.StatusInternalServerError, "Something bad happened", ErrorResponse{}))
 
 	return ws
 }
 
 func (e dataResource) getMetaData(request *restful.Request, response *restful.Response) {
-
-	resp := []MetadataResponse{}
-
-	for k, v := range e.metaStore {
-		resp = append(resp, MetadataResponse{Subject: k, Description: v.Description})
-	}
-
-	response.WriteEntity(resp)
-
+	response.WriteEntity(e.metaStore.All())
 }
 
 func (e dataResource) getData(request *restful.Request, response *restful.Response) {
@@ -122,7 +114,7 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 
 	resp := DataResponse{
 		Data:     data,
-		Metadata: e.metaStore[req.Key],
+		Metadata: e.metaStore.FindBySubject(req.Key),
 	}
 
 	response.WriteEntity(resp)
