@@ -64,7 +64,6 @@ func (e entitlementMap) FindForSubject(subject string) (Entitlement, bool) {
 	defer e.lock.RUnlock()
 
 	for _, ent := range e.store {
-
 		// TODO : look at matching by regex etc
 		if ent.Subject == subject {
 			return ent, true
@@ -97,4 +96,28 @@ func (e entitlementMap) All() []Entitlement {
 	}
 
 	return list
+}
+
+func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
+	e.lock.Lock()
+	defer e.lock.Unlock()
+
+	found := false
+	existing := Entitlement{}
+
+	for _, e := range e.store {
+		if e.Subject == ent.Subject {
+
+			found = true
+			existing = e
+		}
+
+	}
+
+	if found {
+		delete(e.store, existing.UID)
+	}
+
+	e.store[existing.UID] = ent
+
 }
