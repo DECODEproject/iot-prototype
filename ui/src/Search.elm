@@ -225,7 +225,7 @@ view model =
             div []
                 [ div [] [ text "Metadata" ]
                 , drawFiltered model.filter d
-                , div [] [ button [ onClick RefreshMetadata ] [ text "reset" ] ]
+                , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
                 ]
 
 
@@ -238,7 +238,7 @@ drawFiltered tag items =
         Just t ->
             let
                 filtered =
-                    items
+                    filterByTag t items
             in
                 div []
                     [ div [] [ text (t) ]
@@ -292,15 +292,6 @@ uniqueTags items =
         |> List.Extra.unique
 
 
-filterByTag : String -> Decoders.Items -> Maybe Decoders.Items
+filterByTag : String -> Decoders.Items -> Decoders.Items
 filterByTag tag data =
-    let
-        r =
-            List.filter (\x -> List.member tag x.tags) data
-    in
-        case r of
-            [] ->
-                Nothing
-
-            _ ->
-                Just r
+    List.filter (\x -> List.member tag x.tags) data

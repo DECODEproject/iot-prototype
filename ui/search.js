@@ -10568,18 +10568,12 @@ var _user$project$Decoders$decodeDataResponse = A2(
 
 var _user$project$Search$filterByTag = F2(
 	function (tag, data) {
-		var r = A2(
+		return A2(
 			_elm_lang$core$List$filter,
 			function (x) {
 				return A2(_elm_lang$core$List$member, tag, x.tags);
 			},
 			data);
-		var _p0 = r;
-		if (_p0.ctor === '[]') {
-			return _elm_lang$core$Maybe$Nothing;
-		} else {
-			return _elm_lang$core$Maybe$Just(r);
-		}
 	});
 var _user$project$Search$uniqueTags = function (items) {
 	return _elm_community$list_extra$List_Extra$unique(
@@ -10601,8 +10595,8 @@ var _user$project$Search$uniqueLocations = function (items) {
 };
 var _user$project$Search$updateRight = F3(
 	function (items, item, right) {
-		var _p1 = items;
-		if (_p1.ctor === 'Nothing') {
+		var _p0 = items;
+		if (_p0.ctor === 'Nothing') {
 			return items;
 		} else {
 			var location1 = item.location;
@@ -10620,7 +10614,7 @@ var _user$project$Search$updateRight = F3(
 							t,
 							{location: location2});
 					},
-					_p1._0));
+					_p0._0));
 		}
 	});
 var _user$project$Search$subscriptions = function (model) {
@@ -10682,16 +10676,16 @@ var _user$project$Search$prepareGraphData = function (items) {
 	return A2(
 		_elm_lang$core$List$filterMap,
 		function (item) {
-			var _p2 = item.value;
-			switch (_p2.ctor) {
+			var _p1 = item.value;
+			switch (_p1.ctor) {
 				case 'JsFloat':
 					return _elm_lang$core$Maybe$Just(
-						A2(_user$project$Search$FloatDataItem, _p2._0, item.timeStamp));
+						A2(_user$project$Search$FloatDataItem, _p1._0, item.timeStamp));
 				case 'JsInt':
 					return _elm_lang$core$Maybe$Just(
 						A2(
 							_user$project$Search$FloatDataItem,
-							_elm_lang$core$Basics$toFloat(_p2._0),
+							_elm_lang$core$Basics$toFloat(_p1._0),
 							item.timeStamp));
 				default:
 					return _elm_lang$core$Maybe$Nothing;
@@ -10739,8 +10733,8 @@ var _user$project$Search$ViewGraph = function (a) {
 	return {ctor: 'ViewGraph', _0: a};
 };
 var _user$project$Search$drawViewerWidget = function (item) {
-	var _p3 = item.location.right;
-	switch (_p3.ctor) {
+	var _p2 = item.location.right;
+	switch (_p2.ctor) {
 		case 'Unknown':
 			return A2(
 				_elm_lang$html$Html$a,
@@ -10802,8 +10796,8 @@ var _user$project$Search$ShowLocations = function (a) {
 };
 var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
-		var _p4 = tag;
-		if (_p4.ctor === 'Nothing') {
+		var _p3 = tag;
+		if (_p3.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10837,7 +10831,8 @@ var _user$project$Search$drawFiltered = F2(
 					},
 					_user$project$Search$uniqueTags(items)));
 		} else {
-			var filtered = items;
+			var _p4 = _p3._0;
+			var filtered = A2(_user$project$Search$filterByTag, _p4, items);
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10848,7 +10843,7 @@ var _user$project$Search$drawFiltered = F2(
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p4._0),
+							_0: _elm_lang$html$Html$text(_p4),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -11054,7 +11049,7 @@ var _user$project$Search$view = function (model) {
 									},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('reset'),
+										_0: _elm_lang$html$Html$text('refresh'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {ctor: '[]'}

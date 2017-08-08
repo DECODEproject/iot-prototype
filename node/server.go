@@ -327,6 +327,6 @@ func harvestTagData(parent string, v []interface{}) []string {
 			}
 		}
 	}
-
+	log.Println(r)
 	return r
 }
