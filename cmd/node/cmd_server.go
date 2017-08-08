@@ -16,13 +16,6 @@ var serverCommand = &cobra.Command{
 			WebServicesURL:         _config.WebServicesURL,
 			MetadataServiceAddress: _config.MetadataServiceAddress,
 			StorageServiceAddress:  _config.StorageServiceAddress,
-			UseTLS:                 _config.TLS,
-			CertFilePath:           _config.CertFile,
-			KeyFilePath:            _config.KeyFile,
-			TrustedCAFilePath:      _config.CACertFile,
-			LogFile:                _config.LogFile,
-			LogPath:                _config.LogPath,
-			Syslog:                 _config.Syslog,
 		})
 
 	},

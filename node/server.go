@@ -26,14 +26,6 @@ type Options struct {
 	WebServicesURL         string
 	MetadataServiceAddress string
 	StorageServiceAddress  string
-
-	UseTLS            bool
-	CertFilePath      string
-	KeyFilePath       string
-	TrustedCAFilePath string
-	LogFile           bool
-	LogPath           string
-	Syslog            bool
 }
 
 func Serve(options Options) error {
@@ -160,7 +152,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "def",
 		Status: api.Accepted,
 	})
-	metaStore[key2] = api.Metadata{Description: "living room humidity "}
+	metaStore[key2] = api.Metadata{Description: "living room humidity"}
 
 	key3 := buildSubjectKey("sensor-2", "temp")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -180,7 +172,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "klm",
 		Status: api.Accepted,
 	})
-	metaStore[key4] = api.Metadata{Description: "balcony humidity "}
+	metaStore[key4] = api.Metadata{Description: "balcony humidity"}
 
 	key5 := buildSubjectKey("sine", "value")
 	entitlements.Accepted.Add(api.Entitlement{
@@ -190,7 +182,7 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 		UID:    "nop",
 		Status: api.Accepted,
 	})
-	metaStore[key5] = api.Metadata{Description: "sine curve sensor (fake but pretty)"}
+	metaStore[key5] = api.Metadata{Description: "sine curve sensor"}
 
 	for {
 		select {
@@ -198,8 +190,8 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 
 			// for each bit of data
 			// find an entitlement for the data
-			// - if entitlement exists and IsAccessible() send metadata to the 'metadata' service
-			// Write data values to the 'storage' service
+			// - if entitlement exists and IsDiscoverable() send metadata to the 'metadata' service
+			// Always write data values to the 'storage' service
 			for k, v := range message.Data {
 
 				subject := buildSubjectKey(message.SensorUID, k)
@@ -229,7 +221,6 @@ func pretendToBeADeviceHubEndpoint(locationToken string, mClient *metadataclient
 					continue
 				}
 			}
-
 		}
 	}
 }
