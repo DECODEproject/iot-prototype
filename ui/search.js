@@ -10467,12 +10467,12 @@ var _user$project$Decoders$decodeEntitlement = A5(
 var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
 var _user$project$Decoders$MetadataItem = F2(
 	function (a, b) {
-		return {key: a, description: b};
+		return {subject: a, description: b};
 	});
 var _user$project$Decoders$decodeMetadataItem = A3(
 	_elm_lang$core$Json_Decode$map2,
 	_user$project$Decoders$MetadataItem,
-	A2(_elm_lang$core$Json_Decode$field, 'key', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string));
 var _user$project$Decoders$decodeMetadata = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeMetadataItem);
 var _user$project$Decoders$Requesting = {ctor: 'Requesting'};
@@ -10639,7 +10639,7 @@ var _user$project$Search$entitlementRequestEncoder = function (item) {
 			_0: {
 				ctor: '_Tuple2',
 				_0: 'level',
-				_1: _elm_lang$core$Json_Encode$string('can-read')
+				_1: _elm_lang$core$Json_Encode$string('can-access')
 			},
 			_1: {
 				ctor: '::',
@@ -10664,6 +10664,8 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 			_1: {ctor: '[]'}
 		});
 };
+var _user$project$Search$metadataURL = 'http://localhost:8081';
+var _user$project$Search$nodeURL = 'http://localhost:8080';
 var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing, currentGraph: _elm_lang$core$Maybe$Nothing, currentItem: _elm_lang$core$Maybe$Nothing};
 var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
@@ -10707,12 +10709,11 @@ var _user$project$Search$RequestAccessCompleted = function (a) {
 	return {ctor: 'RequestAccessCompleted', _0: a};
 };
 var _user$project$Search$requestAccess = function (item) {
-	var url = 'http://localhost:8080/entitlements/requests/';
 	var request = _elm_lang$http$Http$request(
 		{
 			method: 'PUT',
 			headers: {ctor: '[]'},
-			url: url,
+			url: A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$nodeURL, '/entitlements/requests/'),
 			body: _elm_lang$http$Http$jsonBody(
 				_user$project$Search$entitlementRequestEncoder(item)),
 			expect: _elm_lang$http$Http$expectJson(_user$project$Decoders$decodeEntitlement),
@@ -10728,10 +10729,9 @@ var _user$project$Search$ViewGraphCompleted = function (a) {
 	return {ctor: 'ViewGraphCompleted', _0: a};
 };
 var _user$project$Search$getTimeSeriesData = function (item) {
-	var url = 'http://localhost:8080/data/';
 	var request = A3(
 		_elm_lang$http$Http$post,
-		url,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$nodeURL, '/data/'),
 		_elm_lang$http$Http$jsonBody(
 			_user$project$Search$getTimeSeriesEncoder(item.key)),
 		_user$project$Decoders$decodeDataResponse);
@@ -10874,8 +10874,10 @@ var _user$project$Search$RefreshMetadataCompleted = function (a) {
 	return {ctor: 'RefreshMetadataCompleted', _0: a};
 };
 var _user$project$Search$getAllMetadata = function () {
-	var url = 'http://localhost:8081/catalog/items/';
-	var request = A2(_elm_lang$http$Http$get, url, _user$project$Decoders$decodeItems);
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$metadataURL, '/catalog/items/'),
+		_user$project$Decoders$decodeItems);
 	return A2(_elm_lang$http$Http$send, _user$project$Search$RefreshMetadataCompleted, request);
 }();
 var _user$project$Search$update = F2(
@@ -10898,8 +10900,14 @@ var _user$project$Search$update = F2(
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
-					var _p8 = A2(_elm_lang$core$Debug$log, 'RefreshMetadata error', _p7._0._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Search',
+						{
+							start: {line: 69, column: 5},
+							end: {line: 115, column: 45}
+						},
+						_p7)(
+						_elm_lang$core$Basics$toString(_p7._0._0));
 				}
 			case 'ShowLocations':
 				var _p9 = model.all;
@@ -10953,8 +10961,14 @@ var _user$project$Search$update = F2(
 							_1: _elm_lang$core$Platform_Cmd$none
 						};
 					} else {
-						var _p12 = A2(_elm_lang$core$Debug$log, 'ViewGraph error', _p7._0._0);
-						return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+						return _elm_lang$core$Native_Utils.crashCase(
+							'Search',
+							{
+								start: {line: 69, column: 5},
+								end: {line: 115, column: 45}
+							},
+							_p7)(
+							_elm_lang$core$Basics$toString(_p7._0._0));
 					}
 				}
 			case 'RequestAccess':
@@ -10967,8 +10981,14 @@ var _user$project$Search$update = F2(
 				if (_p7._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 				} else {
-					var _p13 = A2(_elm_lang$core$Debug$log, 'RequestAccess error', _p7._0._0);
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Search',
+						{
+							start: {line: 69, column: 5},
+							end: {line: 115, column: 45}
+						},
+						_p7)(
+						_elm_lang$core$Basics$toString(_p7._0._0));
 				}
 		}
 	});

@@ -77,11 +77,7 @@ update msg model =
             ( { model | all = Just items }, Cmd.none )
 
         RefreshMetadataCompleted (Err httpError) ->
-            let
-                _ =
-                    Debug.log "RefreshMetadata error" httpError
-            in
-                ( model, Cmd.none )
+            Debug.crash (toString httpError)
 
         ShowLocations tag ->
             case model.all of
@@ -105,11 +101,7 @@ update msg model =
                 ( { model | all = items }, Cmd.none )
 
         ViewGraphCompleted (Err httpError) ->
-            let
-                _ =
-                    Debug.log "ViewGraph error" httpError
-            in
-                ( model, Cmd.none )
+            Debug.crash (toString httpError)
 
         RequestAccess item ->
             -- make entitlement request
@@ -120,11 +112,7 @@ update msg model =
             ( model, Cmd.none )
 
         RequestAccessCompleted (Err httpError) ->
-            let
-                _ =
-                    Debug.log "RequestAccess error" httpError
-            in
-                ( model, Cmd.none )
+            Debug.crash (toString httpError)
 
 
 type alias FloatDataItem =
@@ -150,14 +138,25 @@ prepareGraphData items =
         items
 
 
+
+-- RPC
+
+
+nodeURL : String
+nodeURL =
+    "http://localhost:8080"
+
+
+metadataURL : String
+metadataURL =
+    "http://localhost:8081"
+
+
 getAllMetadata : Cmd Msg
 getAllMetadata =
     let
-        url =
-            "http://localhost:8081/catalog/items/"
-
         request =
-            Http.get url Decoders.decodeItems
+            Http.get (metadataURL ++ "/catalog/items/") Decoders.decodeItems
     in
         Http.send RefreshMetadataCompleted request
 
@@ -170,11 +169,8 @@ getTimeSeriesEncoder key =
 getTimeSeriesData : Decoders.Item -> Cmd Msg
 getTimeSeriesData item =
     let
-        url =
-            "http://localhost:8080/data/"
-
         request =
-            Http.post url (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
+            Http.post (nodeURL ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
     in
         Http.send ViewGraphCompleted request
 
@@ -182,7 +178,7 @@ getTimeSeriesData item =
 entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
 entitlementRequestEncoder item =
     Json.Encode.object
-        [ ( "level", Json.Encode.string "can-access")
+        [ ( "level", Json.Encode.string "can-access" )
         , ( "subject", Json.Encode.string item.key )
         ]
 
@@ -190,14 +186,11 @@ entitlementRequestEncoder item =
 requestAccess : Decoders.Item -> Cmd Msg
 requestAccess item =
     let
-        url =
-            "http://localhost:8080/entitlements/requests/"
-
         request =
             Http.request
                 { method = "PUT"
                 , headers = []
-                , url = url
+                , url = nodeURL ++ "/entitlements/requests/"
                 , body = Http.jsonBody (entitlementRequestEncoder item)
                 , expect = Http.expectJson Decoders.decodeEntitlement
                 , timeout = Nothing
