@@ -29,11 +29,6 @@ type MetadataRequest struct {
 	Description string `json:"description" description:"human readable description of the data"`
 }
 
-type Metadata struct {
-	Description string `json:"description" description:"human readable description of the data"`
-	Subject     string `json:"subject" description:"unique name for the data"`
-}
-
 func NewDataService(store *EntitlementStore, sClient *storageclient.DataApi, metaStore *MetadataStore) dataResource {
 
 	return dataResource{

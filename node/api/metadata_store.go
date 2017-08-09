@@ -2,6 +2,11 @@ package api
 
 import "sync"
 
+type Metadata struct {
+	Description string `json:"description" description:"human readable description of the data"`
+	Subject     string `json:"subject" description:"unique name for the data"`
+}
+
 func NewMetadataStore() *MetadataStore {
 	return &MetadataStore{
 		store: map[string]Metadata{},

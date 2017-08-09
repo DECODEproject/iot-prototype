@@ -6,3 +6,8 @@ type SensorMessage struct {
 	Schema    map[string]interface{}
 	SensorUID string
 }
+
+// Sensor is the interface for all sensor implementations
+type Sensor interface {
+	Start()
+}

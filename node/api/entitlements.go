@@ -43,6 +43,7 @@ type AccessLevel string
 
 const (
 	None        = AccessLevel("none")
+	OwnerOnly   = AccessLevel("owner-only")
 	CanAccess   = AccessLevel("can-access")
 	CanDiscover = AccessLevel("can-discover")
 )
