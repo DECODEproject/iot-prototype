@@ -10560,14 +10560,11 @@ var _user$project$Decoders$decodeDataResponse = A2(
 var _user$project$Decoders$CanDiscover = {ctor: 'CanDiscover'};
 var _user$project$Decoders$CanAccess = {ctor: 'CanAccess'};
 var _user$project$Decoders$OwnerOnly = {ctor: 'OwnerOnly'};
-var _user$project$Decoders$None = {ctor: 'None'};
 var _user$project$Decoders$decodeAccessLevel = A2(
 	_elm_lang$core$Json_Decode$andThen,
 	function (str) {
 		var _p2 = str;
 		switch (_p2) {
-			case 'none':
-				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$None);
 			case 'owner-only':
 				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$OwnerOnly);
 			case 'can-access':

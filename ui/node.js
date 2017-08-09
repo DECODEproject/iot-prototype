@@ -10494,14 +10494,11 @@ var _user$project$Decoders$decodeDataResponse = A2(
 var _user$project$Decoders$CanDiscover = {ctor: 'CanDiscover'};
 var _user$project$Decoders$CanAccess = {ctor: 'CanAccess'};
 var _user$project$Decoders$OwnerOnly = {ctor: 'OwnerOnly'};
-var _user$project$Decoders$None = {ctor: 'None'};
 var _user$project$Decoders$decodeAccessLevel = A2(
 	_elm_lang$core$Json_Decode$andThen,
 	function (str) {
 		var _p2 = str;
 		switch (_p2) {
-			case 'none':
-				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$None);
 			case 'owner-only':
 				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$OwnerOnly);
 			case 'can-access':
@@ -10544,10 +10541,8 @@ var _user$project$Node$drawAccessLevel = function (level) {
 			return _elm_lang$html$Html$text('owner-only');
 		case 'CanDiscover':
 			return _elm_lang$html$Html$text('can-discover');
-		case 'CanAccess':
-			return _elm_lang$html$Html$text('can-access');
 		default:
-			return _elm_lang$html$Html$text('none');
+			return _elm_lang$html$Html$text('can-access');
 	}
 };
 var _user$project$Node$subscriptions = function (model) {
@@ -10560,10 +10555,8 @@ var _user$project$Node$accessLevelEncoder = function (level) {
 			return _elm_lang$core$Json_Encode$string('owner-only');
 		case 'CanDiscover':
 			return _elm_lang$core$Json_Encode$string('can-discover');
-		case 'CanAccess':
-			return _elm_lang$core$Json_Encode$string('can-access');
 		default:
-			return _elm_lang$core$Json_Encode$string('none');
+			return _elm_lang$core$Json_Encode$string('can-access');
 	}
 };
 var _user$project$Node$entitlementEncoder = function (ent) {
@@ -10712,7 +10705,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 						}
 					}
 				});
-		case 'CanAccess':
+		default:
 			return A2(
 				_elm_lang$html$Html$span,
 				{ctor: '[]'},
@@ -10739,20 +10732,6 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
-				});
-		default:
-			return A2(
-				_elm_lang$html$Html$span,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('nothing to be done : '),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(
-							_elm_lang$core$Basics$toString(ent.level)),
-						_1: {ctor: '[]'}
-					}
 				});
 	}
 };

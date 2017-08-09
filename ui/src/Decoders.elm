@@ -113,8 +113,7 @@ type alias Entitlement =
 
 
 type AccessLevel
-    = None
-    | OwnerOnly
+    = OwnerOnly
     | CanAccess
     | CanDiscover
 
@@ -134,9 +133,6 @@ decodeAccessLevel =
         |> Json.Decode.andThen
             (\str ->
                 case str of
-                    "none" ->
-                        Json.Decode.succeed None
-
                     "owner-only" ->
                         Json.Decode.succeed OwnerOnly
 

@@ -180,9 +180,6 @@ accessLevelEncoder level =
         Decoders.CanAccess ->
             Json.Encode.string "can-access"
 
-        Decoders.None ->
-            Json.Encode.string "none"
-
 
 amendEntitlement : Decoders.Entitlement -> Cmd Msg
 amendEntitlement ent =
@@ -270,9 +267,6 @@ drawAccessLevelSelector ent =
         Decoders.CanAccess ->
             Html.span [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("remove access") ] ]
 
-        Decoders.None ->
-            Html.span [] [ text ("nothing to be done : "), text (toString ent.level) ]
-
 
 drawAccessLevel : Decoders.AccessLevel -> Html Msg
 drawAccessLevel level =
@@ -285,9 +279,6 @@ drawAccessLevel level =
 
         Decoders.CanAccess ->
             text ("can-access")
-
-        Decoders.None ->
-            text ("none")
 
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg

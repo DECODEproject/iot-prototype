@@ -19,7 +19,7 @@ type ErrorResponse struct {
 // EntitlementRequest are made to request some access to a bit of data
 type EntitlementRequest struct {
 	Subject     string      `json:"subject" description:"path of the data e.g. data://user/email" validate:"nonzero"`
-	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'none','can-read','can-discover'" validate:"nonzero"`
+	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'owner-only', 'can-read','can-discover'" validate:"nonzero"`
 }
 
 //Entitlement is returned to encapsulate the current status of the entitlement
@@ -43,7 +43,6 @@ func (e Entitlement) IsAccessible() bool {
 type AccessLevel string
 
 const (
-	None        = AccessLevel("none")
 	OwnerOnly   = AccessLevel("owner-only")
 	CanAccess   = AccessLevel("can-access")
 	CanDiscover = AccessLevel("can-discover")
