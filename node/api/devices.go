@@ -32,8 +32,8 @@ func NewDeviceService(ctx context.Context, entitlementStore *EntitlementStore, m
 }
 
 type DeviceRequest struct {
-	Type        string `json:"type" description:"type of device"`
-	Description string `json:"description" description:"description of device"`
+	Type        string `json:"type" description:"type of device" validate:"nonzero"`
+	Description string `json:"description" description:"description of device" validate:"nonzero"`
 }
 
 type DeviceResponse struct {
