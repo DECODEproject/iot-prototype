@@ -20,7 +20,9 @@
   app.ports.unsafeDrawGraph.subscribe(function(data) {
       drawGraph(data)
   });
-
+  app.ports.clearGraph.subscribe(function(data) {
+      document.getElementById("graph").innerHTML = "";
+  });
 
   function drawGraph( data ){
 
@@ -31,8 +33,6 @@
     }
 
     MG.data_graphic({
-        //title: "Downloads",
-        //description: "This graphic shows a time-series of downloads.",
         data: prepared,
         width: 600,
         height: 250,

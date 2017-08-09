@@ -23,6 +23,9 @@ main =
 port unsafeDrawGraph : List FloatDataItem -> Cmd msg
 
 
+port clearGraph : String -> Cmd msg
+
+
 
 -- MODEL
 
@@ -70,7 +73,7 @@ update msg model =
             ( { model | filter = Nothing }, getAllMetadata )
 
         RefreshMetadataCompleted (Ok items) ->
-            ( { model | all = Just items }, Cmd.none )
+            ( { model | all = Just items }, clearGraph "only-for-the-compiler" )
 
         RefreshMetadataCompleted (Err httpError) ->
             Debug.crash (toString httpError)

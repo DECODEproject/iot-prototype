@@ -10684,6 +10684,11 @@ var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoi
 				return {value: v.value, date: v.date};
 			});
 	});
+var _user$project$Search$clearGraph = _elm_lang$core$Native_Platform.outgoingPort(
+	'clearGraph',
+	function (v) {
+		return v;
+	});
 var _user$project$Search$Model = F2(
 	function (a, b) {
 		return {all: a, filter: b};
@@ -10930,14 +10935,14 @@ var _user$project$Search$update = F2(
 							{
 								all: _elm_lang$core$Maybe$Just(_p5._0._0)
 							}),
-						_1: _elm_lang$core$Platform_Cmd$none
+						_1: _user$project$Search$clearGraph('only-for-the-compiler')
 					};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 65, column: 5},
-							end: {line: 117, column: 45}
+							start: {line: 68, column: 5},
+							end: {line: 120, column: 45}
 						},
 						_p5)(
 						_elm_lang$core$Basics$toString(_p5._0._0));
@@ -10988,8 +10993,8 @@ var _user$project$Search$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'Search',
 							{
-								start: {line: 65, column: 5},
-								end: {line: 117, column: 45}
+								start: {line: 68, column: 5},
+								end: {line: 120, column: 45}
 							},
 							_p5)(
 							_elm_lang$core$Basics$toString(_p5._1._0));
@@ -11012,8 +11017,8 @@ var _user$project$Search$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 65, column: 5},
-							end: {line: 117, column: 45}
+							start: {line: 68, column: 5},
+							end: {line: 120, column: 45}
 						},
 						_p5)(
 						_elm_lang$core$Basics$toString(_p5._0._0));
