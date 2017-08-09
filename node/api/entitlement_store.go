@@ -50,7 +50,15 @@ func (e entitlementMap) Update(uid string, f entitlementUpdater) error {
 		return ErrEntitlementNotFound
 	}
 
-	return f(&ent)
+	err := f(&ent)
+
+	if err != nil {
+		return err
+	}
+
+	e.store[uid] = ent
+
+	return nil
 }
 
 func (e entitlementMap) Get(uid string) (Entitlement, bool) {
@@ -126,7 +134,9 @@ func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
 	}
 
 	if found {
-		delete(e.store, existing.UID)
+		ent.UID = existing.UID
+		e.store[existing.UID] = ent
+		return
 	}
 
 	e.store[ent.UID] = ent

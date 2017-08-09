@@ -1,6 +1,7 @@
 package api
 
 import (
+	"log"
 	"net/http"
 
 	validator "gopkg.in/validator.v2"
@@ -144,9 +145,23 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Returns(200, "OK", []Entitlement{}).
 		Returns(404, "Not Found", nil))
 
+	// update an existing accepted entitlement
+	// TODO : when adding in authN/R ensure only the creator can modify
+	ws.Route(ws.POST("/accepted/{entitlement-uid}").
+		To(e.amendAcceptedEntitlement).
+		Param(entitlementUIDParameter).
+		Doc("amend an accepted entitlement.").
+		Metadata(restfulspec.KeyOpenAPITags, tags).
+		Reads(Entitlement{}).
+		Returns(http.StatusOK, "OK", Entitlement{}).
+		Returns(http.StatusNotFound, "Not found", nil).
+		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
+		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
+
 	// revoke an entitlement
 	// TODO : review GET
-	ws.Route(ws.GET("/accepted/{entitlement-uid}/revoke").To(e.revokeEntitlement).
+	ws.Route(ws.GET("/accepted/{entitlement-uid}/revoke").
+		To(e.revokeEntitlement).
 		Doc("revoke an entitlement").
 		Param(entitlementUIDParameter).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
@@ -266,6 +281,45 @@ func (e entitlementResource) findEntitlements(request *restful.Request, response
 	}
 
 	response.WriteEntity(list)
+
+}
+
+func (e entitlementResource) amendAcceptedEntitlement(request *restful.Request, response *restful.Response) {
+
+	req := Entitlement{}
+	if err := request.ReadEntity(&req); err != nil {
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	if errs := validator.Validate(req); errs != nil {
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: errs.Error()})
+		return
+	}
+
+	uid := request.PathParameter("entitlement-uid")
+
+	log.Println(uid, req, e.store.Accepted)
+
+	// we only allow updating the access level at the moment
+	err := e.store.Accepted.Update(uid, func(e *Entitlement) error {
+		e.AccessLevel = req.AccessLevel
+		return nil
+	})
+
+	log.Println(err, e.store.Accepted)
+
+	if err != nil {
+
+		if err == ErrEntitlementNotFound {
+			response.WriteHeader(http.StatusNotFound)
+			return
+		}
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	response.WriteEntity(req)
 
 }
 

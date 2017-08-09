@@ -54,7 +54,7 @@ func (e deviceResource) WebService() *restful.WebService {
 	ws.Route(ws.POST("/").To(e.newDevice).
 		Doc("add a new device").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Reads(DeviceRequest{Description: "a demonstration sine wave generator.", Type: "sine"}).
+		Reads(DeviceRequest{}).
 		Writes(DeviceResponse{}).
 		Returns(http.StatusOK, "OK", DeviceResponse{}).
 		Returns(http.StatusBadRequest, "error validating request", ErrorResponse{}).
