@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 	validator "gopkg.in/validator.v2"
 
 	restful "github.com/emicklei/go-restful"
@@ -88,10 +89,11 @@ func (e deviceResource) newDevice(request *restful.Request, response *restful.Re
 	// create an entitlement
 	// TODO : need to deal with devices that output multiple keys
 	// of data
+	subject := utils.BuildSubjectKey(uid)
 	e.entitlementStore.Accepted.Add(
 		Entitlement{
 			EntitlementRequest: EntitlementRequest{
-				Subject:     uid,
+				Subject:     subject.String(),
 				AccessLevel: OwnerOnly,
 			},
 			UID:    uuid.NewV4().String(),
@@ -100,7 +102,7 @@ func (e deviceResource) newDevice(request *restful.Request, response *restful.Re
 	)
 
 	// add the metadata to the catalog
-	e.metaStore.Add(Metadata{Subject: uid, Description: req.Description})
+	e.metaStore.Add(Metadata{Subject: subject.String(), Description: req.Description})
 
 	// start accepting from the sensor
 	if req.Type == "sine" {

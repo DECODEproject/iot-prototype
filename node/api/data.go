@@ -8,6 +8,7 @@ import (
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 )
 
 type dataResource struct {
@@ -86,7 +87,15 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 	}
 
 	// find entitlement for key
-	ent, found := e.store.Accepted.FindForSubject(req.Key)
+	subject, err := utils.ParseSubject(req.Key)
+
+	if err != nil {
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
+		return
+
+	}
+
+	ent, found := e.store.Accepted.FindForSubject(subject)
 
 	if !found {
 		response.WriteHeader(http.StatusForbidden)
@@ -107,9 +116,17 @@ func (e dataResource) getData(request *restful.Request, response *restful.Respon
 		return
 	}
 
+	meta, found := e.metaStore.FindBySubject(subject)
+
+	if !found {
+		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "metadata not found"})
+		return
+
+	}
+
 	resp := DataResponse{
 		Data:     data,
-		Metadata: e.metaStore.FindBySubject(req.Key),
+		Metadata: meta,
 	}
 
 	response.WriteEntity(resp)

@@ -1,6 +1,10 @@
 package api
 
-import "sync"
+import (
+	"sync"
+
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+)
 
 type Metadata struct {
 	Description string `json:"description" description:"human readable description of the data"`
@@ -25,11 +29,23 @@ func (m *MetadataStore) Add(meta Metadata) {
 	m.store[meta.Subject] = meta
 }
 
-func (m *MetadataStore) FindBySubject(subject string) Metadata {
+func (m *MetadataStore) FindBySubject(subject utils.Subject) (Metadata, bool) {
 
 	m.lock.Lock()
 	defer m.lock.Unlock()
-	return m.store[subject]
+
+	perms := subject.Perms()
+
+	// TODO : optimise optimise optimise - rewrite as a trie
+	for _, m := range m.store {
+		for _, s := range perms {
+			if m.Subject == s {
+				return m, true
+			}
+		}
+	}
+
+	return Metadata{}, false
 }
 
 func (m *MetadataStore) All() []Metadata {
@@ -39,7 +55,12 @@ func (m *MetadataStore) All() []Metadata {
 
 	list := []Metadata{}
 	for _, each := range m.store {
-		list = append(list, each)
+
+		sub, _ := utils.ParseSubject(each.Subject)
+
+		if !sub.IsRoot() {
+			list = append(list, each)
+		}
 	}
 
 	return list

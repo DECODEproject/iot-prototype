@@ -7,8 +7,10 @@ import (
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
 	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	"github.com/kazarena/json-gold/ld"
+	uuid "github.com/satori/go.uuid"
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/api"
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
 )
@@ -17,6 +19,7 @@ type device_manager struct {
 	mClient          *metadataclient.MetadataApi
 	sClient          *storageclient.DataApi
 	entitlementStore *api.EntitlementStore
+	metaStore        *api.MetadataStore
 	sensorMessages   chan sensors.SensorMessage
 	ctx              context.Context
 	locationToken    string
@@ -26,13 +29,15 @@ func NewDeviceManager(ctx context.Context,
 	locationToken string,
 	mClient *metadataclient.MetadataApi,
 	sClient *storageclient.DataApi,
-	entitlementStore *api.EntitlementStore) *device_manager {
+	entitlementStore *api.EntitlementStore,
+	metaStore *api.MetadataStore) *device_manager {
 	return &device_manager{
 		ctx:              ctx,
 		locationToken:    locationToken,
 		mClient:          mClient,
 		sClient:          sClient,
 		entitlementStore: entitlementStore,
+		metaStore:        metaStore,
 		sensorMessages:   make(chan sensors.SensorMessage),
 	}
 }
@@ -57,17 +62,17 @@ func (d *device_manager) loop() {
 			// Always write data values to the 'storage' service
 			for k, v := range message.Data {
 
-				subject := buildSubjectKey(message.SensorUID, k)
+				subject := utils.BuildSubjectKey(message.SensorUID, k)
 				log.Println(subject)
+
 				// find entitlement for subject
 				ent, found := d.entitlementStore.Accepted.FindForSubject(subject)
 
 				if found {
-
 					// if the underlying data is discoverable
 					// send to the metadata service
 					if ent.IsDiscoverable() {
-						err := d.sendDataToMetadataService(message.Schema, subject, k, v)
+						err := d.sendDataToMetadataService(message.Schema, subject.String(), k, v)
 
 						if err != nil {
 							log.Println(err.Error())
@@ -76,8 +81,32 @@ func (d *device_manager) loop() {
 
 					}
 				}
+
+				// ensure we have metadata for the key
+				// the default is to copy the subjects parents metadata.
+				// Our system is loosely bound between devices
+				// and data - we don't catalog a fixed dataset from the devices.
+				m, found := d.metaStore.FindBySubject(subject)
+
+				if !found {
+					log.Println(fmt.Sprintf("metadata not found for subject : %s or any of its parents", subject.String()))
+					continue
+				}
+
+				currentSubject := subject.String()
+				ss, _ := utils.ParseSubject(ent.Subject)
+				if ss.IsRoot() {
+
+					m.Subject = currentSubject
+					d.metaStore.Add(m)
+
+					ent.Subject = currentSubject
+					ent.UID = uuid.NewV4().String()
+					d.entitlementStore.Accepted.AppendOrReplaceOnSubject(ent)
+				}
+
 				// write to the storage service
-				err := d.sendDataToStorageService(subject, v)
+				err := d.sendDataToStorageService(subject.String(), v)
 
 				if err != nil {
 					log.Println(err.Error())
@@ -136,10 +165,6 @@ func (d *device_manager) sendDataToMetadataService(schema map[string]interface{}
 	}
 
 	return nil
-}
-
-func buildSubjectKey(sensor, key string) string {
-	return fmt.Sprintf("data://%s/%s", sensor, key)
 }
 
 func harvestTagData(parent string, v []interface{}) []string {

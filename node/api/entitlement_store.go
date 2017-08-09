@@ -3,6 +3,8 @@ package api
 import (
 	"errors"
 	"sync"
+
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 )
 
 type EntitlementStore struct {
@@ -59,16 +61,26 @@ func (e entitlementMap) Get(uid string) (Entitlement, bool) {
 	return ent, found
 }
 
-func (e entitlementMap) FindForSubject(subject string) (Entitlement, bool) {
+// FindForSubject looks for an entitlement for the data using it's subject key.
+// A subject key looks like this - data://foo/bar/xxx
+// and has the form data:// and then a folder type path of an unknown number of segments.
+// FindForSubject will look for an 'entitlement' for the exact key then traverse the path
+// up the chain until it finds an 'entitlement'.
+func (e entitlementMap) FindForSubject(subject utils.Subject) (Entitlement, bool) {
 	e.lock.RLock()
 	defer e.lock.RUnlock()
 
+	perms := subject.Perms()
+
+	// TODO : optimise optimise optimise - rewrite as a trie
 	for _, ent := range e.store {
-		// TODO : look at matching by regex etc
-		if ent.Subject == subject {
-			return ent, true
+		for _, s := range perms {
+			if ent.Subject == s {
+				return ent, true
+			}
 		}
 	}
+
 	return Entitlement{}, false
 }
 
@@ -107,7 +119,6 @@ func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
 
 	for _, e := range e.store {
 		if e.Subject == ent.Subject {
-
 			found = true
 			existing = e
 		}
@@ -118,6 +129,6 @@ func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
 		delete(e.store, existing.UID)
 	}
 
-	e.store[existing.UID] = ent
+	e.store[ent.UID] = ent
 
 }

@@ -49,7 +49,7 @@ func Serve(options Options) error {
 	metaStore := api.NewMetadataStore()
 
 	ctx := context.Background()
-	deviceManager := NewDeviceManager(ctx, token, metadataClient, storageClient, entitlementStore)
+	deviceManager := NewDeviceManager(ctx, token, metadataClient, storageClient, entitlementStore, metaStore)
 	deviceManager.Start()
 
 	// wire up the json apis
