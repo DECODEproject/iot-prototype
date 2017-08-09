@@ -81,8 +81,9 @@ func (e entitlementMap) FindForSubject(subject utils.Subject) (Entitlement, bool
 	perms := subject.Perms()
 
 	// TODO : optimise optimise optimise - rewrite as a trie
-	for _, ent := range e.store {
-		for _, s := range perms {
+	for _, s := range perms {
+		for _, ent := range e.store {
+
 			if ent.Subject == s {
 				return ent, true
 			}
@@ -135,6 +136,7 @@ func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
 
 	if found {
 		ent.UID = existing.UID
+		ent.AccessLevel = existing.AccessLevel
 		e.store[existing.UID] = ent
 		return
 	}

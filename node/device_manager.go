@@ -85,7 +85,7 @@ func (d *device_manager) loop() {
 				// ensure we have metadata for the key
 				// the default is to copy the subjects parents metadata.
 				// Our system is loosely bound between devices
-				// and data - we don't catalog a fixed dataset from the devices.
+				// and data - we don't know the fixed dataset from a specific device.
 				m, found := d.metaStore.FindBySubject(subject)
 
 				if !found {
@@ -95,6 +95,7 @@ func (d *device_manager) loop() {
 
 				currentSubject := subject.String()
 				ss, _ := utils.ParseSubject(ent.Subject)
+
 				if ss.IsRoot() {
 
 					m.Subject = currentSubject
