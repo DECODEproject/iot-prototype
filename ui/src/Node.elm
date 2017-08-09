@@ -6,6 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra exposing (..)
 import Decoders
+import Json.Encode exposing (..)
 
 
 main : Program Never Model Msg
@@ -47,6 +48,8 @@ type Msg
     | AcceptEntitlementCompleted (Result Http.Error Decoders.Entitlement)
     | DeclineEntitlement Decoders.Entitlement
     | DeclineEntitlementCompleted (Result Http.Error Decoders.Entitlement)
+    | AmendEntitlement Decoders.Entitlement
+    | AmendEntitlementCompleted (Result Http.Error Decoders.Entitlement)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -89,6 +92,15 @@ update msg model =
             ( model, getAcceptedEntitlements )
 
         DeclineEntitlementCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
+
+        AmendEntitlement ent ->
+            ( model, amendEntitlement ent )
+
+        AmendEntitlementCompleted (Ok ent) ->
+            ( model, getAcceptedEntitlements )
+
+        AmendEntitlementCompleted (Err httpError) ->
             Debug.crash (toString httpError)
 
 
@@ -146,6 +158,41 @@ declineEntitlement ent =
         Http.send DeclineEntitlementCompleted request
 
 
+entitlementEncoder : Decoders.Entitlement -> Json.Encode.Value
+entitlementEncoder ent =
+    Json.Encode.object
+        [ ( "subject", Json.Encode.string ent.subject )
+        , ( "level", accessLevelEncoder ent.level )
+        , ( "uid", Json.Encode.string ent.uid )
+        , ( "status", Json.Encode.string ent.status )
+        ]
+
+
+accessLevelEncoder : Decoders.AccessLevel -> Json.Encode.Value
+accessLevelEncoder level =
+    case level of
+        Decoders.OwnerOnly ->
+            Json.Encode.string "owner-only"
+
+        Decoders.CanDiscover ->
+            Json.Encode.string "can-discover"
+
+        Decoders.CanAccess ->
+            Json.Encode.string "can-access"
+
+        Decoders.None ->
+            Json.Encode.string "none"
+
+
+amendEntitlement : Decoders.Entitlement -> Cmd Msg
+amendEntitlement ent =
+    let
+        request =
+            Http.post (nodeURL ++ "/entitlements/accepted/" ++ ent.uid) (Http.jsonBody (entitlementEncoder ent)) Decoders.decodeEntitlement
+    in
+        Http.send AmendEntitlementCompleted request
+
+
 
 -- SUBSCRIPTIONS
 
@@ -173,16 +220,6 @@ view model =
                     , drawMetadata e model
                     ]
                 ]
-
-
-drawEntitlements : Decoders.Entitlements -> Html Msg
-drawEntitlements e =
-    div [] <| List.map (\ent -> drawEntitlement ent) e
-
-
-drawEntitlement : Decoders.Entitlement -> Html Msg
-drawEntitlement e =
-    div [] [ text (e.subject), text (":"), text (e.level) ]
 
 
 drawMetadata : Decoders.Metadata -> Model -> Html Msg
@@ -214,7 +251,43 @@ drawAccepted ent =
             text ("entitlement not set")
 
         Just e ->
-            text (e.level)
+            div [] [ drawAccessLevel (e.level), text " ", drawAccessLevelSelector (e) ]
+
+
+drawAccessLevelSelector : Decoders.Entitlement -> Html Msg
+drawAccessLevelSelector ent =
+    case ent.level of
+        Decoders.OwnerOnly ->
+            Html.span [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("make searchable") ] ]
+
+        Decoders.CanDiscover ->
+            Html.span []
+                [ a [ onClick (AmendEntitlement { ent | level = Decoders.OwnerOnly }), href "#" ] [ text ("stop making available for search") ]
+                , text (" ")
+                , a [ onClick (AmendEntitlement { ent | level = Decoders.CanAccess }), href "#" ] [ text ("allow access to values") ]
+                ]
+
+        Decoders.CanAccess ->
+            Html.span [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("remove access") ] ]
+
+        Decoders.None ->
+            Html.span [] [ text ("nothing to be done : "), text (toString ent.level) ]
+
+
+drawAccessLevel : Decoders.AccessLevel -> Html Msg
+drawAccessLevel level =
+    case level of
+        Decoders.OwnerOnly ->
+            text ("owner-only")
+
+        Decoders.CanDiscover ->
+            text ("can-discover")
+
+        Decoders.CanAccess ->
+            text ("can-access")
+
+        Decoders.None ->
+            text ("none")
 
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg
@@ -226,7 +299,7 @@ drawRequested ent =
         Just e ->
             div []
                 [ text (" requested : ")
-                , text (e.level)
+                , drawAccessLevel (e.level)
                 , a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
                 , text (" ")
                 , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]

@@ -106,19 +106,49 @@ jsValDecoder =
 
 type alias Entitlement =
     { subject : String
-    , level : String
+    , level : AccessLevel
     , uid : String
     , status : String
     }
+
+
+type AccessLevel
+    = None
+    | OwnerOnly
+    | CanAccess
+    | CanDiscover
 
 
 decodeEntitlement : Decoder Entitlement
 decodeEntitlement =
     Json.Decode.map4 Entitlement
         (Json.Decode.field "subject" Json.Decode.string)
-        (Json.Decode.field "level" Json.Decode.string)
+        (Json.Decode.field "level" decodeAccessLevel)
         (Json.Decode.field "uid" Json.Decode.string)
         (Json.Decode.field "status" Json.Decode.string)
+
+
+decodeAccessLevel : Decoder AccessLevel
+decodeAccessLevel =
+    Json.Decode.string
+        |> Json.Decode.andThen
+            (\str ->
+                case str of
+                    "none" ->
+                        Json.Decode.succeed None
+
+                    "owner-only" ->
+                        Json.Decode.succeed OwnerOnly
+
+                    "can-access" ->
+                        Json.Decode.succeed CanAccess
+
+                    "can-discover" ->
+                        Json.Decode.succeed CanDiscover
+
+                    somethingElse ->
+                        Json.Decode.fail <| "Unknown AccessLevel: " ++ somethingElse
+            )
 
 
 type alias Entitlements =

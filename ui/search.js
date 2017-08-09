@@ -10457,14 +10457,6 @@ var _user$project$Decoders$Entitlement = F4(
 	function (a, b, c, d) {
 		return {subject: a, level: b, uid: c, status: d};
 	});
-var _user$project$Decoders$decodeEntitlement = A5(
-	_elm_lang$core$Json_Decode$map4,
-	_user$project$Decoders$Entitlement,
-	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'level', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'status', _elm_lang$core$Json_Decode$string));
-var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
 var _user$project$Decoders$MetadataItem = F2(
 	function (a, b) {
 		return {subject: a, description: b};
@@ -10565,6 +10557,37 @@ var _user$project$Decoders$decodeDataResponse = A2(
 		_elm_lang$core$Json_Decode$field,
 		'data',
 		_elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeDataItem)));
+var _user$project$Decoders$CanDiscover = {ctor: 'CanDiscover'};
+var _user$project$Decoders$CanAccess = {ctor: 'CanAccess'};
+var _user$project$Decoders$OwnerOnly = {ctor: 'OwnerOnly'};
+var _user$project$Decoders$None = {ctor: 'None'};
+var _user$project$Decoders$decodeAccessLevel = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	function (str) {
+		var _p2 = str;
+		switch (_p2) {
+			case 'none':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$None);
+			case 'owner-only':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$OwnerOnly);
+			case 'can-access':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$CanAccess);
+			case 'can-discover':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$CanDiscover);
+			default:
+				return _elm_lang$core$Json_Decode$fail(
+					A2(_elm_lang$core$Basics_ops['++'], 'Unknown AccessLevel: ', _p2));
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _user$project$Decoders$decodeEntitlement = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Decoders$Entitlement,
+	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'level', _user$project$Decoders$decodeAccessLevel),
+	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'status', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
 
 var _user$project$Search$filterByTag = F2(
 	function (tag, data) {

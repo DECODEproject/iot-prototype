@@ -10391,14 +10391,6 @@ var _user$project$Decoders$Entitlement = F4(
 	function (a, b, c, d) {
 		return {subject: a, level: b, uid: c, status: d};
 	});
-var _user$project$Decoders$decodeEntitlement = A5(
-	_elm_lang$core$Json_Decode$map4,
-	_user$project$Decoders$Entitlement,
-	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'level', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'status', _elm_lang$core$Json_Decode$string));
-var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
 var _user$project$Decoders$MetadataItem = F2(
 	function (a, b) {
 		return {subject: a, description: b};
@@ -10499,6 +10491,37 @@ var _user$project$Decoders$decodeDataResponse = A2(
 		_elm_lang$core$Json_Decode$field,
 		'data',
 		_elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeDataItem)));
+var _user$project$Decoders$CanDiscover = {ctor: 'CanDiscover'};
+var _user$project$Decoders$CanAccess = {ctor: 'CanAccess'};
+var _user$project$Decoders$OwnerOnly = {ctor: 'OwnerOnly'};
+var _user$project$Decoders$None = {ctor: 'None'};
+var _user$project$Decoders$decodeAccessLevel = A2(
+	_elm_lang$core$Json_Decode$andThen,
+	function (str) {
+		var _p2 = str;
+		switch (_p2) {
+			case 'none':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$None);
+			case 'owner-only':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$OwnerOnly);
+			case 'can-access':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$CanAccess);
+			case 'can-discover':
+				return _elm_lang$core$Json_Decode$succeed(_user$project$Decoders$CanDiscover);
+			default:
+				return _elm_lang$core$Json_Decode$fail(
+					A2(_elm_lang$core$Basics_ops['++'], 'Unknown AccessLevel: ', _p2));
+		}
+	},
+	_elm_lang$core$Json_Decode$string);
+var _user$project$Decoders$decodeEntitlement = A5(
+	_elm_lang$core$Json_Decode$map4,
+	_user$project$Decoders$Entitlement,
+	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'level', _user$project$Decoders$decodeAccessLevel),
+	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'status', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoders$decodeEntitlements = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeEntitlement);
 
 var _user$project$Node$findEntitlement = F2(
 	function (key, entitlements) {
@@ -10514,45 +10537,70 @@ var _user$project$Node$findEntitlement = F2(
 				_p0._0);
 		}
 	});
-var _user$project$Node$drawAccepted = function (ent) {
-	var _p1 = ent;
-	if (_p1.ctor === 'Nothing') {
-		return _elm_lang$html$Html$text('entitlement not set');
-	} else {
-		return _elm_lang$html$Html$text(_p1._0.level);
+var _user$project$Node$drawAccessLevel = function (level) {
+	var _p1 = level;
+	switch (_p1.ctor) {
+		case 'OwnerOnly':
+			return _elm_lang$html$Html$text('owner-only');
+		case 'CanDiscover':
+			return _elm_lang$html$Html$text('can-discover');
+		case 'CanAccess':
+			return _elm_lang$html$Html$text('can-access');
+		default:
+			return _elm_lang$html$Html$text('none');
 	}
-};
-var _user$project$Node$drawEntitlement = function (e) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html$text(e.subject),
-			_1: {
-				ctor: '::',
-				_0: _elm_lang$html$Html$text(':'),
-				_1: {
-					ctor: '::',
-					_0: _elm_lang$html$Html$text(e.level),
-					_1: {ctor: '[]'}
-				}
-			}
-		});
-};
-var _user$project$Node$drawEntitlements = function (e) {
-	return A2(
-		_elm_lang$html$Html$div,
-		{ctor: '[]'},
-		A2(
-			_elm_lang$core$List$map,
-			function (ent) {
-				return _user$project$Node$drawEntitlement(ent);
-			},
-			e));
 };
 var _user$project$Node$subscriptions = function (model) {
 	return _elm_lang$core$Platform_Sub$none;
+};
+var _user$project$Node$accessLevelEncoder = function (level) {
+	var _p2 = level;
+	switch (_p2.ctor) {
+		case 'OwnerOnly':
+			return _elm_lang$core$Json_Encode$string('owner-only');
+		case 'CanDiscover':
+			return _elm_lang$core$Json_Encode$string('can-discover');
+		case 'CanAccess':
+			return _elm_lang$core$Json_Encode$string('can-access');
+		default:
+			return _elm_lang$core$Json_Encode$string('none');
+	}
+};
+var _user$project$Node$entitlementEncoder = function (ent) {
+	return _elm_lang$core$Json_Encode$object(
+		{
+			ctor: '::',
+			_0: {
+				ctor: '_Tuple2',
+				_0: 'subject',
+				_1: _elm_lang$core$Json_Encode$string(ent.subject)
+			},
+			_1: {
+				ctor: '::',
+				_0: {
+					ctor: '_Tuple2',
+					_0: 'level',
+					_1: _user$project$Node$accessLevelEncoder(ent.level)
+				},
+				_1: {
+					ctor: '::',
+					_0: {
+						ctor: '_Tuple2',
+						_0: 'uid',
+						_1: _elm_lang$core$Json_Encode$string(ent.uid)
+					},
+					_1: {
+						ctor: '::',
+						_0: {
+							ctor: '_Tuple2',
+							_0: 'status',
+							_1: _elm_lang$core$Json_Encode$string(ent.status)
+						},
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		});
 };
 var _user$project$Node$nodeURL = 'http://localhost:8080';
 var _user$project$Node$initialModel = {accepted: _elm_lang$core$Maybe$Nothing, requested: _elm_lang$core$Maybe$Nothing, metadata: _elm_lang$core$Maybe$Nothing};
@@ -10560,6 +10608,178 @@ var _user$project$Node$Model = F3(
 	function (a, b, c) {
 		return {accepted: a, requested: b, metadata: c};
 	});
+var _user$project$Node$AmendEntitlementCompleted = function (a) {
+	return {ctor: 'AmendEntitlementCompleted', _0: a};
+};
+var _user$project$Node$amendEntitlement = function (ent) {
+	var request = A3(
+		_elm_lang$http$Http$post,
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_user$project$Node$nodeURL,
+			A2(_elm_lang$core$Basics_ops['++'], '/entitlements/accepted/', ent.uid)),
+		_elm_lang$http$Http$jsonBody(
+			_user$project$Node$entitlementEncoder(ent)),
+		_user$project$Decoders$decodeEntitlement);
+	return A2(_elm_lang$http$Http$send, _user$project$Node$AmendEntitlementCompleted, request);
+};
+var _user$project$Node$AmendEntitlement = function (a) {
+	return {ctor: 'AmendEntitlement', _0: a};
+};
+var _user$project$Node$drawAccessLevelSelector = function (ent) {
+	var _p3 = ent.level;
+	switch (_p3.ctor) {
+		case 'OwnerOnly':
+			return A2(
+				_elm_lang$html$Html$span,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Node$AmendEntitlement(
+									_elm_lang$core$Native_Utils.update(
+										ent,
+										{level: _user$project$Decoders$CanDiscover}))),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$href('#'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('make searchable'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				});
+		case 'CanDiscover':
+			return A2(
+				_elm_lang$html$Html$span,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Node$AmendEntitlement(
+									_elm_lang$core$Native_Utils.update(
+										ent,
+										{level: _user$project$Decoders$OwnerOnly}))),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$href('#'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('stop making available for search'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(' '),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										_user$project$Node$AmendEntitlement(
+											_elm_lang$core$Native_Utils.update(
+												ent,
+												{level: _user$project$Decoders$CanAccess}))),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$href('#'),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('allow access to values'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				});
+		case 'CanAccess':
+			return A2(
+				_elm_lang$html$Html$span,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$a,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(
+								_user$project$Node$AmendEntitlement(
+									_elm_lang$core$Native_Utils.update(
+										ent,
+										{level: _user$project$Decoders$CanDiscover}))),
+							_1: {
+								ctor: '::',
+								_0: _elm_lang$html$Html_Attributes$href('#'),
+								_1: {ctor: '[]'}
+							}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('remove access'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {ctor: '[]'}
+				});
+		default:
+			return A2(
+				_elm_lang$html$Html$span,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('nothing to be done : '),
+					_1: {
+						ctor: '::',
+						_0: _elm_lang$html$Html$text(
+							_elm_lang$core$Basics$toString(ent.level)),
+						_1: {ctor: '[]'}
+					}
+				});
+	}
+};
+var _user$project$Node$drawAccepted = function (ent) {
+	var _p4 = ent;
+	if (_p4.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('entitlement not set');
+	} else {
+		var _p5 = _p4._0;
+		return A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _user$project$Node$drawAccessLevel(_p5.level),
+				_1: {
+					ctor: '::',
+					_0: _elm_lang$html$Html$text(' '),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Node$drawAccessLevelSelector(_p5),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	}
+};
 var _user$project$Node$DeclineEntitlementCompleted = function (a) {
 	return {ctor: 'DeclineEntitlementCompleted', _0: a};
 };
@@ -10599,11 +10819,11 @@ var _user$project$Node$AcceptEntitlement = function (a) {
 	return {ctor: 'AcceptEntitlement', _0: a};
 };
 var _user$project$Node$drawRequested = function (ent) {
-	var _p2 = ent;
-	if (_p2.ctor === 'Nothing') {
+	var _p6 = ent;
+	if (_p6.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('');
 	} else {
-		var _p3 = _p2._0;
+		var _p7 = _p6._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
@@ -10612,7 +10832,7 @@ var _user$project$Node$drawRequested = function (ent) {
 				_0: _elm_lang$html$Html$text(' requested : '),
 				_1: {
 					ctor: '::',
-					_0: _elm_lang$html$Html$text(_p3.level),
+					_0: _user$project$Node$drawAccessLevel(_p7.level),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -10620,7 +10840,7 @@ var _user$project$Node$drawRequested = function (ent) {
 							{
 								ctor: '::',
 								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Node$AcceptEntitlement(_p3)),
+									_user$project$Node$AcceptEntitlement(_p7)),
 								_1: {
 									ctor: '::',
 									_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -10642,7 +10862,7 @@ var _user$project$Node$drawRequested = function (ent) {
 									{
 										ctor: '::',
 										_0: _elm_lang$html$Html_Events$onClick(
-											_user$project$Node$DeclineEntitlement(_p3)),
+											_user$project$Node$DeclineEntitlement(_p7)),
 										_1: {
 											ctor: '::',
 											_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -10711,8 +10931,8 @@ var _user$project$Node$drawMetadata = F2(
 				e));
 	});
 var _user$project$Node$view = function (model) {
-	var _p4 = model.metadata;
-	if (_p4.ctor === 'Nothing') {
+	var _p8 = model.metadata;
+	if (_p8.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('no data exists.');
 	} else {
 		return A2(
@@ -10731,7 +10951,7 @@ var _user$project$Node$view = function (model) {
 							_0: _elm_lang$html$Html$text('Data'),
 							_1: {
 								ctor: '::',
-								_0: A2(_user$project$Node$drawMetadata, _p4._0, model),
+								_0: A2(_user$project$Node$drawMetadata, _p8._0, model),
 								_1: {ctor: '[]'}
 							}
 						}),
@@ -10762,18 +10982,18 @@ var _user$project$Node$getAcceptedEntitlements = function () {
 }();
 var _user$project$Node$update = F2(
 	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
+		var _p9 = msg;
+		switch (_p9.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
 			case 'GetAcceptedEntitlementsCompleted':
-				if (_p5._0.ctor === 'Ok') {
+				if (_p9._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								accepted: _elm_lang$core$Maybe$Just(_p5._0._0)
+								accepted: _elm_lang$core$Maybe$Just(_p9._0._0)
 							}),
 						_1: _user$project$Node$getRequestedEntitlements
 					};
@@ -10781,20 +11001,20 @@ var _user$project$Node$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 54, column: 5},
-							end: {line: 92, column: 45}
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
 						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
 				}
 			case 'GetRequestedEntitlementsCompleted':
-				if (_p5._0.ctor === 'Ok') {
+				if (_p9._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								requested: _elm_lang$core$Maybe$Just(_p5._0._0)
+								requested: _elm_lang$core$Maybe$Just(_p9._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -10802,20 +11022,20 @@ var _user$project$Node$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 54, column: 5},
-							end: {line: 92, column: 45}
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
 						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
 				}
 			case 'GetMetadataCompleted':
-				if (_p5._0.ctor === 'Ok') {
+				if (_p9._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								metadata: _elm_lang$core$Maybe$Just(_p5._0._0)
+								metadata: _elm_lang$core$Maybe$Just(_p9._0._0)
 							}),
 						_1: _user$project$Node$getAcceptedEntitlements
 					};
@@ -10823,49 +11043,68 @@ var _user$project$Node$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 54, column: 5},
-							end: {line: 92, column: 45}
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
 						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
 				}
 			case 'AcceptEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$acceptEntitlement(_p5._0)
+					_1: _user$project$Node$acceptEntitlement(_p9._0)
 				};
 			case 'AcceptEntitlementCompleted':
-				if (_p5._0.ctor === 'Ok') {
+				if (_p9._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 54, column: 5},
-							end: {line: 92, column: 45}
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
 						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
 				}
 			case 'DeclineEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$declineEntitlement(_p5._0)
+					_1: _user$project$Node$declineEntitlement(_p9._0)
 				};
-			default:
-				if (_p5._0.ctor === 'Ok') {
+			case 'DeclineEntitlementCompleted':
+				if (_p9._0.ctor === 'Ok') {
 					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 54, column: 5},
-							end: {line: 92, column: 45}
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
 						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'AmendEntitlement':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Node$amendEntitlement(_p9._0)
+				};
+			default:
+				if (_p9._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 57, column: 5},
+							end: {line: 104, column: 45}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
 				}
 		}
 	});
