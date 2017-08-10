@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"sort"
+	"strings"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
@@ -120,7 +121,8 @@ func (e deviceResource) newDevice(request *restful.Request, response *restful.Re
 		return
 	}
 
-	name := randomdata.SillyName()
+	name := strings.ToLower(randomdata.SillyName())
+
 	// add the metadata to the catalog
 	e.metaStore.Add(Metadata{Subject: subject.String(), Description: description, Name: name})
 
