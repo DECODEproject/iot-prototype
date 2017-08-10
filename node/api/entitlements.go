@@ -192,7 +192,7 @@ func (e entitlementResource) createRequest(request *restful.Request, response *r
 		Status:             Requested,
 	}
 
-	e.store.Requested.Add(entitlement)
+	e.store.Requested.AppendOrReplaceOnSubject(entitlement)
 	response.WriteEntity(entitlement)
 
 }
