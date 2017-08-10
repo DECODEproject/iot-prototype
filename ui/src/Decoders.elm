@@ -159,14 +159,16 @@ decodeEntitlements =
 type alias MetadataItem =
     { subject : String
     , description : String
+    , name : String
     }
 
 
 decodeMetadataItem : Decoder MetadataItem
 decodeMetadataItem =
-    Json.Decode.map2 MetadataItem
+    Json.Decode.map3 MetadataItem
         (Json.Decode.field "subject" Json.Decode.string)
         (Json.Decode.field "description" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)
 
 
 type alias Metadata =
@@ -176,3 +178,20 @@ type alias Metadata =
 decodeMetadata : Decoder Metadata
 decodeMetadata =
     Json.Decode.list decodeMetadataItem
+
+
+type alias Device =
+    { typez : String
+    , description : String
+    , uid : String
+    , name : String
+    }
+
+
+decodeDevice : Decoder Device
+decodeDevice =
+    Json.Decode.map4 Device
+        (Json.Decode.field "type" Json.Decode.string)
+        (Json.Decode.field "description" Json.Decode.string)
+        (Json.Decode.field "uid" Json.Decode.string)
+        (Json.Decode.field "name" Json.Decode.string)

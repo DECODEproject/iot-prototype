@@ -6,8 +6,9 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra exposing (..)
 import Json.Encode exposing (..)
+import Bootstrap.Button as Button
+import Bootstrap.Card as Card
 import Bootstrap.CDN as CDN
-import Bootstrap.Grid as Grid
 import Bootstrap.Tab as Tab
 import Bootstrap.Table as Table
 import Decoders
@@ -57,6 +58,8 @@ type Msg
     | DeclineEntitlementCompleted (Result Http.Error Decoders.Entitlement)
     | AmendEntitlement Decoders.Entitlement
     | AmendEntitlementCompleted (Result Http.Error Decoders.Entitlement)
+    | AddDevice String
+    | AddDeviceCompleted (Result Http.Error Decoders.Device)
     | TabMsg Tab.State
 
 
@@ -116,6 +119,15 @@ update msg model =
 
         TabMsg state ->
             ( { model | tabState = state }, Cmd.none )
+
+        AddDevice deviceType ->
+            ( model, addDevice deviceType )
+
+        AddDeviceCompleted (Ok ent) ->
+            ( model, getAcceptedEntitlements )
+
+        AddDeviceCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
 
 
 
@@ -204,6 +216,22 @@ amendEntitlement ent =
         Http.send AmendEntitlementCompleted request
 
 
+deviceRequestEncoder : String -> Json.Encode.Value
+deviceRequestEncoder deviceType =
+    Json.Encode.object
+        [ ( "type", Json.Encode.string deviceType )
+        ]
+
+
+addDevice : String -> Cmd Msg
+addDevice deviceType =
+    let
+        request =
+            Http.post (nodeURL ++ "/devices/") (Http.jsonBody (deviceRequestEncoder deviceType)) Decoders.decodeDevice
+    in
+        Http.send AddDeviceCompleted request
+
+
 
 -- SUBSCRIPTIONS
 
@@ -238,13 +266,40 @@ view model =
         ]
 
 
-deviceTab : Model -> Tab.Pane msg
+deviceTab : Model -> Tab.Pane Msg
 deviceTab model =
     Tab.pane [ Html.Attributes.class "mt-3" ]
         [ h4 [] [ text "Devices" ]
-        , p [] [ text "This is the page where you can add, remove devices." ]
-        , text "coming soon"
+        , p [] [ text "This is the page where you can add, list and remove devices." ]
+        , Card.group devicesGallery
+
+        --|> Card.view
         ]
+
+
+devicesGallery : List (Card.Config Msg)
+devicesGallery =
+    [ Card.config [ Card.attrs [ width 100 ] ]
+        |> Card.header [ class "text-center" ]
+            [ img [ src "/static/elm-bootstrap.svg", width 100 ] []
+            ]
+        |> Card.block []
+            [ Card.titleH5 [] [ text "Sine Fake Device" ]
+            , Card.text [] [ text "Fake device to generate the perfect sine curve." ]
+            , Card.custom <|
+                Button.button [ Button.primary, Button.attrs [ onClick (AddDevice "fake-sine") ] ] [ text "Add device" ]
+            ]
+    , Card.config [ Card.attrs [] ]
+        |> Card.header [ class "text-center" ]
+            [ img [ src "/static/elm-bootstrap.svg", width 100 ] []
+            ]
+        |> Card.block []
+            [ Card.titleH5 [] [ text "Temp Humidity Fake Device" ]
+            , Card.text [] [ text "Fake device to generate temperature and humidity values." ]
+            , Card.custom <|
+                Button.button [ Button.primary, Button.attrs [ onClick (AddDevice "fake-temp-humidity") ] ] [ text "Add device" ]
+            ]
+    ]
 
 
 entitlementsTab : Model -> Tab.Pane Msg
@@ -290,7 +345,7 @@ drawMetadataItem m model =
         requested =
             findEntitlement m.subject model.requested
     in
-        Table.tr [] [ Table.td [] [ text (m.description) ], Table.td [] [ drawAccepted (accepted) ], Table.td [] [ drawRequested (requested) ] ]
+        Table.tr [] [ Table.td [] [ text m.name, div [] [ text m.description ] ], Table.td [] [ drawAccepted (accepted) ], Table.td [] [ drawRequested (requested) ] ]
 
 
 drawEntitlementSelector : Decoders.MetadataItem -> Model -> Html Msg
@@ -336,7 +391,7 @@ drawAccessLevel : Decoders.AccessLevel -> Html Msg
 drawAccessLevel level =
     case level of
         Decoders.OwnerOnly ->
-            text ("Only the owner (you) can see the data")
+            text ("No one can see the data")
 
         Decoders.CanDiscover ->
             text ("Anyone can discover the data")
