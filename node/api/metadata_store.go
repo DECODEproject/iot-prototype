@@ -1,6 +1,7 @@
 package api
 
 import (
+	"sort"
 	"sync"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
@@ -47,7 +48,6 @@ func (m *MetadataStore) FindBySubject(subject utils.Subject) (Metadata, bool) {
 			}
 		}
 	}
-
 	return Metadata{}, false
 }
 
@@ -66,6 +66,13 @@ func (m *MetadataStore) All() []Metadata {
 		}
 	}
 
+	sort.Sort(byMetSubject(list))
 	return list
 
 }
+
+type byMetSubject []Metadata
+
+func (a byMetSubject) Len() int           { return len(a) }
+func (a byMetSubject) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byMetSubject) Less(i, j int) bool { return a[i].Subject < a[j].Subject }

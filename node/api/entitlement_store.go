@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"sort"
 	"sync"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
@@ -116,6 +117,8 @@ func (e entitlementMap) All() []Entitlement {
 		list = append(list, each)
 	}
 
+	sort.Sort(byEntSubject(list))
+
 	return list
 }
 
@@ -143,3 +146,9 @@ func (e entitlementMap) AppendOrReplaceOnSubject(ent Entitlement) {
 	e.store[ent.UID] = ent
 
 }
+
+type byEntSubject []Entitlement
+
+func (a byEntSubject) Len() int           { return len(a) }
+func (a byEntSubject) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byEntSubject) Less(i, j int) bool { return a[i].Subject < a[j].Subject }
