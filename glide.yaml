@@ -20,3 +20,4 @@ import:
 - package: github.com/cenkalti/backoff
   version: ^1.0.0
 - package: github.com/kazarena/json-gold
+- package: github.com/Pallinder/go-randomdata

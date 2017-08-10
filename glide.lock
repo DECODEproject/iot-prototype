@@ -1,16 +1,16 @@
-hash: 991de31303e05b51733a150ce016c6016052c72d69aad4d0b7bebe4c85446cff
-updated: 2017-07-11T14:29:21.844907059+01:00
+hash: b0ee6de4436a31fe9fc2d86de75470114f30203a0d0b76388c0b84667caa73d8
+updated: 2017-08-10T13:02:58.119685633+01:00
 imports:
 - name: github.com/alecthomas/binary
   version: ec810c4448fb8161fd00898b18c6f72ec661216a
 - name: github.com/cenkalti/backoff
   version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/emicklei/go-restful
-  version: cf834cf8da5b681af81bde6fa32304e6ce8eec71
+  version: 68c9750c36bb8cb433f1b88c807b4b30df4acc40
   subpackages:
   - log
 - name: github.com/emicklei/go-restful-openapi
-  version: 72557b7ecf86456a77114af5c917e83158a5f31f
+  version: 6997f63a0a95bc384f3114c75c609bb5566e08aa
 - name: github.com/garyburd/redigo
   version: 433969511232c397de61b1442f9fd49ec06ae9ba
   subpackages:
@@ -21,7 +21,7 @@ imports:
 - name: github.com/go-openapi/jsonreference
   version: 36d33bfe519efae5632669801b180bf1a245da3b
 - name: github.com/go-openapi/spec
-  version: 9cf697d99bf904e29363382a2e8c23dde5c8d377
+  version: 51363c5ae11ba8152bd9f35d17da715fbd1a1136
 - name: github.com/go-openapi/swag
   version: f3f9494671f93fcff853e3c6e9e948b3eb71e590
 - name: github.com/go-resty/resty
@@ -40,6 +40,8 @@ imports:
   - buffer
   - jlexer
   - jwriter
+- name: github.com/Pallinder/go-randomdata
+  version: 8c3362a5e6781e0d1046f1267b3c1f19b2cde334
 - name: github.com/PuerkitoBio/purell
   version: b938d81255b5473c57635324295cb0fe398c7a58
 - name: github.com/PuerkitoBio/urlesc
