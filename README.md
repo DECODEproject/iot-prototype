@@ -10,12 +10,6 @@ TODO
 Global metadata service
 Nodes holding their IOT data and entitlement data
 
-
-Bootstrap data
---------------
-
-EXPLAIN THE BOOTSTRAP DATA
-
 Walkthrough
 -----------
 
@@ -27,7 +21,7 @@ Notes
 
 - this is a prototype and not production software.
 - there is no authentication and authentication.
-- all data is held in memory - resetting the environment will reset all of the data except for a small amount of bootstrap data for the demonstration.
+- all data is held in memory - resetting the environment will reset all of the data
 
 Building
 --------
