@@ -12,6 +12,7 @@ type Metadata struct {
 	Subject     string `json:"subject" description:"description of the data"`
 	Name        string `json:"name" description:"name of the data"`
 	Path        string `json:"path" description:"path to the key of the data"`
+	CatalogUID  string `json:"-"`
 }
 
 func NewMetadataStore() *MetadataStore {

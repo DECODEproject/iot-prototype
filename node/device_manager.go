@@ -65,6 +65,9 @@ func (d *device_manager) loop() {
 				subject := utils.BuildSubjectKey(message.SensorUID, k)
 				log.Println(subject)
 
+				// set the catalogUID to a known value
+				catalogUID := "UNKNOWN"
+
 				// find entitlement for subject
 				ent, found := d.entitlementStore.Accepted.FindForSubject(subject)
 
@@ -72,7 +75,9 @@ func (d *device_manager) loop() {
 					// if the underlying data is discoverable
 					// send to the metadata service
 					if ent.IsDiscoverable() {
-						err := d.sendDataToMetadataService(message.Schema, subject.String(), k, v)
+
+						var err error
+						catalogUID, err = d.sendDataToMetadataService(message.Schema, subject.String(), k, v)
 
 						if err != nil {
 							log.Println(err.Error())
@@ -99,13 +104,21 @@ func (d *device_manager) loop() {
 				// is this the first time we have seen this data?
 				if ss.IsRoot() {
 
+					// make sure we create the correct entitlement and metadata
 					m.Subject = currentSubject
 					m.Path = k
+					m.CatalogUID = catalogUID
 					d.metaStore.Add(m)
 
 					ent.Subject = currentSubject
 					ent.UID = uuid.NewV4().String()
 					d.entitlementStore.Accepted.AppendOrReplaceOnSubject(ent)
+
+				} else {
+					// else we have seen this before
+					// ensure we capture the catalogUID
+					m.CatalogUID = catalogUID
+					d.metaStore.Add(m)
 				}
 
 				// write to the storage service
@@ -131,7 +144,7 @@ func (d *device_manager) sendDataToStorageService(subject string, value interfac
 	return nil
 }
 
-func (d *device_manager) sendDataToMetadataService(schema map[string]interface{}, subject, key string, value interface{}) error {
+func (d *device_manager) sendDataToMetadataService(schema map[string]interface{}, subject, key string, value interface{}) (string, error) {
 
 	// we first need to use the schema for the data to 'expand' out and fully qualify the metadata
 	// to do this we use the JSON-LD expand function that helpfully drops any unqualified metadata and values
@@ -151,7 +164,7 @@ func (d *device_manager) sendDataToMetadataService(schema map[string]interface{}
 	expanded, err := proc.Expand(s, options)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	// create our metadata request
@@ -161,13 +174,13 @@ func (d *device_manager) sendDataToMetadataService(schema map[string]interface{}
 		Tags:   harvestTagData("", expanded),
 	}
 
-	_, _, err = d.mClient.CatalogItem(d.locationToken, req)
+	response, _, err := d.mClient.CatalogItem(d.locationToken, req)
 
 	if err != nil {
-		return fmt.Errorf("error updating metadata : %s", err.Error())
+		return "", fmt.Errorf("error updating metadata : %s", err.Error())
 	}
 
-	return nil
+	return response.Uid, nil
 }
 
 func harvestTagData(parent string, v []interface{}) []string {
