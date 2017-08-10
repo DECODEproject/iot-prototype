@@ -10,6 +10,7 @@ type Metadata struct {
 	Description string `json:"description" description:"human readable description of the data"`
 	Subject     string `json:"subject" description:"description of the data"`
 	Name        string `json:"name" description:"name of the data"`
+	Path        string `json:"path" description:"path to the key of the data"`
 }
 
 func NewMetadataStore() *MetadataStore {

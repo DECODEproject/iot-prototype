@@ -96,9 +96,11 @@ func (d *device_manager) loop() {
 				currentSubject := subject.String()
 				ss, _ := utils.ParseSubject(ent.Subject)
 
+				// is this the first time we have seen this data?
 				if ss.IsRoot() {
 
 					m.Subject = currentSubject
+					m.Path = k
 					d.metaStore.Add(m)
 
 					ent.Subject = currentSubject
