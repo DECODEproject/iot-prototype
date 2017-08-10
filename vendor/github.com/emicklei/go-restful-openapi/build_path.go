@@ -1,7 +1,10 @@
 package restfulspec
 
 import (
+	"net/http"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 
 	restful "github.com/emicklei/go-restful"
@@ -47,9 +50,9 @@ func buildPathItem(ws *restful.WebService, r restful.Route, existingPathItem spe
 func buildOperation(ws *restful.WebService, r restful.Route, cfg Config) *spec.Operation {
 	o := spec.NewOperation(r.Operation)
 	o.Description = r.Doc
-	// take the first line to be the summary
+	// take the first line (stripping HTML tags) to be the summary
 	if lines := strings.Split(r.Doc, "\n"); len(lines) > 0 {
-		o.Summary = lines[0]
+		o.Summary = stripTags(lines[0])
 	}
 	o.Consumes = r.Consumes
 	o.Produces = r.Produces
@@ -78,7 +81,25 @@ func buildOperation(ws *restful.WebService, r restful.Route, cfg Config) *spec.O
 			o.Responses.Default = &r
 		}
 	}
+	if len(o.Responses.StatusCodeResponses) == 0 {
+		o.Responses.StatusCodeResponses[200] = spec.Response{ResponseProps: spec.ResponseProps{Description: http.StatusText(http.StatusOK)}}
+	}
 	return o
+}
+
+// stringAutoType automatically picks the correct type from an ambiguously typed
+// string. Ex. numbers become int, true/false become bool, etc.
+func stringAutoType(ambiguous string) interface{} {
+	if ambiguous == "" {
+		return nil
+	}
+	if parsedInt, err := strconv.ParseInt(ambiguous, 10, 64); err == nil {
+		return parsedInt
+	}
+	if parsedBool, err := strconv.ParseBool(ambiguous); err == nil {
+		return parsedBool
+	}
+	return ambiguous
 }
 
 func buildParameter(r restful.Route, restfulParam *restful.Parameter, cfg Config) spec.Parameter {
@@ -89,11 +110,13 @@ func buildParameter(r restful.Route, restfulParam *restful.Parameter, cfg Config
 	p.Description = param.Description
 	p.Name = param.Name
 	p.Required = param.Required
-	p.Default = param.DefaultValue
+	p.Default = stringAutoType(param.DefaultValue)
 	p.Format = param.DataFormat
+
 	if p.In == "body" && r.ReadSample != nil && p.Type == reflect.TypeOf(r.ReadSample).String() {
 		p.Schema = new(spec.Schema)
 		p.Schema.Ref = spec.MustCreateRef("#/definitions/" + p.Type)
+		p.SimpleSchema = spec.SimpleSchema{}
 	}
 	return p
 }
@@ -121,4 +144,11 @@ func buildResponse(e restful.ResponseError, cfg Config) (r spec.Response) {
 		}
 	}
 	return r
+}
+
+// stripTags takes a snippet of HTML and returns only the text content.
+// For example, `<b>&lt;Hi!&gt;</b> <br>` -> `&lt;Hi!&gt; `.
+func stripTags(html string) string {
+	re := regexp.MustCompile("<[^>]*>")
+	return re.ReplaceAllString(html, "")
 }
