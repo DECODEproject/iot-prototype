@@ -10457,16 +10457,17 @@ var _user$project$Decoders$Entitlement = F4(
 	function (a, b, c, d) {
 		return {subject: a, level: b, uid: c, status: d};
 	});
-var _user$project$Decoders$MetadataItem = F3(
-	function (a, b, c) {
-		return {subject: a, description: b, name: c};
+var _user$project$Decoders$MetadataItem = F4(
+	function (a, b, c, d) {
+		return {subject: a, description: b, name: c, path: d};
 	});
-var _user$project$Decoders$decodeMetadataItem = A4(
-	_elm_lang$core$Json_Decode$map3,
+var _user$project$Decoders$decodeMetadataItem = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Decoders$MetadataItem,
 	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'path', _elm_lang$core$Json_Decode$string));
 var _user$project$Decoders$decodeMetadata = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeMetadataItem);
 var _user$project$Decoders$Device = F4(
 	function (a, b, c, d) {
@@ -10479,6 +10480,7 @@ var _user$project$Decoders$decodeDevice = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoders$decodeDevices = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeDevice);
 var _user$project$Decoders$Requesting = {ctor: 'Requesting'};
 var _user$project$Decoders$RequestAccess = {ctor: 'RequestAccess'};
 var _user$project$Decoders$Unknown = {ctor: 'Unknown'};
@@ -11086,7 +11088,7 @@ var _user$project$Search$view = function (model) {
 									},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('refresh'),
+										_0: _elm_lang$html$Html$text('new search'),
 										_1: {ctor: '[]'}
 									}),
 								_1: {ctor: '[]'}

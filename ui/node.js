@@ -14229,16 +14229,17 @@ var _user$project$Decoders$Entitlement = F4(
 	function (a, b, c, d) {
 		return {subject: a, level: b, uid: c, status: d};
 	});
-var _user$project$Decoders$MetadataItem = F3(
-	function (a, b, c) {
-		return {subject: a, description: b, name: c};
+var _user$project$Decoders$MetadataItem = F4(
+	function (a, b, c, d) {
+		return {subject: a, description: b, name: c, path: d};
 	});
-var _user$project$Decoders$decodeMetadataItem = A4(
-	_elm_lang$core$Json_Decode$map3,
+var _user$project$Decoders$decodeMetadataItem = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Decoders$MetadataItem,
 	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string),
-	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'path', _elm_lang$core$Json_Decode$string));
 var _user$project$Decoders$decodeMetadata = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeMetadataItem);
 var _user$project$Decoders$Device = F4(
 	function (a, b, c, d) {
@@ -14251,6 +14252,7 @@ var _user$project$Decoders$decodeDevice = A5(
 	A2(_elm_lang$core$Json_Decode$field, 'description', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'name', _elm_lang$core$Json_Decode$string));
+var _user$project$Decoders$decodeDevices = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeDevice);
 var _user$project$Decoders$Requesting = {ctor: 'Requesting'};
 var _user$project$Decoders$RequestAccess = {ctor: 'RequestAccess'};
 var _user$project$Decoders$Unknown = {ctor: 'Unknown'};
@@ -14388,11 +14390,128 @@ var _user$project$Node$drawAccessLevel = function (level) {
 	var _p1 = level;
 	switch (_p1.ctor) {
 		case 'OwnerOnly':
-			return _elm_lang$html$Html$text('No one can see the data');
+			return _elm_lang$html$Html$text('No one can discover or access the data');
 		case 'CanDiscover':
-			return _elm_lang$html$Html$text('Anyone can discover the data');
+			return _elm_lang$html$Html$text('Anyone can discover the data, no one can access the data');
 		default:
-			return _elm_lang$html$Html$text('Anyone can access the data');
+			return _elm_lang$html$Html$text('Anyone can discover the data, anyone can access the data');
+	}
+};
+var _user$project$Node$deviceType = function (s) {
+	var _p2 = s;
+	switch (_p2) {
+		case 'fake-sine':
+			return 'Sine Fake Device.';
+		case 'fake-temp-humidity':
+			return 'Temp Humidity Fake Device ';
+		default:
+			return 'UNKNOWN DEVICE';
+	}
+};
+var _user$project$Node$deviceDescription = function (s) {
+	var _p3 = s;
+	switch (_p3) {
+		case 'fake-sine':
+			return 'Fake device to generate the perfect sine curve.';
+		case 'fake-temp-humidity':
+			return 'Fake device to generate temperature and humidity values.';
+		default:
+			return 'UNKNOWN DEVICE';
+	}
+};
+var _user$project$Node$drawDevices = function (d) {
+	return A2(
+		_elm_lang$core$List$map,
+		function (device) {
+			return A2(
+				_rundis$elm_bootstrap$Bootstrap_Table$tr,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_rundis$elm_bootstrap$Bootstrap_Table$td,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text(device.name),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_rundis$elm_bootstrap$Bootstrap_Table$td,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text(
+									_user$project$Node$deviceType(device.typez)),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_rundis$elm_bootstrap$Bootstrap_Table$td,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(device.description),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
+					}
+				});
+		},
+		d);
+};
+var _user$project$Node$devicesTable = function (model) {
+	var _p4 = model.devices;
+	if (_p4.ctor === 'Nothing') {
+		return _elm_lang$html$Html$text('No devices running');
+	} else {
+		return _rundis$elm_bootstrap$Bootstrap_Table$simpleTable(
+			{
+				ctor: '_Tuple2',
+				_0: _rundis$elm_bootstrap$Bootstrap_Table$simpleThead(
+					{
+						ctor: '::',
+						_0: A2(
+							_rundis$elm_bootstrap$Bootstrap_Table$th,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Device'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_rundis$elm_bootstrap$Bootstrap_Table$th,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Type'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_rundis$elm_bootstrap$Bootstrap_Table$th,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('Description'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
+						}
+					}),
+				_1: A2(
+					_rundis$elm_bootstrap$Bootstrap_Table$tbody,
+					{ctor: '[]'},
+					_user$project$Node$drawDevices(_p4._0))
+			});
 	}
 };
 var _user$project$Node$subscriptions = function (model) {
@@ -14411,8 +14530,8 @@ var _user$project$Node$deviceRequestEncoder = function (deviceType) {
 		});
 };
 var _user$project$Node$accessLevelEncoder = function (level) {
-	var _p2 = level;
-	switch (_p2.ctor) {
+	var _p5 = level;
+	switch (_p5.ctor) {
 		case 'OwnerOnly':
 			return _elm_lang$core$Json_Encode$string('owner-only');
 		case 'CanDiscover':
@@ -14458,14 +14577,24 @@ var _user$project$Node$entitlementEncoder = function (ent) {
 		});
 };
 var _user$project$Node$nodeURL = 'http://localhost:8080';
-var _user$project$Node$initialModel = {accepted: _elm_lang$core$Maybe$Nothing, requested: _elm_lang$core$Maybe$Nothing, metadata: _elm_lang$core$Maybe$Nothing, tabState: _rundis$elm_bootstrap$Bootstrap_Tab$initialState};
-var _user$project$Node$Model = F4(
-	function (a, b, c, d) {
-		return {accepted: a, requested: b, metadata: c, tabState: d};
+var _user$project$Node$initialModel = {accepted: _elm_lang$core$Maybe$Nothing, requested: _elm_lang$core$Maybe$Nothing, metadata: _elm_lang$core$Maybe$Nothing, devices: _elm_lang$core$Maybe$Nothing, tabState: _rundis$elm_bootstrap$Bootstrap_Tab$initialState};
+var _user$project$Node$Model = F5(
+	function (a, b, c, d, e) {
+		return {accepted: a, requested: b, metadata: c, devices: d, tabState: e};
 	});
 var _user$project$Node$TabMsg = function (a) {
 	return {ctor: 'TabMsg', _0: a};
 };
+var _user$project$Node$GetDevicesCompleted = function (a) {
+	return {ctor: 'GetDevicesCompleted', _0: a};
+};
+var _user$project$Node$getDevices = function () {
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/devices'),
+		_user$project$Decoders$decodeDevices);
+	return A2(_elm_lang$http$Http$send, _user$project$Node$GetDevicesCompleted, request);
+}();
 var _user$project$Node$AddDeviceCompleted = function (a) {
 	return {ctor: 'AddDeviceCompleted', _0: a};
 };
@@ -14493,7 +14622,8 @@ var _user$project$Node$devicesGallery = {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: _elm_lang$html$Html$text('Sine Fake Device'),
+					_0: _elm_lang$html$Html$text(
+						_user$project$Node$deviceDescription('fake-sine')),
 					_1: {ctor: '[]'}
 				}),
 			_1: {
@@ -14503,7 +14633,8 @@ var _user$project$Node$devicesGallery = {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Fake device to generate the perfect sine curve.'),
+						_0: _elm_lang$html$Html$text(
+							_user$project$Node$deviceDescription('fake-sine')),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -14581,7 +14712,8 @@ var _user$project$Node$devicesGallery = {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('Temp Humidity Fake Device'),
+						_0: _elm_lang$html$Html$text(
+							_user$project$Node$deviceType('fake-temp-humidity')),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -14591,7 +14723,8 @@ var _user$project$Node$devicesGallery = {
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('Fake device to generate temperature and humidity values.'),
+							_0: _elm_lang$html$Html$text(
+								_user$project$Node$deviceDescription('fake-temp-humidity')),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -14656,42 +14789,6 @@ var _user$project$Node$devicesGallery = {
 		_1: {ctor: '[]'}
 	}
 };
-var _user$project$Node$deviceTab = function (model) {
-	return A2(
-		_rundis$elm_bootstrap$Bootstrap_Tab$pane,
-		{
-			ctor: '::',
-			_0: _elm_lang$html$Html_Attributes$class('mt-3'),
-			_1: {ctor: '[]'}
-		},
-		{
-			ctor: '::',
-			_0: A2(
-				_elm_lang$html$Html$h4,
-				{ctor: '[]'},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('Devices'),
-					_1: {ctor: '[]'}
-				}),
-			_1: {
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$p,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text('This is the page where you can add, list and remove devices.'),
-						_1: {ctor: '[]'}
-					}),
-				_1: {
-					ctor: '::',
-					_0: _rundis$elm_bootstrap$Bootstrap_Card$group(_user$project$Node$devicesGallery),
-					_1: {ctor: '[]'}
-				}
-			}
-		});
-};
 var _user$project$Node$AmendEntitlementCompleted = function (a) {
 	return {ctor: 'AmendEntitlementCompleted', _0: a};
 };
@@ -14711,8 +14808,8 @@ var _user$project$Node$AmendEntitlement = function (a) {
 	return {ctor: 'AmendEntitlement', _0: a};
 };
 var _user$project$Node$drawAccessLevelSelector = function (ent) {
-	var _p3 = ent.level;
-	switch (_p3.ctor) {
+	var _p6 = ent.level;
+	switch (_p6.ctor) {
 		case 'OwnerOnly':
 			return A2(
 				_elm_lang$html$Html$div,
@@ -14736,7 +14833,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('make data searchable'),
+							_0: _elm_lang$html$Html$text('make data discoverable'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
@@ -14748,29 +14845,9 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 				{
 					ctor: '::',
 					_0: A2(
-						_elm_lang$html$Html$a,
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
 						{
-							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(
-								_user$project$Node$AmendEntitlement(
-									_elm_lang$core$Native_Utils.update(
-										ent,
-										{level: _user$project$Decoders$OwnerOnly}))),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html_Attributes$href('#'),
-								_1: {ctor: '[]'}
-							}
-						},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('stop making available for search'),
-							_1: {ctor: '[]'}
-						}),
-					_1: {
-						ctor: '::',
-						_0: _elm_lang$html$Html$text(' '),
-						_1: {
 							ctor: '::',
 							_0: A2(
 								_elm_lang$html$Html$a,
@@ -14780,7 +14857,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 										_user$project$Node$AmendEntitlement(
 											_elm_lang$core$Native_Utils.update(
 												ent,
-												{level: _user$project$Decoders$CanAccess}))),
+												{level: _user$project$Decoders$OwnerOnly}))),
 									_1: {
 										ctor: '::',
 										_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -14789,11 +14866,41 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('make data accessible'),
+									_0: _elm_lang$html$Html$text('stop making data discoverable'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
-						}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$a,
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html_Events$onClick(
+											_user$project$Node$AmendEntitlement(
+												_elm_lang$core$Native_Utils.update(
+													ent,
+													{level: _user$project$Decoders$CanAccess}))),
+										_1: {
+											ctor: '::',
+											_0: _elm_lang$html$Html_Attributes$href('#'),
+											_1: {ctor: '[]'}
+										}
+									},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text('make data accessible'),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}),
+						_1: {ctor: '[]'}
 					}
 				});
 		default:
@@ -14819,7 +14926,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('remove access'),
+							_0: _elm_lang$html$Html$text('stop making data accessible'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
@@ -14827,23 +14934,23 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 	}
 };
 var _user$project$Node$drawAccepted = function (ent) {
-	var _p4 = ent;
-	if (_p4.ctor === 'Nothing') {
+	var _p7 = ent;
+	if (_p7.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('entitlement not set');
 	} else {
-		var _p5 = _p4._0;
+		var _p8 = _p7._0;
 		return A2(
 			_elm_lang$html$Html$span,
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: _user$project$Node$drawAccessLevel(_p5.level),
+				_0: _user$project$Node$drawAccessLevel(_p8.level),
 				_1: {
 					ctor: '::',
 					_0: _elm_lang$html$Html$text(' '),
 					_1: {
 						ctor: '::',
-						_0: _user$project$Node$drawAccessLevelSelector(_p5),
+						_0: _user$project$Node$drawAccessLevelSelector(_p8),
 						_1: {ctor: '[]'}
 					}
 				}
@@ -14889,17 +14996,17 @@ var _user$project$Node$AcceptEntitlement = function (a) {
 	return {ctor: 'AcceptEntitlement', _0: a};
 };
 var _user$project$Node$drawRequested = function (ent) {
-	var _p6 = ent;
-	if (_p6.ctor === 'Nothing') {
+	var _p9 = ent;
+	if (_p9.ctor === 'Nothing') {
 		return _elm_lang$html$Html$text('');
 	} else {
-		var _p7 = _p6._0;
+		var _p10 = _p9._0;
 		return A2(
 			_elm_lang$html$Html$div,
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: _user$project$Node$drawAccessLevel(_p7.level),
+				_0: _user$project$Node$drawAccessLevel(_p10.level),
 				_1: {
 					ctor: '::',
 					_0: A2(
@@ -14908,33 +15015,16 @@ var _user$project$Node$drawRequested = function (ent) {
 						{
 							ctor: '::',
 							_0: A2(
-								_elm_lang$html$Html$a,
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
 								{
-									ctor: '::',
-									_0: _elm_lang$html$Html_Events$onClick(
-										_user$project$Node$AcceptEntitlement(_p7)),
-									_1: {
-										ctor: '::',
-										_0: _elm_lang$html$Html_Attributes$href('#'),
-										_1: {ctor: '[]'}
-									}
-								},
-								{
-									ctor: '::',
-									_0: _elm_lang$html$Html$text('accept'),
-									_1: {ctor: '[]'}
-								}),
-							_1: {
-								ctor: '::',
-								_0: _elm_lang$html$Html$text(' '),
-								_1: {
 									ctor: '::',
 									_0: A2(
 										_elm_lang$html$Html$a,
 										{
 											ctor: '::',
 											_0: _elm_lang$html$Html_Events$onClick(
-												_user$project$Node$DeclineEntitlement(_p7)),
+												_user$project$Node$AcceptEntitlement(_p10)),
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html_Attributes$href('#'),
@@ -14943,11 +15033,38 @@ var _user$project$Node$drawRequested = function (ent) {
 										},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('decline'),
+											_0: _elm_lang$html$Html$text('accept'),
 											_1: {ctor: '[]'}
 										}),
 									_1: {ctor: '[]'}
-								}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$a,
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html_Events$onClick(
+													_user$project$Node$DeclineEntitlement(_p10)),
+												_1: {
+													ctor: '::',
+													_0: _elm_lang$html$Html_Attributes$href('#'),
+													_1: {ctor: '[]'}
+												}
+											},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('decline'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
 							}
 						}),
 					_1: {ctor: '[]'}
@@ -14977,10 +15094,21 @@ var _user$project$Node$drawMetadataItem = F2(
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text(m.description),
+									_0: _elm_lang$html$Html$text(m.path),
 									_1: {ctor: '[]'}
 								}),
-							_1: {ctor: '[]'}
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: _elm_lang$html$Html$text(m.description),
+										_1: {ctor: '[]'}
+									}),
+								_1: {ctor: '[]'}
+							}
 						}
 					}),
 				_1: {
@@ -15009,8 +15137,8 @@ var _user$project$Node$drawMetadataItem = F2(
 			});
 	});
 var _user$project$Node$drawMetadata = function (model) {
-	var _p8 = model.metadata;
-	if (_p8.ctor === 'Nothing') {
+	var _p11 = model.metadata;
+	if (_p11.ctor === 'Nothing') {
 		return A2(
 			_elm_lang$core$List$map,
 			function (m) {
@@ -15024,7 +15152,7 @@ var _user$project$Node$drawMetadata = function (model) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: _elm_lang$html$Html$text('no data exists.'),
+								_0: _elm_lang$html$Html$text(''),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
@@ -15041,7 +15169,7 @@ var _user$project$Node$drawMetadata = function (model) {
 			function (m) {
 				return A2(_user$project$Node$drawMetadataItem, m, model);
 			},
-			_p8._0);
+			_p11._0);
 	}
 };
 var _user$project$Node$entitlementsTable = function (model) {
@@ -15140,44 +15268,63 @@ var _user$project$Node$getMetadata = function () {
 		_user$project$Decoders$decodeMetadata);
 	return A2(_elm_lang$http$Http$send, _user$project$Node$GetMetadataCompleted, request);
 }();
-var _user$project$Node$init = {ctor: '_Tuple2', _0: _user$project$Node$initialModel, _1: _user$project$Node$getMetadata};
+var _user$project$Node$init = {
+	ctor: '_Tuple2',
+	_0: _user$project$Node$initialModel,
+	_1: _elm_lang$core$Platform_Cmd$batch(
+		{
+			ctor: '::',
+			_0: _user$project$Node$getRequestedEntitlements,
+			_1: {
+				ctor: '::',
+				_0: _user$project$Node$getAcceptedEntitlements,
+				_1: {
+					ctor: '::',
+					_0: _user$project$Node$getMetadata,
+					_1: {
+						ctor: '::',
+						_0: _user$project$Node$getDevices,
+						_1: {ctor: '[]'}
+					}
+				}
+			}
+		})
+};
 var _user$project$Node$update = F2(
 	function (msg, model) {
-		var _p9 = msg;
-		switch (_p9.ctor) {
+		var _p12 = msg;
+		switch (_p12.ctor) {
 			case 'NoOp':
 				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'Refresh':
-				return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getMetadata};
-			case 'GetAcceptedEntitlementsCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								accepted: _elm_lang$core$Maybe$Just(_p9._0._0)
-							}),
-						_1: _user$project$Node$getRequestedEntitlements
-					};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
+			case 'RefreshEntitlements':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _elm_lang$core$Platform_Cmd$batch(
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'GetRequestedEntitlementsCompleted':
-				if (_p9._0.ctor === 'Ok') {
+							ctor: '::',
+							_0: _user$project$Node$getRequestedEntitlements,
+							_1: {
+								ctor: '::',
+								_0: _user$project$Node$getAcceptedEntitlements,
+								_1: {
+									ctor: '::',
+									_0: _user$project$Node$getMetadata,
+									_1: {ctor: '[]'}
+								}
+							}
+						})
+				};
+			case 'RefreshDevices':
+				return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getDevices};
+			case 'GetAcceptedEntitlementsCompleted':
+				if (_p12._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								requested: _elm_lang$core$Maybe$Just(_p9._0._0)
+								accepted: _elm_lang$core$Maybe$Just(_p12._0._0)
 							}),
 						_1: _elm_lang$core$Platform_Cmd$none
 					};
@@ -15185,120 +15332,300 @@ var _user$project$Node$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
-			case 'GetMetadataCompleted':
-				if (_p9._0.ctor === 'Ok') {
+			case 'GetRequestedEntitlementsCompleted':
+				if (_p12._0.ctor === 'Ok') {
 					return {
 						ctor: '_Tuple2',
 						_0: _elm_lang$core$Native_Utils.update(
 							model,
 							{
-								metadata: _elm_lang$core$Maybe$Just(_p9._0._0)
+								requested: _elm_lang$core$Maybe$Just(_p12._0._0)
 							}),
-						_1: _user$project$Node$getAcceptedEntitlements
+						_1: _elm_lang$core$Platform_Cmd$none
 					};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
+				}
+			case 'GetMetadataCompleted':
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								metadata: _elm_lang$core$Maybe$Just(_p12._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
+						},
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
 			case 'AcceptEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$acceptEntitlement(_p9._0)
+					_1: _user$project$Node$acceptEntitlement(_p12._0)
 				};
 			case 'AcceptEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _elm_lang$core$Platform_Cmd$batch(
+							{
+								ctor: '::',
+								_0: _user$project$Node$getRequestedEntitlements,
+								_1: {
+									ctor: '::',
+									_0: _user$project$Node$getAcceptedEntitlements,
+									_1: {ctor: '[]'}
+								}
+							})
+					};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
 			case 'DeclineEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$declineEntitlement(_p9._0)
+					_1: _user$project$Node$declineEntitlement(_p12._0)
 				};
 			case 'DeclineEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _elm_lang$core$Platform_Cmd$batch(
+							{
+								ctor: '::',
+								_0: _user$project$Node$getRequestedEntitlements,
+								_1: {
+									ctor: '::',
+									_0: _user$project$Node$getAcceptedEntitlements,
+									_1: {ctor: '[]'}
+								}
+							})
+					};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
 			case 'AmendEntitlement':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$amendEntitlement(_p9._0)
+					_1: _user$project$Node$amendEntitlement(_p12._0)
 				};
 			case 'AmendEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: model,
+						_1: _elm_lang$core$Platform_Cmd$batch(
+							{
+								ctor: '::',
+								_0: _user$project$Node$getRequestedEntitlements,
+								_1: {
+									ctor: '::',
+									_0: _user$project$Node$getAcceptedEntitlements,
+									_1: {ctor: '[]'}
+								}
+							})
+					};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
 			case 'TabMsg':
 				return {
 					ctor: '_Tuple2',
 					_0: _elm_lang$core$Native_Utils.update(
 						model,
-						{tabState: _p9._0}),
+						{tabState: _p12._0}),
 					_1: _elm_lang$core$Platform_Cmd$none
 				};
 			case 'AddDevice':
 				return {
 					ctor: '_Tuple2',
 					_0: model,
-					_1: _user$project$Node$addDevice(_p9._0)
+					_1: _user$project$Node$addDevice(_p12._0)
 				};
-			default:
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+			case 'AddDeviceCompleted':
+				if (_p12._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getDevices};
 				} else {
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Node',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 130, column: 45}
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
 						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
+				}
+			default:
+				if (_p12._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								devices: _elm_lang$core$Maybe$Just(_p12._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 72, column: 5},
+							end: {line: 143, column: 45}
+						},
+						_p12)(
+						_elm_lang$core$Basics$toString(_p12._0._0));
 				}
 		}
 	});
-var _user$project$Node$Refresh = {ctor: 'Refresh'};
+var _user$project$Node$RefreshDevices = {ctor: 'RefreshDevices'};
+var _user$project$Node$deviceTab = function (model) {
+	return A2(
+		_rundis$elm_bootstrap$Bootstrap_Tab$pane,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('mt-3'),
+			_1: {ctor: '[]'}
+		},
+		{
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$h4,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('Devices'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {
+				ctor: '::',
+				_0: A2(
+					_elm_lang$html$Html$p,
+					{ctor: '[]'},
+					{
+						ctor: '::',
+						_0: _elm_lang$html$Html$text('This is the page where you can configure your devices.'),
+						_1: {ctor: '[]'}
+					}),
+				_1: {
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$h5,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('Configured devices'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$button,
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html_Events$onClick(_user$project$Node$RefreshDevices),
+								_1: {ctor: '[]'}
+							},
+							{
+								ctor: '::',
+								_0: _elm_lang$html$Html$text('Refresh'),
+								_1: {ctor: '[]'}
+							}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _user$project$Node$devicesTable(model),
+									_1: {ctor: '[]'}
+								}),
+							_1: {
+								ctor: '::',
+								_0: A2(
+									_elm_lang$html$Html$div,
+									{ctor: '[]'},
+									{
+										ctor: '::',
+										_0: A2(
+											_elm_lang$html$Html$h5,
+											{ctor: '[]'},
+											{
+												ctor: '::',
+												_0: _elm_lang$html$Html$text('New device'),
+												_1: {ctor: '[]'}
+											}),
+										_1: {ctor: '[]'}
+									}),
+								_1: {
+									ctor: '::',
+									_0: _rundis$elm_bootstrap$Bootstrap_Card$group(_user$project$Node$devicesGallery),
+									_1: {ctor: '[]'}
+								}
+							}
+						}
+					}
+				}
+			}
+		});
+};
+var _user$project$Node$RefreshEntitlements = {ctor: 'RefreshEntitlements'};
 var _user$project$Node$entitlementsTab = function (model) {
 	return A2(
 		_rundis$elm_bootstrap$Bootstrap_Tab$pane,
@@ -15333,7 +15660,7 @@ var _user$project$Node$entitlementsTab = function (model) {
 						_elm_lang$html$Html$button,
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html_Events$onClick(_user$project$Node$Refresh),
+							_0: _elm_lang$html$Html_Events$onClick(_user$project$Node$RefreshEntitlements),
 							_1: {ctor: '[]'}
 						},
 						{

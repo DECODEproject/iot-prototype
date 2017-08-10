@@ -160,15 +160,17 @@ type alias MetadataItem =
     { subject : String
     , description : String
     , name : String
+    , path : String
     }
 
 
 decodeMetadataItem : Decoder MetadataItem
 decodeMetadataItem =
-    Json.Decode.map3 MetadataItem
+    Json.Decode.map4 MetadataItem
         (Json.Decode.field "subject" Json.Decode.string)
         (Json.Decode.field "description" Json.Decode.string)
         (Json.Decode.field "name" Json.Decode.string)
+        (Json.Decode.field "path" Json.Decode.string)
 
 
 type alias Metadata =
@@ -195,3 +197,12 @@ decodeDevice =
         (Json.Decode.field "description" Json.Decode.string)
         (Json.Decode.field "uid" Json.Decode.string)
         (Json.Decode.field "name" Json.Decode.string)
+
+
+type alias Devices =
+    List Device
+
+
+decodeDevices : Decoder Devices
+decodeDevices =
+    Json.Decode.list decodeDevice

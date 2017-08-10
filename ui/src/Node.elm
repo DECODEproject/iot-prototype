@@ -28,6 +28,7 @@ type alias Model =
     { accepted : Maybe Decoders.Entitlements
     , requested : Maybe Decoders.Entitlements
     , metadata : Maybe Decoders.Metadata
+    , devices : Maybe Decoders.Devices
     , tabState : Tab.State
     }
 
@@ -37,18 +38,20 @@ initialModel =
     { accepted = Nothing
     , requested = Nothing
     , metadata = Nothing
+    , devices = Nothing
     , tabState = Tab.initialState
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, getMetadata )
+    ( initialModel, Cmd.batch [ getRequestedEntitlements, getAcceptedEntitlements, getMetadata, getDevices ] )
 
 
 type Msg
     = NoOp
-    | Refresh
+    | RefreshEntitlements
+    | RefreshDevices
     | GetMetadataCompleted (Result Http.Error Decoders.Metadata)
     | GetAcceptedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
     | GetRequestedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
@@ -60,6 +63,7 @@ type Msg
     | AmendEntitlementCompleted (Result Http.Error Decoders.Entitlement)
     | AddDevice String
     | AddDeviceCompleted (Result Http.Error Decoders.Device)
+    | GetDevicesCompleted (Result Http.Error Decoders.Devices)
     | TabMsg Tab.State
 
 
@@ -69,11 +73,14 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        Refresh ->
-            ( model, getMetadata )
+        RefreshEntitlements ->
+            ( model, Cmd.batch [ getRequestedEntitlements, getAcceptedEntitlements, getMetadata ] )
+
+        RefreshDevices ->
+            ( model, getDevices )
 
         GetAcceptedEntitlementsCompleted (Ok items) ->
-            ( { model | accepted = Just items }, getRequestedEntitlements )
+            ( { model | accepted = Just items }, Cmd.none )
 
         GetAcceptedEntitlementsCompleted (Err httpError) ->
             Debug.crash (toString httpError)
@@ -85,7 +92,7 @@ update msg model =
             Debug.crash (toString httpError)
 
         GetMetadataCompleted (Ok items) ->
-            ( { model | metadata = Just items }, getAcceptedEntitlements )
+            ( { model | metadata = Just items }, Cmd.none )
 
         GetMetadataCompleted (Err httpError) ->
             Debug.crash (toString httpError)
@@ -94,7 +101,7 @@ update msg model =
             ( model, acceptEntitlement ent )
 
         AcceptEntitlementCompleted (Ok ent) ->
-            ( model, getAcceptedEntitlements )
+            ( model, Cmd.batch [ getRequestedEntitlements, getAcceptedEntitlements ] )
 
         AcceptEntitlementCompleted (Err httpError) ->
             Debug.crash (toString httpError)
@@ -103,7 +110,7 @@ update msg model =
             ( model, declineEntitlement ent )
 
         DeclineEntitlementCompleted (Ok ent) ->
-            ( model, getAcceptedEntitlements )
+            ( model, Cmd.batch [ getRequestedEntitlements, getAcceptedEntitlements ] )
 
         DeclineEntitlementCompleted (Err httpError) ->
             Debug.crash (toString httpError)
@@ -112,7 +119,7 @@ update msg model =
             ( model, amendEntitlement ent )
 
         AmendEntitlementCompleted (Ok ent) ->
-            ( model, getAcceptedEntitlements )
+            ( model, Cmd.batch [ getRequestedEntitlements, getAcceptedEntitlements ] )
 
         AmendEntitlementCompleted (Err httpError) ->
             Debug.crash (toString httpError)
@@ -124,9 +131,15 @@ update msg model =
             ( model, addDevice deviceType )
 
         AddDeviceCompleted (Ok ent) ->
-            ( model, getAcceptedEntitlements )
+            ( model, getDevices )
 
         AddDeviceCompleted (Err httpError) ->
+            Debug.crash (toString httpError)
+
+        GetDevicesCompleted (Ok d) ->
+            ( { model | devices = Just d }, Cmd.none )
+
+        GetDevicesCompleted (Err httpError) ->
             Debug.crash (toString httpError)
 
 
@@ -232,6 +245,15 @@ addDevice deviceType =
         Http.send AddDeviceCompleted request
 
 
+getDevices : Cmd Msg
+getDevices =
+    let
+        request =
+            Http.get (nodeURL ++ "/devices") Decoders.decodeDevices
+    in
+        Http.send GetDevicesCompleted request
+
+
 
 -- SUBSCRIPTIONS
 
@@ -270,10 +292,12 @@ deviceTab : Model -> Tab.Pane Msg
 deviceTab model =
     Tab.pane [ Html.Attributes.class "mt-3" ]
         [ h4 [] [ text "Devices" ]
-        , p [] [ text "This is the page where you can add, list and remove devices." ]
+        , p [] [ text "This is the page where you can configure your devices." ]
+        , div [] [ h5 [] [ text "Configured devices" ] ]
+        , button [ onClick RefreshDevices ] [ text "Refresh" ]
+        , div [] [ devicesTable model ]
+        , div [] [ h5 [] [ text "New device" ] ]
         , Card.group devicesGallery
-
-        --|> Card.view
         ]
 
 
@@ -284,8 +308,8 @@ devicesGallery =
             [ img [ src "/static/elm-bootstrap.svg", width 100 ] []
             ]
         |> Card.block []
-            [ Card.titleH5 [] [ text "Sine Fake Device" ]
-            , Card.text [] [ text "Fake device to generate the perfect sine curve." ]
+            [ Card.titleH5 [] [ text (deviceDescription "fake-sine") ]
+            , Card.text [] [ text (deviceDescription "fake-sine") ]
             , Card.custom <|
                 Button.button [ Button.primary, Button.attrs [ onClick (AddDevice "fake-sine") ] ] [ text "Add device" ]
             ]
@@ -294,12 +318,68 @@ devicesGallery =
             [ img [ src "/static/elm-bootstrap.svg", width 100 ] []
             ]
         |> Card.block []
-            [ Card.titleH5 [] [ text "Temp Humidity Fake Device" ]
-            , Card.text [] [ text "Fake device to generate temperature and humidity values." ]
+            [ Card.titleH5 [] [ text (deviceType "fake-temp-humidity") ]
+            , Card.text [] [ text (deviceDescription "fake-temp-humidity") ]
             , Card.custom <|
                 Button.button [ Button.primary, Button.attrs [ onClick (AddDevice "fake-temp-humidity") ] ] [ text "Add device" ]
             ]
     ]
+
+
+devicesTable : Model -> Html Msg
+devicesTable model =
+    case model.devices of
+        Nothing ->
+            text "No devices running"
+
+        Just d ->
+            Table.simpleTable
+                ( Table.simpleThead
+                    [ Table.th [] [ text "Device" ]
+                    , Table.th [] [ text "Type" ]
+                    , Table.th [] [ text "Description" ]
+                    ]
+                , Table.tbody [] <| drawDevices d
+                )
+
+
+drawDevices : Decoders.Devices -> List (Table.Row msg)
+drawDevices d =
+    List.map
+        (\device ->
+            Table.tr []
+                [ Table.td [] [ text device.name ]
+                , Table.td [] [ text (deviceType device.typez) ]
+                , Table.td [] [ text device.description ]
+                ]
+        )
+        d
+
+
+deviceDescription : String -> String
+deviceDescription s =
+    case s of
+        "fake-sine" ->
+            "Fake device to generate the perfect sine curve."
+
+        "fake-temp-humidity" ->
+            "Fake device to generate temperature and humidity values."
+
+        _ ->
+            "UNKNOWN DEVICE"
+
+
+deviceType : String -> String
+deviceType s =
+    case s of
+        "fake-sine" ->
+            "Sine Fake Device."
+
+        "fake-temp-humidity" ->
+            "Temp Humidity Fake Device "
+
+        _ ->
+            "UNKNOWN DEVICE"
 
 
 entitlementsTab : Model -> Tab.Pane Msg
@@ -307,7 +387,7 @@ entitlementsTab model =
     Tab.pane [ Html.Attributes.class "mt-3" ]
         [ h4 [] [ text "Entitlements" ]
         , p [] [ text "This page is where you can edit, view, accept and reject entitlements to your data." ]
-        , button [ onClick Refresh ] [ text "Refresh" ]
+        , button [ onClick RefreshEntitlements ] [ text "Refresh" ]
         , div [] []
         , entitlementsTable model
         ]
@@ -330,7 +410,7 @@ drawMetadata model =
     case model.metadata of
         Nothing ->
             -- there must be a better way than this!
-            List.map (\m -> Table.tr [] [ Table.td [] [ text ("no data exists.") ] ]) [ 1 ]
+            List.map (\m -> Table.tr [] [ Table.td [] [ text ("") ] ]) [ 1 ]
 
         Just e ->
             List.map (\m -> drawMetadataItem m model) e
@@ -345,7 +425,7 @@ drawMetadataItem m model =
         requested =
             findEntitlement m.subject model.requested
     in
-        Table.tr [] [ Table.td [] [ text m.name, div [] [ text m.description ] ], Table.td [] [ drawAccepted (accepted) ], Table.td [] [ drawRequested (requested) ] ]
+        Table.tr [] [ Table.td [] [ text m.name, div [] [ text m.path ], div [] [ text m.description ] ], Table.td [] [ drawAccepted (accepted) ], Table.td [] [ drawRequested (requested) ] ]
 
 
 drawEntitlementSelector : Decoders.MetadataItem -> Model -> Html Msg
@@ -374,30 +454,29 @@ drawAccessLevelSelector : Decoders.Entitlement -> Html Msg
 drawAccessLevelSelector ent =
     case ent.level of
         Decoders.OwnerOnly ->
-            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("make data searchable") ] ]
+            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("make data discoverable") ] ]
 
         Decoders.CanDiscover ->
             div []
-                [ a [ onClick (AmendEntitlement { ent | level = Decoders.OwnerOnly }), href "#" ] [ text ("stop making available for search") ]
-                , text (" ")
-                , a [ onClick (AmendEntitlement { ent | level = Decoders.CanAccess }), href "#" ] [ text ("make data accessible") ]
+                [ div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.OwnerOnly }), href "#" ] [ text ("stop making data discoverable") ] ]
+                , div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanAccess }), href "#" ] [ text ("make data accessible") ] ]
                 ]
 
         Decoders.CanAccess ->
-            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("remove access") ] ]
+            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("stop making data accessible") ] ]
 
 
 drawAccessLevel : Decoders.AccessLevel -> Html Msg
 drawAccessLevel level =
     case level of
         Decoders.OwnerOnly ->
-            text ("No one can see the data")
+            text ("No one can discover or access the data")
 
         Decoders.CanDiscover ->
-            text ("Anyone can discover the data")
+            text ("Anyone can discover the data, no one can access the data")
 
         Decoders.CanAccess ->
-            text ("Anyone can access the data")
+            text ("Anyone can discover the data, anyone can access the data")
 
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg
@@ -410,9 +489,8 @@ drawRequested ent =
             div []
                 [ drawAccessLevel (e.level)
                 , div []
-                    [ a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
-                    , text (" ")
-                    , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
+                    [ div [] [ a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ] ]
+                    , div [] [ a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ] ]
                     ]
                 ]
 

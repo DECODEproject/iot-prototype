@@ -228,7 +228,7 @@ view model =
             div []
                 [ div [] [ text "Metadata" ]
                 , drawFiltered model.filter d
-                , div [] [ button [ onClick RefreshMetadata ] [ text "refresh" ] ]
+                , div [] [ button [ onClick RefreshMetadata ] [ text "new search" ] ]
                 ]
 
 
