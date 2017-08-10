@@ -13333,11 +13333,11 @@ var _user$project$Node$drawAccessLevel = function (level) {
 	var _p1 = level;
 	switch (_p1.ctor) {
 		case 'OwnerOnly':
-			return _elm_lang$html$Html$text('owner-only');
+			return _elm_lang$html$Html$text('Only the owner (you) can see the data');
 		case 'CanDiscover':
-			return _elm_lang$html$Html$text('can-discover');
+			return _elm_lang$html$Html$text('Anyone can discover the data');
 		default:
-			return _elm_lang$html$Html$text('can-access');
+			return _elm_lang$html$Html$text('Anyone can access the data');
 	}
 };
 var _user$project$Node$deviceTab = function (model) {
@@ -13365,7 +13365,7 @@ var _user$project$Node$deviceTab = function (model) {
 					{ctor: '[]'},
 					{
 						ctor: '::',
-						_0: _elm_lang$html$Html$text('add, remove devices.'),
+						_0: _elm_lang$html$Html$text('This is the page where you can add, remove devices.'),
 						_1: {ctor: '[]'}
 					}),
 				_1: {
@@ -13458,7 +13458,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 	switch (_p3.ctor) {
 		case 'OwnerOnly':
 			return A2(
-				_elm_lang$html$Html$span,
+				_elm_lang$html$Html$div,
 				{ctor: '[]'},
 				{
 					ctor: '::',
@@ -13479,14 +13479,14 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 						},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text('make searchable'),
+							_0: _elm_lang$html$Html$text('make data searchable'),
 							_1: {ctor: '[]'}
 						}),
 					_1: {ctor: '[]'}
 				});
 		case 'CanDiscover':
 			return A2(
-				_elm_lang$html$Html$span,
+				_elm_lang$html$Html$div,
 				{ctor: '[]'},
 				{
 					ctor: '::',
@@ -13532,7 +13532,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 								},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('allow access to values'),
+									_0: _elm_lang$html$Html$text('make data accessible'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {ctor: '[]'}
@@ -13541,7 +13541,7 @@ var _user$project$Node$drawAccessLevelSelector = function (ent) {
 				});
 		default:
 			return A2(
-				_elm_lang$html$Html$span,
+				_elm_lang$html$Html$div,
 				{ctor: '[]'},
 				{
 					ctor: '::',
@@ -13638,59 +13638,62 @@ var _user$project$Node$drawRequested = function (ent) {
 	} else {
 		var _p7 = _p6._0;
 		return A2(
-			_elm_lang$html$Html$span,
+			_elm_lang$html$Html$div,
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text(' requested : '),
+				_0: _user$project$Node$drawAccessLevel(_p7.level),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Node$drawAccessLevel(_p7.level),
-					_1: {
-						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$a,
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html_Events$onClick(
-									_user$project$Node$AcceptEntitlement(_p7)),
-								_1: {
-									ctor: '::',
-									_0: _elm_lang$html$Html_Attributes$href('#'),
-									_1: {ctor: '[]'}
-								}
-							},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('accept'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(' '),
+							_0: A2(
+								_elm_lang$html$Html$a,
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Events$onClick(
+										_user$project$Node$AcceptEntitlement(_p7)),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$href('#'),
+										_1: {ctor: '[]'}
+									}
+								},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text('accept'),
+									_1: {ctor: '[]'}
+								}),
 							_1: {
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$a,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(
-											_user$project$Node$DeclineEntitlement(_p7)),
-										_1: {
+								_0: _elm_lang$html$Html$text(' '),
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$a,
+										{
 											ctor: '::',
-											_0: _elm_lang$html$Html_Attributes$href('#'),
+											_0: _elm_lang$html$Html_Events$onClick(
+												_user$project$Node$DeclineEntitlement(_p7)),
+											_1: {
+												ctor: '::',
+												_0: _elm_lang$html$Html_Attributes$href('#'),
+												_1: {ctor: '[]'}
+											}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('decline'),
 											_1: {ctor: '[]'}
-										}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('decline'),
-										_1: {ctor: '[]'}
-									}),
-								_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
-						}
-					}
+						}),
+					_1: {ctor: '[]'}
 				}
 			});
 	}
@@ -13818,6 +13821,197 @@ var _user$project$Node$entitlementsTable = function (model) {
 				_user$project$Node$drawMetadata(model))
 		});
 };
+var _user$project$Node$drawEntitlementSelector = F2(
+	function (m, model) {
+		var requested = A2(_user$project$Node$findEntitlement, m.subject, model.requested);
+		var accepted = A2(_user$project$Node$findEntitlement, m.subject, model.accepted);
+		return A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text(' current : '),
+				_1: {
+					ctor: '::',
+					_0: _user$project$Node$drawAccepted(accepted),
+					_1: {
+						ctor: '::',
+						_0: _user$project$Node$drawRequested(requested),
+						_1: {ctor: '[]'}
+					}
+				}
+			});
+	});
+var _user$project$Node$GetRequestedEntitlementsCompleted = function (a) {
+	return {ctor: 'GetRequestedEntitlementsCompleted', _0: a};
+};
+var _user$project$Node$getRequestedEntitlements = function () {
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/entitlements/requests'),
+		_user$project$Decoders$decodeEntitlements);
+	return A2(_elm_lang$http$Http$send, _user$project$Node$GetRequestedEntitlementsCompleted, request);
+}();
+var _user$project$Node$GetAcceptedEntitlementsCompleted = function (a) {
+	return {ctor: 'GetAcceptedEntitlementsCompleted', _0: a};
+};
+var _user$project$Node$getAcceptedEntitlements = function () {
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/entitlements/accepted/'),
+		_user$project$Decoders$decodeEntitlements);
+	return A2(_elm_lang$http$Http$send, _user$project$Node$GetAcceptedEntitlementsCompleted, request);
+}();
+var _user$project$Node$GetMetadataCompleted = function (a) {
+	return {ctor: 'GetMetadataCompleted', _0: a};
+};
+var _user$project$Node$getMetadata = function () {
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/data/meta'),
+		_user$project$Decoders$decodeMetadata);
+	return A2(_elm_lang$http$Http$send, _user$project$Node$GetMetadataCompleted, request);
+}();
+var _user$project$Node$init = {ctor: '_Tuple2', _0: _user$project$Node$initialModel, _1: _user$project$Node$getMetadata};
+var _user$project$Node$update = F2(
+	function (msg, model) {
+		var _p9 = msg;
+		switch (_p9.ctor) {
+			case 'NoOp':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'Refresh':
+				return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getMetadata};
+			case 'GetAcceptedEntitlementsCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								accepted: _elm_lang$core$Maybe$Just(_p9._0._0)
+							}),
+						_1: _user$project$Node$getRequestedEntitlements
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'GetRequestedEntitlementsCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								requested: _elm_lang$core$Maybe$Just(_p9._0._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'GetMetadataCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								metadata: _elm_lang$core$Maybe$Just(_p9._0._0)
+							}),
+						_1: _user$project$Node$getAcceptedEntitlements
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'AcceptEntitlement':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Node$acceptEntitlement(_p9._0)
+				};
+			case 'AcceptEntitlementCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'DeclineEntitlement':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Node$declineEntitlement(_p9._0)
+				};
+			case 'DeclineEntitlementCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			case 'AmendEntitlement':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Node$amendEntitlement(_p9._0)
+				};
+			case 'AmendEntitlementCompleted':
+				if (_p9._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Node',
+						{
+							start: {line: 65, column: 5},
+							end: {line: 118, column: 55}
+						},
+						_p9)(
+						_elm_lang$core$Basics$toString(_p9._0._0));
+				}
+			default:
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{tabState: _p9._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+		}
+	});
+var _user$project$Node$Refresh = {ctor: 'Refresh'};
 var _user$project$Node$entitlementsTab = function (model) {
 	return A2(
 		_rundis$elm_bootstrap$Bootstrap_Tab$pane,
@@ -13848,8 +14042,30 @@ var _user$project$Node$entitlementsTab = function (model) {
 					}),
 				_1: {
 					ctor: '::',
-					_0: _user$project$Node$entitlementsTable(model),
-					_1: {ctor: '[]'}
+					_0: A2(
+						_elm_lang$html$Html$button,
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html_Events$onClick(_user$project$Node$Refresh),
+							_1: {ctor: '[]'}
+						},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Refresh'),
+							_1: {ctor: '[]'}
+						}),
+					_1: {
+						ctor: '::',
+						_0: A2(
+							_elm_lang$html$Html$div,
+							{ctor: '[]'},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: _user$project$Node$entitlementsTable(model),
+							_1: {ctor: '[]'}
+						}
+					}
 				}
 			}
 		});
@@ -13906,194 +14122,6 @@ var _user$project$Node$view = function (model) {
 			}
 		});
 };
-var _user$project$Node$drawEntitlementSelector = F2(
-	function (m, model) {
-		var requested = A2(_user$project$Node$findEntitlement, m.subject, model.requested);
-		var accepted = A2(_user$project$Node$findEntitlement, m.subject, model.accepted);
-		return A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text(' current : '),
-				_1: {
-					ctor: '::',
-					_0: _user$project$Node$drawAccepted(accepted),
-					_1: {
-						ctor: '::',
-						_0: _user$project$Node$drawRequested(requested),
-						_1: {ctor: '[]'}
-					}
-				}
-			});
-	});
-var _user$project$Node$GetRequestedEntitlementsCompleted = function (a) {
-	return {ctor: 'GetRequestedEntitlementsCompleted', _0: a};
-};
-var _user$project$Node$getRequestedEntitlements = function () {
-	var request = A2(
-		_elm_lang$http$Http$get,
-		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/entitlements/requests'),
-		_user$project$Decoders$decodeEntitlements);
-	return A2(_elm_lang$http$Http$send, _user$project$Node$GetRequestedEntitlementsCompleted, request);
-}();
-var _user$project$Node$GetAcceptedEntitlementsCompleted = function (a) {
-	return {ctor: 'GetAcceptedEntitlementsCompleted', _0: a};
-};
-var _user$project$Node$getAcceptedEntitlements = function () {
-	var request = A2(
-		_elm_lang$http$Http$get,
-		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/entitlements/accepted/'),
-		_user$project$Decoders$decodeEntitlements);
-	return A2(_elm_lang$http$Http$send, _user$project$Node$GetAcceptedEntitlementsCompleted, request);
-}();
-var _user$project$Node$update = F2(
-	function (msg, model) {
-		var _p9 = msg;
-		switch (_p9.ctor) {
-			case 'NoOp':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'GetAcceptedEntitlementsCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								accepted: _elm_lang$core$Maybe$Just(_p9._0._0)
-							}),
-						_1: _user$project$Node$getRequestedEntitlements
-					};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'GetRequestedEntitlementsCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								requested: _elm_lang$core$Maybe$Just(_p9._0._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'GetMetadataCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								metadata: _elm_lang$core$Maybe$Just(_p9._0._0)
-							}),
-						_1: _user$project$Node$getAcceptedEntitlements
-					};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'AcceptEntitlement':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: _user$project$Node$acceptEntitlement(_p9._0)
-				};
-			case 'AcceptEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'DeclineEntitlement':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: _user$project$Node$declineEntitlement(_p9._0)
-				};
-			case 'DeclineEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			case 'AmendEntitlement':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: _user$project$Node$amendEntitlement(_p9._0)
-				};
-			case 'AmendEntitlementCompleted':
-				if (_p9._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _user$project$Node$getAcceptedEntitlements};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Node',
-						{
-							start: {line: 64, column: 5},
-							end: {line: 114, column: 55}
-						},
-						_p9)(
-						_elm_lang$core$Basics$toString(_p9._0._0));
-				}
-			default:
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{tabState: _p9._0}),
-					_1: _elm_lang$core$Platform_Cmd$none
-				};
-		}
-	});
-var _user$project$Node$GetMetadataCompleted = function (a) {
-	return {ctor: 'GetMetadataCompleted', _0: a};
-};
-var _user$project$Node$getMetadata = function () {
-	var request = A2(
-		_elm_lang$http$Http$get,
-		A2(_elm_lang$core$Basics_ops['++'], _user$project$Node$nodeURL, '/data/meta'),
-		_user$project$Decoders$decodeMetadata);
-	return A2(_elm_lang$http$Http$send, _user$project$Node$GetMetadataCompleted, request);
-}();
-var _user$project$Node$init = {ctor: '_Tuple2', _0: _user$project$Node$initialModel, _1: _user$project$Node$getMetadata};
 var _user$project$Node$main = _elm_lang$html$Html$program(
 	{init: _user$project$Node$init, view: _user$project$Node$view, update: _user$project$Node$update, subscriptions: _user$project$Node$subscriptions})();
 var _user$project$Node$NoOp = {ctor: 'NoOp'};

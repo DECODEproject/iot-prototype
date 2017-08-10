@@ -47,6 +47,7 @@ init =
 
 type Msg
     = NoOp
+    | Refresh
     | GetMetadataCompleted (Result Http.Error Decoders.Metadata)
     | GetAcceptedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
     | GetRequestedEntitlementsCompleted (Result Http.Error Decoders.Entitlements)
@@ -64,6 +65,9 @@ update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        Refresh ->
+            ( model, getMetadata )
 
         GetAcceptedEntitlementsCompleted (Ok items) ->
             ( { model | accepted = Just items }, getRequestedEntitlements )
@@ -238,7 +242,7 @@ deviceTab : Model -> Tab.Pane msg
 deviceTab model =
     Tab.pane [ Html.Attributes.class "mt-3" ]
         [ h4 [] [ text "Devices" ]
-        , p [] [ text "add, remove devices." ]
+        , p [] [ text "This is the page where you can add, remove devices." ]
         , text "coming soon"
         ]
 
@@ -248,6 +252,8 @@ entitlementsTab model =
     Tab.pane [ Html.Attributes.class "mt-3" ]
         [ h4 [] [ text "Entitlements" ]
         , p [] [ text "This page is where you can edit, view, accept and reject entitlements to your data." ]
+        , button [ onClick Refresh ] [ text "Refresh" ]
+        , div [] []
         , entitlementsTable model
         ]
 
@@ -313,30 +319,30 @@ drawAccessLevelSelector : Decoders.Entitlement -> Html Msg
 drawAccessLevelSelector ent =
     case ent.level of
         Decoders.OwnerOnly ->
-            Html.span [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("make searchable") ] ]
+            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("make data searchable") ] ]
 
         Decoders.CanDiscover ->
-            Html.span []
+            div []
                 [ a [ onClick (AmendEntitlement { ent | level = Decoders.OwnerOnly }), href "#" ] [ text ("stop making available for search") ]
                 , text (" ")
-                , a [ onClick (AmendEntitlement { ent | level = Decoders.CanAccess }), href "#" ] [ text ("allow access to values") ]
+                , a [ onClick (AmendEntitlement { ent | level = Decoders.CanAccess }), href "#" ] [ text ("make data accessible") ]
                 ]
 
         Decoders.CanAccess ->
-            Html.span [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("remove access") ] ]
+            div [] [ a [ onClick (AmendEntitlement { ent | level = Decoders.CanDiscover }), href "#" ] [ text ("remove access") ] ]
 
 
 drawAccessLevel : Decoders.AccessLevel -> Html Msg
 drawAccessLevel level =
     case level of
         Decoders.OwnerOnly ->
-            text ("owner-only")
+            text ("Only the owner (you) can see the data")
 
         Decoders.CanDiscover ->
-            text ("can-discover")
+            text ("Anyone can discover the data")
 
         Decoders.CanAccess ->
-            text ("can-access")
+            text ("Anyone can access the data")
 
 
 drawRequested : Maybe Decoders.Entitlement -> Html Msg
@@ -346,12 +352,13 @@ drawRequested ent =
             text ("")
 
         Just e ->
-            Html.span []
-                [ text (" requested : ")
-                , drawAccessLevel (e.level)
-                , a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
-                , text (" ")
-                , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
+            div []
+                [ drawAccessLevel (e.level)
+                , div []
+                    [ a [ onClick (AcceptEntitlement e), href "#" ] [ text ("accept") ]
+                    , text (" ")
+                    , a [ onClick (DeclineEntitlement e), href "#" ] [ text ("decline") ]
+                    ]
                 ]
 
 
