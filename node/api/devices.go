@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"net/http"
+	"sort"
 
 	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
@@ -144,7 +145,13 @@ func (e deviceResource) allDevices(request *restful.Request, response *restful.R
 	for _, v := range e.deviceStore {
 		resp = append(resp, v)
 	}
+	sort.Sort(byDeviceName(resp))
 
 	response.WriteEntity(resp)
-
 }
+
+type byDeviceName []DeviceResponse
+
+func (a byDeviceName) Len() int           { return len(a) }
+func (a byDeviceName) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a byDeviceName) Less(i, j int) bool { return a[i].Name < a[j].Name }
