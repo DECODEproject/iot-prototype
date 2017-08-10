@@ -6,6 +6,9 @@ import (
 
 	validator "gopkg.in/validator.v2"
 
+	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
+	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	uuid "github.com/satori/go.uuid"
@@ -59,12 +62,16 @@ const (
 
 type entitlementResource struct {
 	// all data held in memory
-	store *EntitlementStore
+	store     *EntitlementStore
+	mClient   *metadataclient.MetadataApi
+	metaStore *MetadataStore
 }
 
-func NewEntitlementService(store *EntitlementStore) entitlementResource {
+func NewEntitlementService(store *EntitlementStore, metaStore *MetadataStore, mClient *metadataclient.MetadataApi) entitlementResource {
 	return entitlementResource{
-		store: store,
+		store:     store,
+		metaStore: metaStore,
+		mClient:   mClient,
 	}
 }
 
@@ -158,6 +165,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// revoke an entitlement
+	// NOT useful at the moment but when we get users it will revoke a specific users entitlement
 	// TODO : review GET
 	ws.Route(ws.GET("/accepted/{entitlement-uid}/revoke").
 		To(e.revokeEntitlement).
@@ -298,24 +306,47 @@ func (e entitlementResource) amendAcceptedEntitlement(request *restful.Request, 
 
 	uid := request.PathParameter("entitlement-uid")
 
-	log.Println(uid, req, e.store.Accepted)
-
 	// we only allow updating the access level at the moment
 	err := e.store.Accepted.Update(uid, func(e *Entitlement) error {
 		e.AccessLevel = req.AccessLevel
 		return nil
 	})
 
-	log.Println(err, e.store.Accepted)
-
 	if err != nil {
-
 		if err == ErrEntitlementNotFound {
 			response.WriteHeader(http.StatusNotFound)
 			return
 		}
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 		return
+	}
+
+	// if the entitlement is now not discoverable we will need to
+	// remove the data from the metadata service
+	if !req.IsDiscoverable() {
+		go func() {
+
+			subject, err := utils.ParseSubject(req.Subject)
+
+			if err != nil {
+				log.Println("error parsing subject : ", subject)
+				return
+			}
+
+			metaData, found := e.metaStore.FindBySubject(subject)
+
+			if !found {
+				log.Println("error finding metadata for subject : ", subject)
+				return
+			}
+
+			_, err = e.mClient.RemoveFromCatalog(metaData.CatalogUID)
+
+			if err != nil {
+				log.Println("error removing from catalog : ", err.Error())
+				return
+			}
+		}()
 	}
 
 	response.WriteEntity(req)

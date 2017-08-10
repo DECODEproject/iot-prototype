@@ -53,7 +53,7 @@ func Serve(options Options) error {
 	deviceManager.Start()
 
 	// wire up the json apis
-	restful.DefaultContainer.Add(api.NewEntitlementService(entitlementStore).WebService())
+	restful.DefaultContainer.Add(api.NewEntitlementService(entitlementStore, metaStore, metadataClient).WebService())
 	restful.DefaultContainer.Add(api.NewDataService(entitlementStore, storageClient, metaStore).WebService())
 	restful.DefaultContainer.Add(api.NewDeviceService(ctx, entitlementStore, metaStore, deviceManager.Out()).WebService())
 
