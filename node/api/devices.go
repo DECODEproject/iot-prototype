@@ -8,6 +8,7 @@ import (
 	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 	validator "gopkg.in/validator.v2"
 
+	randomdata "github.com/Pallinder/go-randomdata"
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	uuid "github.com/satori/go.uuid"
@@ -32,13 +33,14 @@ func NewDeviceService(ctx context.Context, entitlementStore *EntitlementStore, m
 }
 
 type DeviceRequest struct {
-	Type        string `json:"type" description:"type of device" validate:"nonzero"`
-	Description string `json:"description" description:"description of device" validate:"nonzero"`
+	Type string `json:"type" description:"type of device" validate:"nonzero"`
 }
 
 type DeviceResponse struct {
 	DeviceRequest
-	UID string `json:"uid" description:"unique identifier for the device"`
+	UID         string `json:"uid" description:"unique identifier for the device"`
+	Name        string `json:"name" description:"unique name for the device" `
+	Description string `json:"description" description:"information about the device" `
 }
 
 func (e deviceResource) WebService() *restful.WebService {
@@ -100,19 +102,32 @@ func (e deviceResource) newDevice(request *restful.Request, response *restful.Re
 			Status: Accepted,
 		},
 	)
+	var description string
 
-	// add the metadata to the catalog
-	e.metaStore.Add(Metadata{Subject: subject.String(), Description: req.Description})
-
-	// start accepting from the sensor
-	if req.Type == "sine" {
+	switch req.Type {
+	case "fake-sine":
+		description = "fake device producing a sine curve"
 		sensor := sensors.NewSineCurveEmitterSensor(e.ctx, uid, e.out)
 		go sensor.Start()
+	case "fake-temp-humidity":
+		description = "fake device producing temperature and humidity values"
+		sensor := sensors.NewTemperatureHumiditySensor(e.ctx, uid, e.out)
+		go sensor.Start()
+
+	default:
+		response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: "unknown device type"})
+		return
 	}
+
+	name := randomdata.SillyName()
+	// add the metadata to the catalog
+	e.metaStore.Add(Metadata{Subject: subject.String(), Description: description, Name: name})
 
 	resp := DeviceResponse{
 		DeviceRequest: req,
 		UID:           uid,
+		Description:   description,
+		Name:          name,
 	}
 
 	// TODO : add lock

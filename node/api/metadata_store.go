@@ -8,7 +8,8 @@ import (
 
 type Metadata struct {
 	Description string `json:"description" description:"human readable description of the data"`
-	Subject     string `json:"subject" description:"unique name for the data"`
+	Subject     string `json:"subject" description:"description of the data"`
+	Name        string `json:"name" description:"name of the data"`
 }
 
 func NewMetadataStore() *MetadataStore {
