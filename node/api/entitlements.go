@@ -25,7 +25,7 @@ type EntitlementRequest struct {
 	AccessLevel AccessLevel `json:"level" description:"access level requested. Valid values 'owner-only', 'can-read','can-discover'" validate:"nonzero"`
 }
 
-//Entitlement is returned to encapsulate the current status of the entitlement
+// Entitlement is returned to encapsulate the current status of the entitlement
 type Entitlement struct {
 	EntitlementRequest
 	UID    string `json:"uid" description:"unique identifier of the entitlement request" validate:"nonzero"`
@@ -324,29 +324,33 @@ func (e entitlementResource) amendAcceptedEntitlement(request *restful.Request, 
 	// if the entitlement is now not discoverable we will need to
 	// remove the data from the metadata service
 	if !req.IsDiscoverable() {
-		go func() {
 
-			subject, err := utils.ParseSubject(req.Subject)
+		subject, err := utils.ParseSubject(req.Subject)
 
-			if err != nil {
-				log.Println("error parsing subject : ", subject)
-				return
-			}
+		if err != nil {
+			log.Println("error parsing subject : ", subject)
+			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 
-			metaData, found := e.metaStore.FindBySubject(subject)
+			return
+		}
 
-			if !found {
-				log.Println("error finding metadata for subject : ", subject)
-				return
-			}
+		metaData, found := e.metaStore.FindBySubject(subject)
 
-			_, err = e.mClient.RemoveFromCatalog(metaData.CatalogUID)
+		if !found {
+			log.Println("error finding metadata for subject : ", subject)
+			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "error finding metadata"})
 
-			if err != nil {
-				log.Println("error removing from catalog : ", err.Error())
-				return
-			}
-		}()
+			return
+		}
+
+		_, err = e.mClient.RemoveFromCatalog(metaData.CatalogUID)
+
+		if err != nil {
+			log.Println("error removing from catalog : ", err.Error(), subject.String(), metaData)
+			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
+
+			return
+		}
 	}
 
 	response.WriteEntity(req)
