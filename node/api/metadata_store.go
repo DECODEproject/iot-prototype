@@ -41,11 +41,11 @@ func (m *MetadataStore) FindBySubject(subject utils.Subject) (Metadata, bool) {
 	perms := subject.Perms()
 
 	// TODO : optimise optimise optimise - rewrite as a trie
-
 	for _, s := range perms {
 		for _, m := range m.store {
 			if m.Subject == s {
-				return m, true
+				ffs := m
+				return ffs, true
 			}
 		}
 	}

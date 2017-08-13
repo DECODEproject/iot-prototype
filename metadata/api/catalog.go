@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	validator "gopkg.in/validator.v2"
 
@@ -215,6 +216,8 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 	key := []byte(fmt.Sprintf("%s:%s", locationUID, req.Key))
 	hash := md5.Sum(key)
 	encoded := base64.StdEncoding.EncodeToString(hash[:])
+	// urlencode the url as used in URL for deletes
+	encoded = strings.Replace(encoded, "/", "_", -1)
 
 	item := CatalogItem{
 		CatalogRequest: req,
