@@ -222,18 +222,26 @@ view : Model -> Html Msg
 view model =
     case model.all of
         Nothing ->
-            button [ onClick RefreshMetadata ] [ text "refresh" ]
+            drawNoMetadata
 
         Just d ->
             case d of
                 [] ->
-                    button [ onClick RefreshMetadata ] [ text "refresh" ]
+                    drawNoMetadata
 
                 _ ->
                     div []
                         [ div [] [ text "Metadata" ]
                         , div [] [ drawFiltered model.filter d ]
                         ]
+
+
+drawNoMetadata : Html Msg
+drawNoMetadata =
+    div []
+        [ div [] [ text "no metadata available." ]
+        , button [ onClick RefreshMetadata ] [ text "refresh" ]
+        ]
 
 
 drawFiltered : Maybe String -> Decoders.Items -> Html Msg

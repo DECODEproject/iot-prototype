@@ -10957,6 +10957,36 @@ var _user$project$Search$update = F2(
 		}
 	});
 var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
+var _user$project$Search$drawNoMetadata = A2(
+	_elm_lang$html$Html$div,
+	{ctor: '[]'},
+	{
+		ctor: '::',
+		_0: A2(
+			_elm_lang$html$Html$div,
+			{ctor: '[]'},
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html$text('no metadata available.'),
+				_1: {ctor: '[]'}
+			}),
+		_1: {
+			ctor: '::',
+			_0: A2(
+				_elm_lang$html$Html$button,
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('refresh'),
+					_1: {ctor: '[]'}
+				}),
+			_1: {ctor: '[]'}
+		}
+	});
 var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
 		var _p9 = tag;
@@ -11065,34 +11095,12 @@ var _user$project$Search$drawFiltered = F2(
 var _user$project$Search$view = function (model) {
 	var _p11 = model.all;
 	if (_p11.ctor === 'Nothing') {
-		return A2(
-			_elm_lang$html$Html$button,
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
-				_1: {ctor: '[]'}
-			},
-			{
-				ctor: '::',
-				_0: _elm_lang$html$Html$text('refresh'),
-				_1: {ctor: '[]'}
-			});
+		return _user$project$Search$drawNoMetadata;
 	} else {
 		var _p13 = _p11._0;
 		var _p12 = _p13;
 		if (_p12.ctor === '[]') {
-			return A2(
-				_elm_lang$html$Html$button,
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
-					_1: {ctor: '[]'}
-				},
-				{
-					ctor: '::',
-					_0: _elm_lang$html$Html$text('refresh'),
-					_1: {ctor: '[]'}
-				});
+			return _user$project$Search$drawNoMetadata;
 		} else {
 			return A2(
 				_elm_lang$html$Html$div,
