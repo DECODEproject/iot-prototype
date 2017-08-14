@@ -109,7 +109,7 @@ func (e entitlementResource) WebService() *restful.WebService {
 
 	// delete a request
 	// TODO : when adding in authN/R ensure only the creator can delete
-	ws.Route(ws.DELETE("/request/{request-uid}").To(e.removeRequest).
+	ws.Route(ws.DELETE("/requests/{request-uid}").To(e.removeRequest).
 		Doc("delete an entitlement request").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Param(requestUIDParameter))
