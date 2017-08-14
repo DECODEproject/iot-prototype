@@ -147,9 +147,9 @@ prepareGraphData items =
 -- RPC
 
 
-nodeURL : String
-nodeURL =
-    "http://localhost:8080"
+nodeURLFromLocation : Decoders.Location -> String
+nodeURLFromLocation location =
+    "http://" ++ location.ipAddress ++ ":" ++ toString (location.ipPort)
 
 
 metadataURL : String
@@ -175,7 +175,7 @@ getTimeSeriesData : Decoders.Item -> Cmd Msg
 getTimeSeriesData item =
     let
         request =
-            Http.post (nodeURL ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
+            Http.post (nodeURLFromLocation (item.location) ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
     in
         Http.send (ViewGraphCompleted item) request
 
@@ -195,7 +195,7 @@ requestAccess item =
             Http.request
                 { method = "PUT"
                 , headers = []
-                , url = nodeURL ++ "/entitlements/requests/"
+                , url = nodeURLFromLocation (item.location) ++ "/entitlements/requests/"
                 , body = Http.jsonBody (entitlementRequestEncoder item)
                 , expect = Http.expectJson Decoders.decodeEntitlement
                 , timeout = Nothing

@@ -10687,7 +10687,18 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 		});
 };
 var _user$project$Search$metadataURL = 'http://localhost:8081';
-var _user$project$Search$nodeURL = 'http://localhost:8080';
+var _user$project$Search$nodeURLFromLocation = function (location) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'http://',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			location.ipAddress,
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				':',
+				_elm_lang$core$Basics$toString(location.ipPort))));
+};
 var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
 	'unsafeDrawGraph',
@@ -10739,7 +10750,10 @@ var _user$project$Search$requestAccess = function (item) {
 		{
 			method: 'PUT',
 			headers: {ctor: '[]'},
-			url: A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$nodeURL, '/entitlements/requests/'),
+			url: A2(
+				_elm_lang$core$Basics_ops['++'],
+				_user$project$Search$nodeURLFromLocation(item.location),
+				'/entitlements/requests/'),
 			body: _elm_lang$http$Http$jsonBody(
 				_user$project$Search$entitlementRequestEncoder(item)),
 			expect: _elm_lang$http$Http$expectJson(_user$project$Decoders$decodeEntitlement),
@@ -10758,7 +10772,10 @@ var _user$project$Search$ViewGraphCompleted = F2(
 var _user$project$Search$getTimeSeriesData = function (item) {
 	var request = A3(
 		_elm_lang$http$Http$post,
-		A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$nodeURL, '/data/'),
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_user$project$Search$nodeURLFromLocation(item.location),
+			'/data/'),
 		_elm_lang$http$Http$jsonBody(
 			_user$project$Search$getTimeSeriesEncoder(item.key)),
 		_user$project$Decoders$decodeDataResponse);
