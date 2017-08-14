@@ -10689,7 +10689,6 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 var _user$project$Search$metadataURL = 'http://localhost:8081';
 var _user$project$Search$nodeURL = 'http://localhost:8080';
 var _user$project$Search$initialModel = {all: _elm_lang$core$Maybe$Nothing, filter: _elm_lang$core$Maybe$Nothing};
-var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _elm_lang$core$Platform_Cmd$none};
 var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoingPort(
 	'unsafeDrawGraph',
 	function (v) {
@@ -10698,8 +10697,8 @@ var _user$project$Search$unsafeDrawGraph = _elm_lang$core$Native_Platform.outgoi
 				return {value: v.value, date: v.date};
 			});
 	});
-var _user$project$Search$clearGraph = _elm_lang$core$Native_Platform.outgoingPort(
-	'clearGraph',
+var _user$project$Search$unsafeClearGraph = _elm_lang$core$Native_Platform.outgoingPort(
+	'unsafeClearGraph',
 	function (v) {
 		return v;
 	});
@@ -10833,10 +10832,135 @@ var _user$project$Search$drawViewerWidget = function (item) {
 var _user$project$Search$ShowLocations = function (a) {
 	return {ctor: 'ShowLocations', _0: a};
 };
+var _user$project$Search$RefreshMetadataCompleted = function (a) {
+	return {ctor: 'RefreshMetadataCompleted', _0: a};
+};
+var _user$project$Search$getAllMetadata = function () {
+	var request = A2(
+		_elm_lang$http$Http$get,
+		A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$metadataURL, '/catalog/items/'),
+		_user$project$Decoders$decodeItems);
+	return A2(_elm_lang$http$Http$send, _user$project$Search$RefreshMetadataCompleted, request);
+}();
+var _user$project$Search$init = {ctor: '_Tuple2', _0: _user$project$Search$initialModel, _1: _user$project$Search$getAllMetadata};
+var _user$project$Search$update = F2(
+	function (msg, model) {
+		var _p3 = msg;
+		switch (_p3.ctor) {
+			case 'NoOp':
+				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+			case 'RefreshMetadata':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{filter: _elm_lang$core$Maybe$Nothing}),
+					_1: _user$project$Search$getAllMetadata
+				};
+			case 'RefreshMetadataCompleted':
+				if (_p3._0.ctor === 'Ok') {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								all: _elm_lang$core$Maybe$Just(_p3._0._0)
+							}),
+						_1: _user$project$Search$unsafeClearGraph('only-for-the-compiler')
+					};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Search',
+						{
+							start: {line: 68, column: 5},
+							end: {line: 120, column: 45}
+						},
+						_p3)(
+						_elm_lang$core$Basics$toString(_p3._0._0));
+				}
+			case 'ShowLocations':
+				var _p5 = model.all;
+				if (_p5.ctor === 'Nothing') {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{
+								filter: _elm_lang$core$Maybe$Just(_p3._0)
+							}),
+						_1: _elm_lang$core$Platform_Cmd$none
+					};
+				}
+			case 'ViewGraph':
+				return {
+					ctor: '_Tuple2',
+					_0: model,
+					_1: _user$project$Search$getTimeSeriesData(_p3._0)
+				};
+			case 'ViewGraphCompleted':
+				if (_p3._1.ctor === 'Ok') {
+					var items = A3(_user$project$Search$updateRight, model.all, _p3._0, _user$project$Decoders$Unknown);
+					return {
+						ctor: '_Tuple2',
+						_0: _elm_lang$core$Native_Utils.update(
+							model,
+							{all: items}),
+						_1: _user$project$Search$unsafeDrawGraph(
+							_user$project$Search$prepareGraphData(_p3._1._0.data))
+					};
+				} else {
+					if (_p3._1._0.ctor === 'BadStatus') {
+						var items = A3(_user$project$Search$updateRight, model.all, _p3._0, _user$project$Decoders$RequestAccess);
+						return {
+							ctor: '_Tuple2',
+							_0: _elm_lang$core$Native_Utils.update(
+								model,
+								{all: items}),
+							_1: _elm_lang$core$Platform_Cmd$none
+						};
+					} else {
+						return _elm_lang$core$Native_Utils.crashCase(
+							'Search',
+							{
+								start: {line: 68, column: 5},
+								end: {line: 120, column: 45}
+							},
+							_p3)(
+							_elm_lang$core$Basics$toString(_p3._1._0));
+					}
+				}
+			case 'RequestAccess':
+				var _p7 = _p3._0;
+				var items = A3(_user$project$Search$updateRight, model.all, _p7, _user$project$Decoders$Requesting);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{all: items}),
+					_1: _user$project$Search$requestAccess(_p7)
+				};
+			default:
+				if (_p3._0.ctor === 'Ok') {
+					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
+				} else {
+					return _elm_lang$core$Native_Utils.crashCase(
+						'Search',
+						{
+							start: {line: 68, column: 5},
+							end: {line: 120, column: 45}
+						},
+						_p3)(
+						_elm_lang$core$Basics$toString(_p3._0._0));
+				}
+		}
+	});
+var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
 var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
-		var _p3 = tag;
-		if (_p3.ctor === 'Nothing') {
+		var _p9 = tag;
+		if (_p9.ctor === 'Nothing') {
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10870,8 +10994,8 @@ var _user$project$Search$drawFiltered = F2(
 					},
 					_user$project$Search$uniqueTags(items)));
 		} else {
-			var _p4 = _p3._0;
-			var filtered = A2(_user$project$Search$filterByTag, _p4, items);
+			var _p10 = _p9._0;
+			var filtered = A2(_user$project$Search$filterByTag, _p10, items);
 			return A2(
 				_elm_lang$html$Html$div,
 				{ctor: '[]'},
@@ -10882,7 +11006,7 @@ var _user$project$Search$drawFiltered = F2(
 						{ctor: '[]'},
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p4),
+							_0: _elm_lang$html$Html$text(_p10),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
@@ -10911,135 +11035,33 @@ var _user$project$Search$drawFiltered = F2(
 										});
 								},
 								filtered)),
-						_1: {ctor: '[]'}
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(
+										_elm_lang$html$Html$button,
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
+											_1: {ctor: '[]'}
+										},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('new search'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}
 				});
 		}
 	});
-var _user$project$Search$RefreshMetadataCompleted = function (a) {
-	return {ctor: 'RefreshMetadataCompleted', _0: a};
-};
-var _user$project$Search$getAllMetadata = function () {
-	var request = A2(
-		_elm_lang$http$Http$get,
-		A2(_elm_lang$core$Basics_ops['++'], _user$project$Search$metadataURL, '/catalog/items/'),
-		_user$project$Decoders$decodeItems);
-	return A2(_elm_lang$http$Http$send, _user$project$Search$RefreshMetadataCompleted, request);
-}();
-var _user$project$Search$update = F2(
-	function (msg, model) {
-		var _p5 = msg;
-		switch (_p5.ctor) {
-			case 'NoOp':
-				return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-			case 'RefreshMetadata':
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{filter: _elm_lang$core$Maybe$Nothing}),
-					_1: _user$project$Search$getAllMetadata
-				};
-			case 'RefreshMetadataCompleted':
-				if (_p5._0.ctor === 'Ok') {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								all: _elm_lang$core$Maybe$Just(_p5._0._0)
-							}),
-						_1: _user$project$Search$clearGraph('only-for-the-compiler')
-					};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Search',
-						{
-							start: {line: 68, column: 5},
-							end: {line: 120, column: 45}
-						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
-				}
-			case 'ShowLocations':
-				var _p7 = model.all;
-				if (_p7.ctor === 'Nothing') {
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{
-								filter: _elm_lang$core$Maybe$Just(_p5._0)
-							}),
-						_1: _elm_lang$core$Platform_Cmd$none
-					};
-				}
-			case 'ViewGraph':
-				return {
-					ctor: '_Tuple2',
-					_0: model,
-					_1: _user$project$Search$getTimeSeriesData(_p5._0)
-				};
-			case 'ViewGraphCompleted':
-				if (_p5._1.ctor === 'Ok') {
-					var items = A3(_user$project$Search$updateRight, model.all, _p5._0, _user$project$Decoders$Unknown);
-					return {
-						ctor: '_Tuple2',
-						_0: _elm_lang$core$Native_Utils.update(
-							model,
-							{all: items}),
-						_1: _user$project$Search$unsafeDrawGraph(
-							_user$project$Search$prepareGraphData(_p5._1._0.data))
-					};
-				} else {
-					if (_p5._1._0.ctor === 'BadStatus') {
-						var items = A3(_user$project$Search$updateRight, model.all, _p5._0, _user$project$Decoders$RequestAccess);
-						return {
-							ctor: '_Tuple2',
-							_0: _elm_lang$core$Native_Utils.update(
-								model,
-								{all: items}),
-							_1: _elm_lang$core$Platform_Cmd$none
-						};
-					} else {
-						return _elm_lang$core$Native_Utils.crashCase(
-							'Search',
-							{
-								start: {line: 68, column: 5},
-								end: {line: 120, column: 45}
-							},
-							_p5)(
-							_elm_lang$core$Basics$toString(_p5._1._0));
-					}
-				}
-			case 'RequestAccess':
-				var _p9 = _p5._0;
-				var items = A3(_user$project$Search$updateRight, model.all, _p9, _user$project$Decoders$Requesting);
-				return {
-					ctor: '_Tuple2',
-					_0: _elm_lang$core$Native_Utils.update(
-						model,
-						{all: items}),
-					_1: _user$project$Search$requestAccess(_p9)
-				};
-			default:
-				if (_p5._0.ctor === 'Ok') {
-					return {ctor: '_Tuple2', _0: model, _1: _elm_lang$core$Platform_Cmd$none};
-				} else {
-					return _elm_lang$core$Native_Utils.crashCase(
-						'Search',
-						{
-							start: {line: 68, column: 5},
-							end: {line: 120, column: 45}
-						},
-						_p5)(
-						_elm_lang$core$Basics$toString(_p5._0._0));
-				}
-		}
-	});
-var _user$project$Search$RefreshMetadata = {ctor: 'RefreshMetadata'};
 var _user$project$Search$view = function (model) {
 	var _p11 = model.all;
 	if (_p11.ctor === 'Nothing') {
@@ -11056,22 +11078,35 @@ var _user$project$Search$view = function (model) {
 				_1: {ctor: '[]'}
 			});
 	} else {
-		return A2(
-			_elm_lang$html$Html$div,
-			{ctor: '[]'},
-			{
-				ctor: '::',
-				_0: A2(
-					_elm_lang$html$Html$div,
-					{ctor: '[]'},
-					{
-						ctor: '::',
-						_0: _elm_lang$html$Html$text('Metadata'),
-						_1: {ctor: '[]'}
-					}),
-				_1: {
+		var _p13 = _p11._0;
+		var _p12 = _p13;
+		if (_p12.ctor === '[]') {
+			return A2(
+				_elm_lang$html$Html$button,
+				{
 					ctor: '::',
-					_0: A2(_user$project$Search$drawFiltered, model.filter, _p11._0),
+					_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
+					_1: {ctor: '[]'}
+				},
+				{
+					ctor: '::',
+					_0: _elm_lang$html$Html$text('refresh'),
+					_1: {ctor: '[]'}
+				});
+		} else {
+			return A2(
+				_elm_lang$html$Html$div,
+				{ctor: '[]'},
+				{
+					ctor: '::',
+					_0: A2(
+						_elm_lang$html$Html$div,
+						{ctor: '[]'},
+						{
+							ctor: '::',
+							_0: _elm_lang$html$Html$text('Metadata'),
+							_1: {ctor: '[]'}
+						}),
 					_1: {
 						ctor: '::',
 						_0: A2(
@@ -11079,24 +11114,13 @@ var _user$project$Search$view = function (model) {
 							{ctor: '[]'},
 							{
 								ctor: '::',
-								_0: A2(
-									_elm_lang$html$Html$button,
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html_Events$onClick(_user$project$Search$RefreshMetadata),
-										_1: {ctor: '[]'}
-									},
-									{
-										ctor: '::',
-										_0: _elm_lang$html$Html$text('new search'),
-										_1: {ctor: '[]'}
-									}),
+								_0: A2(_user$project$Search$drawFiltered, model.filter, _p13),
 								_1: {ctor: '[]'}
 							}),
 						_1: {ctor: '[]'}
 					}
-				}
-			});
+				});
+		}
 	}
 };
 var _user$project$Search$main = _elm_lang$html$Html$program(

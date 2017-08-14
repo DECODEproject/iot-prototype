@@ -45,7 +45,7 @@ initialModel =
 
 init : ( Model, Cmd Msg )
 init =
-    ( initialModel, Cmd.none )
+    ( initialModel, getAllMetadata )
 
 
 
@@ -225,11 +225,15 @@ view model =
             button [ onClick RefreshMetadata ] [ text "refresh" ]
 
         Just d ->
-            div []
-                [ div [] [ text "Metadata" ]
-                , drawFiltered model.filter d
-                , div [] [ button [ onClick RefreshMetadata ] [ text "new search" ] ]
-                ]
+            case d of
+                [] ->
+                    button [ onClick RefreshMetadata ] [ text "refresh" ]
+
+                _ ->
+                    div []
+                        [ div [] [ text "Metadata" ]
+                        , div [] [ drawFiltered model.filter d ]
+                        ]
 
 
 drawFiltered : Maybe String -> Decoders.Items -> Html Msg
@@ -246,6 +250,7 @@ drawFiltered tag items =
                 div []
                     [ div [] [ text (t) ]
                     , div [] <| List.map (\item -> div [] [ text item.key, text " ", drawViewerWidget (item) ]) filtered
+                    , div [] [ button [ onClick RefreshMetadata ] [ text "new search" ] ]
                     ]
 
 
