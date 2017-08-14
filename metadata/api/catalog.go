@@ -51,6 +51,7 @@ type ItemWithLocation struct {
 type LocationRequest struct {
 	IPAddress string `json:"ip-address" description:"public IP address of the node" validate:"nonzero"`
 	Port      int    `json:"port" description:"public port of the node" validate:"nonzero"`
+	Scheme    string `json:"scheme" description:protocol to use e.g. http or https`
 }
 
 // Location contains the original request and a UID to use when interacting with the service e.g. adding Items to the catalog.

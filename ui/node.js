@@ -14214,9 +14214,9 @@ var _user$project$Decoders$Item = F5(
 	function (a, b, c, d, e) {
 		return {key: a, location: b, sample: c, tags: d, uid: e};
 	});
-var _user$project$Decoders$Location = F4(
-	function (a, b, c, d) {
-		return {ipAddress: a, ipPort: b, uid: c, right: d};
+var _user$project$Decoders$Location = F5(
+	function (a, b, c, d, e) {
+		return {ipAddress: a, ipPort: b, scheme: c, uid: d, right: e};
 	});
 var _user$project$Decoders$DataResponse = function (a) {
 	return {data: a};
@@ -14256,11 +14256,12 @@ var _user$project$Decoders$decodeDevices = _elm_lang$core$Json_Decode$list(_user
 var _user$project$Decoders$Requesting = {ctor: 'Requesting'};
 var _user$project$Decoders$RequestAccess = {ctor: 'RequestAccess'};
 var _user$project$Decoders$Unknown = {ctor: 'Unknown'};
-var _user$project$Decoders$decodeLocation = A5(
-	_elm_lang$core$Json_Decode$map4,
+var _user$project$Decoders$decodeLocation = A6(
+	_elm_lang$core$Json_Decode$map5,
 	_user$project$Decoders$Location,
 	A2(_elm_lang$core$Json_Decode$field, 'ip-address', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'port', _elm_lang$core$Json_Decode$int),
+	A2(_elm_lang$core$Json_Decode$field, 'scheme', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	_elm_lang$core$Json_Decode$succeed(_user$project$Decoders$Unknown));
 var _user$project$Decoders$decodeItem = A6(

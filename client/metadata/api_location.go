@@ -26,6 +26,8 @@ type ApiLocation struct {
 	// public port of the node
 	Port int32 `json:"port,omitempty"`
 
+	Scheme string `json:"scheme,omitempty"`
+
 	// unique identifier for a node
 	Uid string `json:"uid,omitempty"`
 }

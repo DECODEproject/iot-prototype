@@ -85,8 +85,8 @@ func Serve(options Options) error {
 // registerWithMetadataService returns the 'announce' token from the metadata service
 func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicAddress string) (string, error) {
 
-	// parse the nods public address into its component parts
-	ok, host, port := utils.HostAndIpToBits(nodePublicAddress)
+	// parse the node's public address into its component parts
+	ok, scheme, host, port := utils.HostAndIpToBits(nodePublicAddress)
 
 	if !ok {
 		return "", errors.New("unable to parse WEBSERVICES_URL or flag -u. Expected value : http[s]://host:port")
@@ -101,6 +101,7 @@ func registerWithMetadataService(client *metadataclient.MetadataApi, nodePublicA
 		response, _, err := client.RegisterLocation(metadataclient.ApiLocationRequest{
 			IpAddress: host,
 			Port:      int32(port),
+			Scheme:    scheme,
 		})
 
 		if err != nil {

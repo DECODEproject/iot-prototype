@@ -149,7 +149,7 @@ prepareGraphData items =
 
 nodeURLFromLocation : Decoders.Location -> String
 nodeURLFromLocation location =
-    "http://" ++ location.ipAddress ++ ":" ++ toString (location.ipPort)
+    location.scheme ++ "://" ++ location.ipAddress ++ ":" ++ toString (location.ipPort)
 
 
 metadataURL : String

@@ -25,4 +25,6 @@ type ApiLocationRequest struct {
 
 	// public port of the node
 	Port int32 `json:"port,omitempty"`
+
+	Scheme string `json:"scheme,omitempty"`
 }

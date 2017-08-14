@@ -35,6 +35,7 @@ decodeItem =
 type alias Location =
     { ipAddress : String
     , ipPort : Int
+    , scheme : String
     , uid : String
     , right : Right
     }
@@ -48,9 +49,10 @@ type Right
 
 decodeLocation : Json.Decode.Decoder Location
 decodeLocation =
-    Json.Decode.map4 Location
+    Json.Decode.map5 Location
         (Json.Decode.field "ip-address" Json.Decode.string)
         (Json.Decode.field "port" Json.Decode.int)
+        (Json.Decode.field "scheme" Json.Decode.string)
         (Json.Decode.field "uid" Json.Decode.string)
         (Json.Decode.succeed Unknown)
 
