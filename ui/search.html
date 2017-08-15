@@ -20,7 +20,7 @@
   app.ports.unsafeDrawGraph.subscribe(function(data) {
       drawGraph(data)
   });
-  app.ports.clearGraph.subscribe(function(data) {
+  app.ports.unsafeClearGraph.subscribe(function(data) {
       document.getElementById("graph").innerHTML = "";
   });
 
