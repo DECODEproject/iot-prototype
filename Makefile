@@ -51,18 +51,12 @@ coverage: test_integration ## generate and display coverage report
 
 .PHONY: test_integration
 
-docker-up: ## run dependencies as docker containers
-	docker-compose up -d
-	docker ps
+ui-build: ## build the ui project
+	$(MAKE) -C ui build
 
-.PHONY: docker-up
+.PHONY: ui-build
 
-docker-down: ## stop docker containers
-	docker-compose down
-
-.PHONY: docker-down
-
-docker-build: clean linux-amd64 ## build docker images for all of the executables
+docker-build: clean ui-build linux-amd64 ## build docker images for all of the executables
 	docker build -t prototype/metadata:latest -t prototype/metadata:$(SOURCE_VERSION) -f=./docker/Dockerfile.metadata .
 	docker build -t prototype/node:latest -t prototype/node:$(SOURCE_VERSION) -f=./docker/Dockerfile.node .
 	docker build -t prototype/storage:latest -t prototype/storage:$(SOURCE_VERSION) -f=./docker/Dockerfile.storage .
