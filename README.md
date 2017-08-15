@@ -17,7 +17,7 @@ Data Entitlement
 An introduction to concepts of data entitlements as well as a review of prior art was completed as part of the DECODE project.
 This document can be found [here](https://desk.dyne.org/s/7gHFaUIoNEFB1Wx#pdfviewer).
 
-For the purposes of the prototype we have defined any singular piece of  data in our system as being in one of three logical states -
+For the purposes of the prototype any singular piece of data in our system will be in one of three logical states -
 - owner-only - the data is not discoverable or accessible.
 - can-discover - the data is discoverable and there will be made available for search. The data is not accessible.
 - can-access - the data is accessible and by default discoverable.
@@ -27,7 +27,7 @@ It is important to note that the prototype does not, by design, implement authen
 Architecture
 ------------
 
-The prototype is implemented as a set of HTTP services exposing various endpoints accepting various JSON messages in a REST-like manner.
+The prototype is implemented as a set of HTTP services, written in golang, exposing various endpoints accepting various JSON messages in a REST-like manner.
 Each of the services is documented with a [swagger api](https://swagger.io/)
 
 An overview of a single node system.
@@ -36,9 +36,10 @@ An overview of a single node system.
 
 In this diagram two IoT devices logically direct their data to the node service.
 As a convenience we have included fake IoT devices as part of the prototype.
-The output of these fake devices correspond to the output of the [device-hub](https://github.com/thingful/device-hub) component as developed by [thingful](https://thingful.net).
+The output of these fake devices correspond to the output of the [device-hub](https://github.com/thingful/device-hub) component as developed by [thingful](https://thingful.net)
+and open-sourced as part of the DECODE project.
 
-The node service owns an instance of the storage service.
+The node service is the entry point for an instance of the storage service.
 The node has a relationship with the metadata service.
 
 The node service is responsible for:
