@@ -14467,30 +14467,23 @@ var _user$project$Node$drawDevices = function (d) {
 var _user$project$Node$devicesTable = function (model) {
 	var _p4 = model.devices;
 	if (_p4.ctor === 'Nothing') {
-		return _elm_lang$html$Html$text('No devices running');
+		return _elm_lang$html$Html$text('No devices configured.');
 	} else {
-		return _rundis$elm_bootstrap$Bootstrap_Table$simpleTable(
-			{
-				ctor: '_Tuple2',
-				_0: _rundis$elm_bootstrap$Bootstrap_Table$simpleThead(
-					{
-						ctor: '::',
-						_0: A2(
-							_rundis$elm_bootstrap$Bootstrap_Table$th,
-							{ctor: '[]'},
-							{
-								ctor: '::',
-								_0: _elm_lang$html$Html$text('Device'),
-								_1: {ctor: '[]'}
-							}),
-						_1: {
+		if (_p4._0.ctor === '[]') {
+			return _elm_lang$html$Html$text('No devices configured.');
+		} else {
+			return _rundis$elm_bootstrap$Bootstrap_Table$simpleTable(
+				{
+					ctor: '_Tuple2',
+					_0: _rundis$elm_bootstrap$Bootstrap_Table$simpleThead(
+						{
 							ctor: '::',
 							_0: A2(
 								_rundis$elm_bootstrap$Bootstrap_Table$th,
 								{ctor: '[]'},
 								{
 									ctor: '::',
-									_0: _elm_lang$html$Html$text('Type'),
+									_0: _elm_lang$html$Html$text('Device'),
 									_1: {ctor: '[]'}
 								}),
 							_1: {
@@ -14500,18 +14493,29 @@ var _user$project$Node$devicesTable = function (model) {
 									{ctor: '[]'},
 									{
 										ctor: '::',
-										_0: _elm_lang$html$Html$text('Description'),
+										_0: _elm_lang$html$Html$text('Type'),
 										_1: {ctor: '[]'}
 									}),
-								_1: {ctor: '[]'}
+								_1: {
+									ctor: '::',
+									_0: A2(
+										_rundis$elm_bootstrap$Bootstrap_Table$th,
+										{ctor: '[]'},
+										{
+											ctor: '::',
+											_0: _elm_lang$html$Html$text('Description'),
+											_1: {ctor: '[]'}
+										}),
+									_1: {ctor: '[]'}
+								}
 							}
-						}
-					}),
-				_1: A2(
-					_rundis$elm_bootstrap$Bootstrap_Table$tbody,
-					{ctor: '[]'},
-					_user$project$Node$drawDevices(_p4._0))
-			});
+						}),
+					_1: A2(
+						_rundis$elm_bootstrap$Bootstrap_Table$tbody,
+						{ctor: '[]'},
+						_user$project$Node$drawDevices(_p4._0))
+				});
+		}
 	}
 };
 var _user$project$Node$subscriptions = function (model) {

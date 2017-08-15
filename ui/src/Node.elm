@@ -330,7 +330,10 @@ devicesTable : Model -> Html Msg
 devicesTable model =
     case model.devices of
         Nothing ->
-            text "No devices running"
+            text "No devices configured."
+
+        Just [] ->
+            text "No devices configured."
 
         Just d ->
             Table.simpleTable
