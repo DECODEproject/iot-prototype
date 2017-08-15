@@ -14210,9 +14210,9 @@ var _rundis$elm_bootstrap$Bootstrap_Table$tbody = F2(
 			{attributes: attributes, rows: rows});
 	});
 
-var _user$project$Decoders$Item = F5(
-	function (a, b, c, d, e) {
-		return {key: a, location: b, sample: c, tags: d, uid: e};
+var _user$project$Decoders$Item = F4(
+	function (a, b, c, d) {
+		return {subject: a, location: b, sample: c, tags: d};
 	});
 var _user$project$Decoders$Location = F5(
 	function (a, b, c, d, e) {
@@ -14264,17 +14264,16 @@ var _user$project$Decoders$decodeLocation = A6(
 	A2(_elm_lang$core$Json_Decode$field, 'scheme', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	_elm_lang$core$Json_Decode$succeed(_user$project$Decoders$Unknown));
-var _user$project$Decoders$decodeItem = A6(
-	_elm_lang$core$Json_Decode$map5,
+var _user$project$Decoders$decodeItem = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Decoders$Item,
-	A2(_elm_lang$core$Json_Decode$field, 'key', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'location', _user$project$Decoders$decodeLocation),
 	A2(_elm_lang$core$Json_Decode$field, 'sample', _elm_lang$core$Json_Decode$string),
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'tags',
-		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
-	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string));
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
 var _user$project$Decoders$decodeItems = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeItem);
 var _user$project$Decoders$JsNull = {ctor: 'JsNull'};
 var _user$project$Decoders$JsObject = function (a) {

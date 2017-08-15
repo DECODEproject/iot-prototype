@@ -14,22 +14,20 @@ decodeItems =
 
 
 type alias Item =
-    { key : String
+    { subject : String
     , location : Location
     , sample : String
     , tags : List String
-    , uid : String
     }
 
 
 decodeItem : Json.Decode.Decoder Item
 decodeItem =
-    Json.Decode.map5 Item
-        (Json.Decode.field "key" Json.Decode.string)
+    Json.Decode.map4 Item
+        (Json.Decode.field "subject" Json.Decode.string)
         (Json.Decode.field "location" decodeLocation)
         (Json.Decode.field "sample" Json.Decode.string)
         (Json.Decode.field "tags" (Json.Decode.list Json.Decode.string))
-        (Json.Decode.field "uid" Json.Decode.string)
 
 
 type alias Location =

@@ -10438,9 +10438,9 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
-var _user$project$Decoders$Item = F5(
-	function (a, b, c, d, e) {
-		return {key: a, location: b, sample: c, tags: d, uid: e};
+var _user$project$Decoders$Item = F4(
+	function (a, b, c, d) {
+		return {subject: a, location: b, sample: c, tags: d};
 	});
 var _user$project$Decoders$Location = F5(
 	function (a, b, c, d, e) {
@@ -10492,17 +10492,16 @@ var _user$project$Decoders$decodeLocation = A6(
 	A2(_elm_lang$core$Json_Decode$field, 'scheme', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string),
 	_elm_lang$core$Json_Decode$succeed(_user$project$Decoders$Unknown));
-var _user$project$Decoders$decodeItem = A6(
-	_elm_lang$core$Json_Decode$map5,
+var _user$project$Decoders$decodeItem = A5(
+	_elm_lang$core$Json_Decode$map4,
 	_user$project$Decoders$Item,
-	A2(_elm_lang$core$Json_Decode$field, 'key', _elm_lang$core$Json_Decode$string),
+	A2(_elm_lang$core$Json_Decode$field, 'subject', _elm_lang$core$Json_Decode$string),
 	A2(_elm_lang$core$Json_Decode$field, 'location', _user$project$Decoders$decodeLocation),
 	A2(_elm_lang$core$Json_Decode$field, 'sample', _elm_lang$core$Json_Decode$string),
 	A2(
 		_elm_lang$core$Json_Decode$field,
 		'tags',
-		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)),
-	A2(_elm_lang$core$Json_Decode$field, 'uid', _elm_lang$core$Json_Decode$string));
+		_elm_lang$core$Json_Decode$list(_elm_lang$core$Json_Decode$string)));
 var _user$project$Decoders$decodeItems = _elm_lang$core$Json_Decode$list(_user$project$Decoders$decodeItem);
 var _user$project$Decoders$JsNull = {ctor: 'JsNull'};
 var _user$project$Decoders$JsObject = function (a) {
@@ -10642,7 +10641,7 @@ var _user$project$Search$updateRight = F3(
 				A3(
 					_elm_community$list_extra$List_Extra$updateIf,
 					function (n) {
-						return _elm_lang$core$Native_Utils.eq(n.uid, item.uid);
+						return _elm_lang$core$Native_Utils.eq(n.subject, item.subject);
 					},
 					function (t) {
 						return _elm_lang$core$Native_Utils.update(
@@ -10669,7 +10668,7 @@ var _user$project$Search$entitlementRequestEncoder = function (item) {
 				_0: {
 					ctor: '_Tuple2',
 					_0: 'subject',
-					_1: _elm_lang$core$Json_Encode$string(item.key)
+					_1: _elm_lang$core$Json_Encode$string(item.subject)
 				},
 				_1: {ctor: '[]'}
 			}
@@ -10781,7 +10780,7 @@ var _user$project$Search$getTimeSeriesData = function (item) {
 			_user$project$Search$nodeURLFromLocation(item.location),
 			'/data/'),
 		_elm_lang$http$Http$jsonBody(
-			_user$project$Search$getTimeSeriesEncoder(item.key)),
+			_user$project$Search$getTimeSeriesEncoder(item.subject)),
 		_user$project$Decoders$decodeDataResponse);
 	return A2(
 		_elm_lang$http$Http$send,
@@ -11073,7 +11072,7 @@ var _user$project$Search$drawFiltered = F2(
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(item.key),
+											_0: _elm_lang$html$Html$text(item.subject),
 											_1: {
 												ctor: '::',
 												_0: _elm_lang$html$Html$text(' '),

@@ -175,7 +175,7 @@ getTimeSeriesData : Decoders.Item -> Cmd Msg
 getTimeSeriesData item =
     let
         request =
-            Http.post (nodeURLFromLocation (item.location) ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.key)) Decoders.decodeDataResponse
+            Http.post (nodeURLFromLocation (item.location) ++ "/data/") (Http.jsonBody (getTimeSeriesEncoder item.subject)) Decoders.decodeDataResponse
     in
         Http.send (ViewGraphCompleted item) request
 
@@ -184,7 +184,7 @@ entitlementRequestEncoder : Decoders.Item -> Json.Encode.Value
 entitlementRequestEncoder item =
     Json.Encode.object
         [ ( "level", Json.Encode.string "can-access" )
-        , ( "subject", Json.Encode.string item.key )
+        , ( "subject", Json.Encode.string item.subject )
         ]
 
 
@@ -257,7 +257,7 @@ drawFiltered tag items =
             in
                 div []
                     [ div [] [ text (t) ]
-                    , div [] <| List.map (\item -> div [] [ text item.key, text " ", drawViewerWidget (item) ]) filtered
+                    , div [] <| List.map (\item -> div [] [ text item.subject, text " ", drawViewerWidget (item) ]) filtered
                     , div [] [ button [ onClick RefreshMetadata ] [ text "new search" ] ]
                     ]
 
@@ -293,7 +293,7 @@ updateRight items item right =
                 location2 =
                     { location1 | right = right }
             in
-                Just (List.Extra.updateIf (\n -> n.uid == item.uid) (\t -> { t | location = location2 }) all)
+                Just (List.Extra.updateIf (\n -> n.subject == item.subject) (\t -> { t | location = location2 }) all)
 
 
 uniqueLocations : Decoders.Items -> List String
