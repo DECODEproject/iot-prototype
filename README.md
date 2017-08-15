@@ -36,7 +36,7 @@ An overview of a single node system.
 
 In this diagram two IoT devices logically direct their data to the node service.
 As a convenience we have included fake IoT devices as part of the prototype.
-The output of these fake devices correspond to the output of the [device-hub](https://github.com/thingful/device-hub) component as developed by (thingful)[https://thingful.net].
+The output of these fake devices correspond to the output of the [device-hub](https://github.com/thingful/device-hub) component as developed by [thingful](https://thingful.net).
 
 The node service owns an instance of the storage service.
 The node has a relationship with the metadata service.
