@@ -49,15 +49,15 @@ func (e itemMap) Add(i CatalogItem) {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	e.store[i.UID] = i
+	e.store[i.Subject] = i
 
 }
 
-func (e itemMap) Delete(uid string) {
+func (e itemMap) Delete(subject string) {
 	e.lock.Lock()
 	defer e.lock.Unlock()
 
-	delete(e.store, uid)
+	delete(e.store, subject)
 }
 
 func (e itemMap) All() []CatalogItem {

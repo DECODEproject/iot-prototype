@@ -1,12 +1,8 @@
 package api
 
 import (
-	"crypto/md5"
-	"encoding/base64"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
 	validator "gopkg.in/validator.v2"
 
@@ -29,15 +25,14 @@ type ErrorResponse struct {
 // The Tags property should contain enough information to enable a search index
 // The Sample property should contain enough detail to interact with the data
 type CatalogRequest struct {
-	Key    string   `json:"key" description:"path of the data item" validate:"nonzero"`
-	Tags   []string `json:"tags" description:"a collection of tags probably belonging to an ontology" validate:"nonzero"`
-	Sample string   `json:"sample" description:"sample value e.g. a json object `
+	Subject string   `json:"subject" description:"path of the data item" validate:"nonzero"`
+	Tags    []string `json:"tags" description:"a collection of tags probably belonging to an ontology" validate:"nonzero"`
+	Sample  string   `json:"sample" description:"sample value e.g. a json object `
 }
 
 // CatalogItem contains the original request
 type CatalogItem struct {
 	CatalogRequest
-	UID         string `json:"uid" description:"unique identifier for the catalogued piece of data" validate:"nonzero"`
 	LocationUID string `json:"-"`
 }
 
@@ -213,16 +208,8 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 		return
 	}
 
-	// generate a consistent uid
-	key := []byte(fmt.Sprintf("%s:%s", locationUID, req.Key))
-	hash := md5.Sum(key)
-	encoded := base64.StdEncoding.EncodeToString(hash[:])
-	// urlencode the url as used in URL for deletes
-	encoded = strings.Replace(encoded, "/", "_", -1)
-
 	item := CatalogItem{
 		CatalogRequest: req,
-		UID:            encoded,
 		LocationUID:    locationUID,
 	}
 	e.store.Items.Add(item)
