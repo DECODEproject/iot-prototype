@@ -100,15 +100,13 @@ func (a DataApi) Append(body ApiData) (*APIResponse, error) {
 }
 
 /**
- * returns all of the data stored in a logical &#39;bucket&#39;.
- * returns all of the data stored in a logical &#39;bucket&#39;.
+ * returns all of the data stored in a logical &#39;bucket&#39; in the last 24 hours.
+ * returns all of the data stored in a logical &#39;bucket&#39; in the last 24 hours.
  *
- * @param from return data from this ISO8601 timestamp. Defaults to 24 hours ago.
- * @param to finish at this ISO8601 timestamp 
  * @param bucketUid name of the &#39;bucket&#39; of data
  * @return []ApiDataResponse
  */
-func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ApiDataResponse, *APIResponse, error) {
+func (a DataApi) GetAll(bucketUid string) ([]ApiDataResponse, *APIResponse, error) {
 
 	var httpMethod = "Get"
 	// create path and map variables
@@ -125,9 +123,7 @@ func (a DataApi) GetAll(from string, to string, bucketUid string) ([]ApiDataResp
 	for key := range a.Configuration.DefaultHeader {
 		headerParams[key] = a.Configuration.DefaultHeader[key]
 	}
-		queryParams.Add("from", a.Configuration.APIClient.ParameterToString(from, ""))
-			queryParams.Add("to", a.Configuration.APIClient.ParameterToString(to, ""))
-			queryParams.Add("bucket-uid", a.Configuration.APIClient.ParameterToString(bucketUid, ""))
+		queryParams.Add("bucket-uid", a.Configuration.APIClient.ParameterToString(bucketUid, ""))
 	
 
 	// to determine the Content-Type header

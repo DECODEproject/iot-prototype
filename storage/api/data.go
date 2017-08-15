@@ -9,7 +9,6 @@ import (
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
 	redis_client "github.com/garyburd/redigo/redis"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 )
 
 // ErrorResponse signals error messages back to the client
@@ -51,9 +50,7 @@ func (e dataResource) WebService() *restful.WebService {
 	tags := []string{"data"}
 
 	ws.Route(ws.GET("/").To(e.getAll).
-		Doc("returns all of the data stored in a logical 'bucket'.").
-		Param(ws.QueryParameter("from", "return data from this ISO8601 timestamp. Defaults to 24 hours ago.").DataType("date").DataFormat(utils.ISO8601)).
-		Param(ws.QueryParameter("to", "finish at this ISO8601 timestamp ").DataType("date").DataFormat(utils.ISO8601)).
+		Doc("returns all of the data stored in a logical 'bucket' in the last 24 hours.").
 		Param(ws.QueryParameter("bucket-uid", "name of the 'bucket' of data").DataType("string")).
 		Metadata(restfulspec.KeyOpenAPITags, tags).
 		Writes([]DataResponse{}).
@@ -73,48 +70,20 @@ func (e dataResource) WebService() *restful.WebService {
 }
 func (e dataResource) getAll(request *restful.Request, response *restful.Response) {
 
-	fromStr := request.QueryParameter("from")
-	toStr := request.QueryParameter("to")
 	prefix := request.QueryParameter("bucket-uid")
 
 	timestep := time.Second
-	expiry := time.Duration(0)
+	expiry := time.Duration(time.Hour * 24)
 
 	ts := NewTimeSeries(prefix, timestep, expiry, e.pool)
-	var from, to time.Time
-	var err error
 
 	// TODO : review should this be UTC?
-	now := time.Now()
-
-	if fromStr == "" {
-		// default to 24 hours ago
-		from = now.Add(-(time.Hour * 24))
-	} else {
-
-		from, err = time.Parse(utils.ISO8601, fromStr)
-
-		if err != nil {
-			response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
-			return
-		}
-
-	}
-	if toStr == "" {
-		//default to now
-		to = now
-	} else {
-		to, err = time.Parse(utils.ISO8601, toStr)
-
-		if err != nil {
-			response.WriteHeaderAndEntity(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
-			return
-		}
-	}
+	to := time.Now()
+	from := to.Add(-(time.Hour * 24))
 
 	data := []*DataResponse{}
 
-	err = ts.FetchRange(from, to, &data)
+	err := ts.FetchRange(from, to, &data)
 
 	if err != nil {
 		response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
@@ -140,7 +109,7 @@ func (e dataResource) append(request *restful.Request, response *restful.Respons
 
 	prefix := data.Bucket
 	timestep := time.Second
-	expiry := time.Duration(0)
+	expiry := time.Duration(time.Hour * 24)
 
 	ts := NewTimeSeries(prefix, timestep, expiry, e.pool)
 
