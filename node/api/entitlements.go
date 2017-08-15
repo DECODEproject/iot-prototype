@@ -7,7 +7,6 @@ import (
 	validator "gopkg.in/validator.v2"
 
 	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
@@ -62,16 +61,14 @@ const (
 
 type entitlementResource struct {
 	// all data held in memory
-	store     *EntitlementStore
-	mClient   *metadataclient.MetadataApi
-	metaStore *MetadataStore
+	store   *EntitlementStore
+	mClient *metadataclient.MetadataApi
 }
 
-func NewEntitlementService(store *EntitlementStore, metaStore *MetadataStore, mClient *metadataclient.MetadataApi) entitlementResource {
+func NewEntitlementService(store *EntitlementStore, mClient *metadataclient.MetadataApi) entitlementResource {
 	return entitlementResource{
-		store:     store,
-		metaStore: metaStore,
-		mClient:   mClient,
+		store:   store,
+		mClient: mClient,
 	}
 }
 
@@ -325,28 +322,10 @@ func (e entitlementResource) amendAcceptedEntitlement(request *restful.Request, 
 	// remove the data from the metadata service
 	if !req.IsDiscoverable() {
 
-		subject, err := utils.ParseSubject(req.Subject)
+		_, err = e.mClient.RemoveFromCatalog(req.Subject)
 
 		if err != nil {
-			log.Println("error parsing subject : ", subject)
-			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
-
-			return
-		}
-
-		metaData, found := e.metaStore.FindBySubject(subject)
-
-		if !found {
-			log.Println("error finding metadata for subject : ", subject)
-			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: "error finding metadata"})
-
-			return
-		}
-
-		_, err = e.mClient.RemoveFromCatalog(metaData.CatalogUID)
-
-		if err != nil {
-			log.Println("error removing from catalog : ", err.Error(), subject.String(), metaData)
+			log.Println("error removing from catalog : ", err.Error(), req.Subject)
 			response.WriteHeaderAndEntity(http.StatusInternalServerError, ErrorResponse{Error: err.Error()})
 
 			return
