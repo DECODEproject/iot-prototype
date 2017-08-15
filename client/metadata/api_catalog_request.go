@@ -21,7 +21,7 @@ package swagger
 type ApiCatalogRequest struct {
 
 	// path of the data item
-	Key string `json:"key,omitempty"`
+	Subject string `json:"Subject,omitempty"`
 
 	Sample string `json:"sample,omitempty"`
 

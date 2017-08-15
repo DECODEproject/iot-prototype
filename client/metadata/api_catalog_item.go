@@ -21,13 +21,10 @@ package swagger
 type ApiCatalogItem struct {
 
 	// path of the data item
-	Key string `json:"key,omitempty"`
+	Subject string `json:"Subject,omitempty"`
 
 	Sample string `json:"sample,omitempty"`
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`
-
-	// unique identifier for the catalogued piece of data
-	Uid string `json:"uid,omitempty"`
 }
