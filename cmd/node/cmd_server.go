@@ -16,6 +16,7 @@ var serverCommand = &cobra.Command{
 			WebServicesURL:         _config.WebServicesURL,
 			MetadataServiceAddress: _config.MetadataServiceAddress,
 			StorageServiceAddress:  _config.StorageServiceAddress,
+			AssetsPath:             _config.AssetsPath,
 		})
 
 	},

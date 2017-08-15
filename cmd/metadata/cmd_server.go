@@ -14,6 +14,7 @@ var serverCommand = &cobra.Command{
 			Binding:        _config.Binding,
 			SwaggerUIPath:  _config.SwaggerUIPath,
 			WebServicesURL: _config.WebServicesURL,
+			AssetsPath:     _config.AssetsPath,
 		})
 
 	},

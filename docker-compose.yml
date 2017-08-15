@@ -27,22 +27,6 @@ services:
         # address of the node
         # TODO : resolve this to be the external address
         #- WEBSERVICES_URL=http://node_one:8080
-  ## node_one_ui is the user interface for the decode node
-  node_one_ui:
-    image : prototype/ui
-    ports:
-        - "8085:8085"
-    links :
-        - "metadata:metadata"
-        - "node_one:node"
-    depends_on:
-        - "metadata"
-        - "node_one"
-    environment:
-        # address of the metadata service
-        - METADATA_SERVICE_ADDRESS=http://metadata:8081
-        # address of the node service
-        - NODE_SERVICE_ADDRESS=http://node:8080
   ## node_one_device_hub is an instance of device hub for IOT integration
   ##node_one_device_hub:
   ##  image: thingful/device-hub

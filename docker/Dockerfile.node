@@ -5,6 +5,12 @@ EXPOSE 8080
 COPY tmp/build/linux-amd64/node /prototype/
 COPY ./swagger-ui/ /prototype/swagger-ui/
 
+COPY ui/node.html /prototype/assets/index.html
+COPY ui/node.js /prototype/assets/
+COPY ui/static /prototype/assets/static/
+
 ENV SWAGGER_UI_PATH=/prototype/swagger-ui/
+ENV ASSETS_PATH=/prototype/assets/
+
 
 ENTRYPOINT [ "/prototype/node", "server"]

@@ -20,6 +20,7 @@ type config struct {
 	Binding        string `envconfig:"BINDING" default:":8081"`
 	SwaggerUIPath  string `envconfig:"SWAGGER_UI_PATH" default:"../../swagger-ui/"`
 	WebServicesURL string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8081"`
+	AssetsPath     string `envconfig:"ASSETS_PATH" default:"../../ui/"`
 }
 
 func newConfig() *config {
@@ -32,6 +33,7 @@ func (o *config) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.Binding, "binding", "b", o.Binding, "binding address in form of {ip}:port")
 	fs.StringVarP(&o.SwaggerUIPath, "swagger-ui", "s", o.SwaggerUIPath, "path to folder to server Swagger UI")
 	fs.StringVarP(&o.WebServicesURL, "url", "u", o.WebServicesURL, "external address of the API service")
+	fs.StringVarP(&o.AssetsPath, "assets", "a", o.AssetsPath, "path to folder of static files to serve")
 }
 
 func init() {

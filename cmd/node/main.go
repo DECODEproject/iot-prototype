@@ -22,6 +22,7 @@ type config struct {
 	WebServicesURL         string `envconfig:"WEBSERVICES_URL" default:"http://localhost:8080"`
 	MetadataServiceAddress string `envconfig:"METADATA_SERVICE_ADDRESS" default:"http://localhost:8081"`
 	StorageServiceAddress  string `envconfig:"STORAGE_SERVICE_ADDRESS" default:"http://localhost:8083"`
+	AssetsPath             string `envconfig:"ASSETS_PATH" default:"../../ui/"`
 }
 
 func newConfig() *config {
@@ -36,6 +37,7 @@ func (o *config) AddFlags(fs *pflag.FlagSet) {
 	fs.StringVarP(&o.WebServicesURL, "url", "u", o.WebServicesURL, "public address of the API service")
 	fs.StringVarP(&o.MetadataServiceAddress, "metadata", "m", o.MetadataServiceAddress, "public address of the Metadata service")
 	fs.StringVarP(&o.StorageServiceAddress, "storage", "s", o.StorageServiceAddress, "public address of the Storage service")
+	fs.StringVarP(&o.AssetsPath, "assets", "a", o.AssetsPath, "path to folder of static files to serve")
 }
 
 func init() {
