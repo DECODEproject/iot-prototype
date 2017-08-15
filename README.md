@@ -62,11 +62,11 @@ The prototype should then be available at the following urls
 
 'node' swagger api - http://localhost:8080/apidocs
 
-'node' ui - http://localhost:8085/node.html
+'node' ui - http://localhost:8080
 
 'metadata' swagger api - http://localhost:8081/apidocs
 
-'metadata' ui - http://localhost:8085/search.html
+'metadata' ui - http://localhost:8081
 
 'storage' swagger api - http://localhost:8083/apidocs
 
