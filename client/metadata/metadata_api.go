@@ -273,15 +273,14 @@ func (a MetadataApi) RegisterLocation(body ApiLocationRequest) (*ApiLocation, *A
  * delete an item from the catalog
  * delete an item from the catalog
  *
- * @param catalogUid identifier for a cataloged item
+ * @param subject &#39;subject&#39; of the item to delete
  * @return void
  */
-func (a MetadataApi) RemoveFromCatalog(catalogUid string) (*APIResponse, error) {
+func (a MetadataApi) RemoveFromCatalog(subject string) (*APIResponse, error) {
 
 	var httpMethod = "Delete"
 	// create path and map variables
-	path := a.Configuration.BasePath + "/catalog/items/{catalog-uid}"
-	path = strings.Replace(path, "{"+"catalog-uid"+"}", fmt.Sprintf("%v", catalogUid), -1)
+	path := a.Configuration.BasePath + "/catalog/items/"
 
 
 	headerParams := make(map[string]string)
@@ -294,7 +293,8 @@ func (a MetadataApi) RemoveFromCatalog(catalogUid string) (*APIResponse, error) 
 	for key := range a.Configuration.DefaultHeader {
 		headerParams[key] = a.Configuration.DefaultHeader[key]
 	}
-
+		queryParams.Add("subject", a.Configuration.APIClient.ParameterToString(subject, ""))
+	
 
 	// to determine the Content-Type header
 	localVarHttpContentTypes := []string{ "application/json",  }

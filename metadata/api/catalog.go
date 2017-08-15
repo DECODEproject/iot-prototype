@@ -69,7 +69,6 @@ func (e catalogResource) WebService() *restful.WebService {
 		Consumes(restful.MIME_JSON).
 		Produces(restful.MIME_JSON)
 
-	catalogUIDParameter := ws.PathParameter("catalog-uid", "identifier for a cataloged item").DataType("string")
 	locationUIDParameter := ws.PathParameter("location-uid", "identifier for a location").DataType("string")
 
 	tags := []string{"metadata"}
@@ -105,11 +104,11 @@ func (e catalogResource) WebService() *restful.WebService {
 		Returns(http.StatusInternalServerError, "something went wrong", ErrorResponse{}))
 
 	// delete an item from the catalog
-	ws.Route(ws.DELETE("/items/{catalog-uid}").To(e.removeFromCatalog).
+	ws.Route(ws.DELETE("/items/").To(e.removeFromCatalog).
+		Param(ws.QueryParameter("subject", "'subject' of the item to delete").DataType("string")).
 		Doc("delete an item from the catalog").
 		Metadata(restfulspec.KeyOpenAPITags, tags).
-		Returns(http.StatusOK, "OK", nil).
-		Param(catalogUIDParameter))
+		Returns(http.StatusOK, "OK", nil))
 
 	// get all items - simple search
 	ws.Route(ws.GET("/items/").To(e.allItems).
@@ -218,7 +217,7 @@ func (e catalogResource) catalogItem(request *restful.Request, response *restful
 }
 
 func (e catalogResource) removeFromCatalog(request *restful.Request, response *restful.Response) {
-	uid := request.PathParameter("catalog-uid")
+	uid := request.QueryParameter("subject")
 	e.store.Items.Delete(uid)
 }
 

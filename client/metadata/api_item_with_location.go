@@ -20,13 +20,13 @@ package swagger
 
 type ApiItemWithLocation struct {
 
-	// path of the data item
-	Subject string `json:"Subject,omitempty"`
-
 	// location for the catalogued piece of data
 	Location ApiLocation `json:"location,omitempty"`
 
 	Sample string `json:"sample,omitempty"`
+
+	// path of the data item
+	Subject string `json:"subject,omitempty"`
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`

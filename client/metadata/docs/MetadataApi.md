@@ -8,7 +8,7 @@ Method | HTTP request | Description
 [**CatalogItem**](MetadataApi.md#CatalogItem) | **Put** /catalog/items/{location-uid} | catalog an item for discovery e.g. what and where
 [**MoveLocation**](MetadataApi.md#MoveLocation) | **Patch** /catalog/announce/{location-uid} | change a node&#39;s location - keeping the same location-uid
 [**RegisterLocation**](MetadataApi.md#RegisterLocation) | **Put** /catalog/announce | register a node&#39;s location
-[**RemoveFromCatalog**](MetadataApi.md#RemoveFromCatalog) | **Delete** /catalog/items/{catalog-uid} | delete an item from the catalog
+[**RemoveFromCatalog**](MetadataApi.md#RemoveFromCatalog) | **Delete** /catalog/items/ | delete an item from the catalog
 
 
 # **AllItems**
@@ -127,7 +127,7 @@ No authorization required
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **RemoveFromCatalog**
-> RemoveFromCatalog($catalogUid)
+> RemoveFromCatalog($subject)
 
 delete an item from the catalog
 
@@ -138,7 +138,7 @@ delete an item from the catalog
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **catalogUid** | **string**| identifier for a cataloged item | 
+ **subject** | **string**| &#39;subject&#39; of the item to delete | [optional] 
 
 ### Return type
 

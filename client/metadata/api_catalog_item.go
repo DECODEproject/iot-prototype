@@ -20,10 +20,10 @@ package swagger
 
 type ApiCatalogItem struct {
 
-	// path of the data item
-	Subject string `json:"Subject,omitempty"`
-
 	Sample string `json:"sample,omitempty"`
+
+	// path of the data item
+	Subject string `json:"subject,omitempty"`
 
 	// a collection of tags probably belonging to an ontology
 	Tags []string `json:"tags,omitempty"`
