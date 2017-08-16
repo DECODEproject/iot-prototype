@@ -10077,6 +10077,10 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _elm_lang$html$Html_Keyed$node = _elm_lang$virtual_dom$VirtualDom$keyedNode;
+var _elm_lang$html$Html_Keyed$ol = _elm_lang$html$Html_Keyed$node('ol');
+var _elm_lang$html$Html_Keyed$ul = _elm_lang$html$Html_Keyed$node('ul');
+
 var _elm_lang$http$Native_Http = function() {
 
 
@@ -10438,6 +10442,305 @@ var _elm_lang$http$Http$StringPart = F2(
 	});
 var _elm_lang$http$Http$stringPart = _elm_lang$http$Http$StringPart;
 
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$roleClass = function (role) {
+	return _elm_lang$html$Html_Attributes$class(
+		function () {
+			var _p0 = role;
+			switch (_p0.ctor) {
+				case 'Success':
+					return 'list-group-item-success';
+				case 'Info':
+					return 'list-group-item-info';
+				case 'Warning':
+					return 'list-group-item-warning';
+				default:
+					return 'list-group-item-danger';
+			}
+		}());
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$itemAttributes = function (options) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$classList(
+				{
+					ctor: '::',
+					_0: {ctor: '_Tuple2', _0: 'list-group-item', _1: true},
+					_1: {
+						ctor: '::',
+						_0: {ctor: '_Tuple2', _0: 'disabled', _1: options.disabled},
+						_1: {
+							ctor: '::',
+							_0: {ctor: '_Tuple2', _0: 'active', _1: options.active},
+							_1: {
+								ctor: '::',
+								_0: {ctor: '_Tuple2', _0: 'list-group-item-action', _1: options.action},
+								_1: {ctor: '[]'}
+							}
+						}
+					}
+				}),
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			{
+				ctor: '::',
+				_0: _elm_lang$html$Html_Attributes$disabled(options.disabled),
+				_1: {ctor: '[]'}
+			},
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				A2(
+					_elm_lang$core$Maybe$withDefault,
+					{ctor: '[]'},
+					A2(
+						_elm_lang$core$Maybe$map,
+						function (r) {
+							return {
+								ctor: '::',
+								_0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$roleClass(r),
+								_1: {ctor: '[]'}
+							};
+						},
+						options.role)),
+				options.attributes)));
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$preventClick = A2(_elm_lang$html$Html_Attributes$attribute, 'onclick', 'var event = arguments[0] || window.event; event.preventDefault();');
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$applyModifier = F2(
+	function (modifier, options) {
+		var _p1 = modifier;
+		switch (_p1.ctor) {
+			case 'Roled':
+				return _elm_lang$core$Native_Utils.update(
+					options,
+					{
+						role: _elm_lang$core$Maybe$Just(_p1._0)
+					});
+			case 'Action':
+				return _elm_lang$core$Native_Utils.update(
+					options,
+					{action: true});
+			case 'Disabled':
+				return _elm_lang$core$Native_Utils.update(
+					options,
+					{disabled: true});
+			case 'Active':
+				return _elm_lang$core$Native_Utils.update(
+					options,
+					{active: true});
+			default:
+				return _elm_lang$core$Native_Utils.update(
+					options,
+					{
+						attributes: A2(_elm_lang$core$Basics_ops['++'], options.attributes, _p1._0)
+					});
+		}
+	});
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$defaultOptions = {
+	role: _elm_lang$core$Maybe$Nothing,
+	active: false,
+	disabled: false,
+	action: false,
+	attributes: {ctor: '[]'}
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderCustomItem = function (_p2) {
+	var _p3 = _p2;
+	return A2(
+		_p3._0.itemFn,
+		_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$itemAttributes(
+			A3(_elm_lang$core$List$foldl, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$applyModifier, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$defaultOptions, _p3._0.options)),
+		_p3._0.children);
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderItem = function (_p4) {
+	var _p5 = _p4;
+	return A2(
+		_p5._0.itemFn,
+		_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$itemAttributes(
+			A3(_elm_lang$core$List$foldl, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$applyModifier, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$defaultOptions, _p5._0.options)),
+		_p5._0.children);
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$ItemOptions = F5(
+	function (a, b, c, d, e) {
+		return {role: a, active: b, disabled: c, action: d, attributes: e};
+	});
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Attrs = function (a) {
+	return {ctor: 'Attrs', _0: a};
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Action = {ctor: 'Action'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Disabled = {ctor: 'Disabled'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Active = {ctor: 'Active'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Roled = function (a) {
+	return {ctor: 'Roled', _0: a};
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Danger = {ctor: 'Danger'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Warning = {ctor: 'Warning'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Info = {ctor: 'Info'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Success = {ctor: 'Success'};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Item = function (a) {
+	return {ctor: 'Item', _0: a};
+};
+var _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$CustomItem = function (a) {
+	return {ctor: 'CustomItem', _0: a};
+};
+
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$attrs = function (attrs) {
+	return _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Attrs(attrs);
+};
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$disabled = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Disabled;
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$active = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Active;
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$danger = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Roled(_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Danger);
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$warning = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Roled(_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Warning);
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$info = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Roled(_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Info);
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$success = _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Roled(_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Success);
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$button = F2(
+	function (options, children) {
+		return _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$CustomItem(
+			{
+				itemFn: _elm_lang$html$Html$button,
+				children: children,
+				options: {
+					ctor: '::',
+					_0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Action,
+					_1: A2(
+						_elm_lang$core$Basics_ops['++'],
+						options,
+						{
+							ctor: '::',
+							_0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Attrs(
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$type_('button'),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						})
+				}
+			});
+	});
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$anchor = F2(
+	function (options, children) {
+		var updOptions = A2(
+			_elm_lang$core$List$any,
+			F2(
+				function (x, y) {
+					return _elm_lang$core$Native_Utils.eq(x, y);
+				})(_rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Disabled),
+			options) ? A2(
+			_elm_lang$core$Basics_ops['++'],
+			options,
+			{
+				ctor: '::',
+				_0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Attrs(
+					{
+						ctor: '::',
+						_0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$preventClick,
+						_1: {ctor: '[]'}
+					}),
+				_1: {ctor: '[]'}
+			}) : options;
+		return _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$CustomItem(
+			{
+				itemFn: _elm_lang$html$Html$a,
+				children: children,
+				options: {ctor: '::', _0: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Action, _1: updOptions}
+			});
+	});
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$keyedCustom = function (items) {
+	return A3(
+		_elm_lang$html$Html_Keyed$node,
+		'div',
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('list-group'),
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$List$map,
+			function (_p0) {
+				var _p1 = _p0;
+				return {
+					ctor: '_Tuple2',
+					_0: _p1._0,
+					_1: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderCustomItem(_p1._1)
+				};
+			},
+			items));
+};
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$custom = function (items) {
+	return A2(
+		_elm_lang$html$Html$div,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('list-group'),
+			_1: {ctor: '[]'}
+		},
+		A2(_elm_lang$core$List$map, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderCustomItem, items));
+};
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$li = F2(
+	function (options, children) {
+		return _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$Item(
+			{itemFn: _elm_lang$html$Html$li, children: children, options: options});
+	});
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$keyedUl = function (keyedItems) {
+	return A2(
+		_elm_lang$html$Html_Keyed$ul,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('list-group'),
+			_1: {ctor: '[]'}
+		},
+		A2(
+			_elm_lang$core$List$map,
+			function (_p2) {
+				var _p3 = _p2;
+				return {
+					ctor: '_Tuple2',
+					_0: _p3._0,
+					_1: _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderItem(_p3._1)
+				};
+			},
+			keyedItems));
+};
+var _rundis$elm_bootstrap$Bootstrap_ListGroup$ul = function (items) {
+	return A2(
+		_elm_lang$html$Html$ul,
+		{
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$class('list-group'),
+			_1: {ctor: '[]'}
+		},
+		A2(_elm_lang$core$List$map, _rundis$elm_bootstrap$Bootstrap_Internal_ListGroup$renderItem, items));
+};
+
+var _rundis$elm_bootstrap$Bootstrap_CDN$fontAwesome = A3(
+	_elm_lang$html$Html$node,
+	'link',
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
+		_1: {
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$href('https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css'),
+			_1: {ctor: '[]'}
+		}
+	},
+	{ctor: '[]'});
+var _rundis$elm_bootstrap$Bootstrap_CDN$stylesheet = A3(
+	_elm_lang$html$Html$node,
+	'link',
+	{
+		ctor: '::',
+		_0: _elm_lang$html$Html_Attributes$rel('stylesheet'),
+		_1: {
+			ctor: '::',
+			_0: _elm_lang$html$Html_Attributes$href('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css'),
+			_1: {ctor: '[]'}
+		}
+	},
+	{ctor: '[]'});
+
 var _user$project$Decoders$Item = F4(
 	function (a, b, c, d) {
 		return {subject: a, location: b, sample: c, tags: d};
@@ -10686,7 +10989,7 @@ var _user$project$Search$getTimeSeriesEncoder = function (key) {
 			_1: {ctor: '[]'}
 		});
 };
-var _user$project$Search$metadataURL = 'http://localhost:8081';
+var _user$project$Search$metadataURL = '//localhost:8081';
 var _user$project$Search$nodeURLFromLocation = function (location) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -10892,8 +11195,8 @@ var _user$project$Search$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 120, column: 45}
+							start: {line: 70, column: 5},
+							end: {line: 122, column: 45}
 						},
 						_p3)(
 						_elm_lang$core$Basics$toString(_p3._0._0));
@@ -10944,8 +11247,8 @@ var _user$project$Search$update = F2(
 						return _elm_lang$core$Native_Utils.crashCase(
 							'Search',
 							{
-								start: {line: 68, column: 5},
-								end: {line: 120, column: 45}
+								start: {line: 70, column: 5},
+								end: {line: 122, column: 45}
 							},
 							_p3)(
 							_elm_lang$core$Basics$toString(_p3._1._0));
@@ -10968,8 +11271,8 @@ var _user$project$Search$update = F2(
 					return _elm_lang$core$Native_Utils.crashCase(
 						'Search',
 						{
-							start: {line: 68, column: 5},
-							end: {line: 120, column: 45}
+							start: {line: 70, column: 5},
+							end: {line: 122, column: 45}
 						},
 						_p3)(
 						_elm_lang$core$Basics$toString(_p3._0._0));
@@ -10987,7 +11290,7 @@ var _user$project$Search$drawNoMetadata = A2(
 			{ctor: '[]'},
 			{
 				ctor: '::',
-				_0: _elm_lang$html$Html$text('no metadata available.'),
+				_0: _elm_lang$html$Html$text('no data available for search.'),
 				_1: {ctor: '[]'}
 			}),
 		_1: {
@@ -11011,14 +11314,12 @@ var _user$project$Search$drawFiltered = F2(
 	function (tag, items) {
 		var _p9 = tag;
 		if (_p9.ctor === 'Nothing') {
-			return A2(
-				_elm_lang$html$Html$div,
-				{ctor: '[]'},
+			return _rundis$elm_bootstrap$Bootstrap_ListGroup$ul(
 				A2(
 					_elm_lang$core$List$map,
 					function (x) {
 						return A2(
-							_elm_lang$html$Html$div,
+							_rundis$elm_bootstrap$Bootstrap_ListGroup$li,
 							{ctor: '[]'},
 							{
 								ctor: '::',
@@ -11051,37 +11352,32 @@ var _user$project$Search$drawFiltered = F2(
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
+					_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$ul(
 						{
 							ctor: '::',
-							_0: _elm_lang$html$Html$text(_p10),
+							_0: A2(
+								_rundis$elm_bootstrap$Bootstrap_ListGroup$li,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: _elm_lang$html$Html$text(_p10),
+									_1: {ctor: '[]'}
+								}),
 							_1: {ctor: '[]'}
 						}),
 					_1: {
 						ctor: '::',
-						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
+						_0: _rundis$elm_bootstrap$Bootstrap_ListGroup$ul(
 							A2(
 								_elm_lang$core$List$map,
 								function (item) {
 									return A2(
-										_elm_lang$html$Html$div,
+										_rundis$elm_bootstrap$Bootstrap_ListGroup$li,
 										{ctor: '[]'},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text(item.subject),
-											_1: {
-												ctor: '::',
-												_0: _elm_lang$html$Html$text(' '),
-												_1: {
-													ctor: '::',
-													_0: _user$project$Search$drawViewerWidget(item),
-													_1: {ctor: '[]'}
-												}
-											}
+											_0: _user$project$Search$drawViewerWidget(item),
+											_1: {ctor: '[]'}
 										});
 								},
 								filtered)),
@@ -11101,7 +11397,7 @@ var _user$project$Search$drawFiltered = F2(
 										},
 										{
 											ctor: '::',
-											_0: _elm_lang$html$Html$text('new search'),
+											_0: _elm_lang$html$Html$text('back'),
 											_1: {ctor: '[]'}
 										}),
 									_1: {ctor: '[]'}
@@ -11127,25 +11423,50 @@ var _user$project$Search$view = function (model) {
 				{ctor: '[]'},
 				{
 					ctor: '::',
-					_0: A2(
-						_elm_lang$html$Html$div,
-						{ctor: '[]'},
-						{
-							ctor: '::',
-							_0: _elm_lang$html$Html$text('Metadata'),
-							_1: {ctor: '[]'}
-						}),
+					_0: _rundis$elm_bootstrap$Bootstrap_CDN$stylesheet,
 					_1: {
 						ctor: '::',
 						_0: A2(
-							_elm_lang$html$Html$div,
-							{ctor: '[]'},
+							_elm_lang$html$Html$img,
 							{
 								ctor: '::',
-								_0: A2(_user$project$Search$drawFiltered, model.filter, _p13),
-								_1: {ctor: '[]'}
-							}),
-						_1: {ctor: '[]'}
+								_0: _elm_lang$html$Html_Attributes$src('/static/decode.svg'),
+								_1: {
+									ctor: '::',
+									_0: _elm_lang$html$Html_Attributes$width(300),
+									_1: {
+										ctor: '::',
+										_0: _elm_lang$html$Html_Attributes$style(
+											{
+												ctor: '::',
+												_0: {ctor: '_Tuple2', _0: 'display', _1: 'block'},
+												_1: {
+													ctor: '::',
+													_0: {ctor: '_Tuple2', _0: 'margin-left', _1: 'auto'},
+													_1: {
+														ctor: '::',
+														_0: {ctor: '_Tuple2', _0: 'margin-right', _1: 'auto'},
+														_1: {ctor: '[]'}
+													}
+												}
+											}),
+										_1: {ctor: '[]'}
+									}
+								}
+							},
+							{ctor: '[]'}),
+						_1: {
+							ctor: '::',
+							_0: A2(
+								_elm_lang$html$Html$div,
+								{ctor: '[]'},
+								{
+									ctor: '::',
+									_0: A2(_user$project$Search$drawFiltered, model.filter, _p13),
+									_1: {ctor: '[]'}
+								}),
+							_1: {ctor: '[]'}
+						}
 					}
 				});
 		}

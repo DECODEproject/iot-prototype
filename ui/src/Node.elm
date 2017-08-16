@@ -149,7 +149,7 @@ update msg model =
 
 nodeURL : String
 nodeURL =
-    "http://localhost:8080"
+    "//localhost:8080"
 
 
 getMetadata : Cmd Msg

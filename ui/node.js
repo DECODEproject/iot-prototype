@@ -14580,7 +14580,7 @@ var _user$project$Node$entitlementEncoder = function (ent) {
 			}
 		});
 };
-var _user$project$Node$nodeURL = 'http://localhost:8080';
+var _user$project$Node$nodeURL = '//localhost:8080';
 var _user$project$Node$initialModel = {accepted: _elm_lang$core$Maybe$Nothing, requested: _elm_lang$core$Maybe$Nothing, metadata: _elm_lang$core$Maybe$Nothing, devices: _elm_lang$core$Maybe$Nothing, tabState: _rundis$elm_bootstrap$Bootstrap_Tab$initialState};
 var _user$project$Node$Model = F5(
 	function (a, b, c, d, e) {

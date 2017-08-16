@@ -6,8 +6,10 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import List.Extra exposing (unique)
-import Decoders
 import Json.Encode exposing (..)
+import Bootstrap.ListGroup as ListG
+import Bootstrap.CDN as CDN
+import Decoders
 
 
 main : Program Never Model Msg
@@ -154,7 +156,7 @@ nodeURLFromLocation location =
 
 metadataURL : String
 metadataURL =
-    "http://localhost:8081"
+    "//localhost:8081"
 
 
 getAllMetadata : Cmd Msg
@@ -231,7 +233,8 @@ view model =
 
                 _ ->
                     div []
-                        [ div [] [ text "Metadata" ]
+                        [ CDN.stylesheet
+                        , img [ src "/static/decode.svg", width 300, style [ ( "display", "block" ), ( "margin-left", "auto" ), ( "margin-right", "auto" ) ] ] []
                         , div [] [ drawFiltered model.filter d ]
                         ]
 
@@ -239,7 +242,7 @@ view model =
 drawNoMetadata : Html Msg
 drawNoMetadata =
     div []
-        [ div [] [ text "no metadata available." ]
+        [ div [] [ text "no data available for search." ]
         , button [ onClick RefreshMetadata ] [ text "refresh" ]
         ]
 
@@ -248,7 +251,7 @@ drawFiltered : Maybe String -> Decoders.Items -> Html Msg
 drawFiltered tag items =
     case tag of
         Nothing ->
-            div [] <| List.map (\x -> div [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
+            ListG.ul <| List.map (\x -> ListG.li [] [ a [ onClick (ShowLocations x), href "#" ] [ text (x) ] ]) (uniqueTags items)
 
         Just t ->
             let
@@ -256,9 +259,11 @@ drawFiltered tag items =
                     filterByTag t items
             in
                 div []
-                    [ div [] [ text (t) ]
-                    , div [] <| List.map (\item -> div [] [ text item.subject, text " ", drawViewerWidget (item) ]) filtered
-                    , div [] [ button [ onClick RefreshMetadata ] [ text "new search" ] ]
+                    [ ListG.ul
+                        [ ListG.li [] [ text (t) ]
+                        ]
+                    , ListG.ul <| List.map (\item -> ListG.li [] [ drawViewerWidget (item) ]) filtered
+                    , div [] [ button [ onClick RefreshMetadata ] [ text "back" ] ]
                     ]
 
 
