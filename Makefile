@@ -84,7 +84,7 @@ linux-i386: tmp/build/linux-i386/metadata tmp/build/linux-i386/storage tmp/build
 
 linux-amd64: tmp/build/linux-amd64/metadata tmp/build/linux-amd64/storage tmp/build/linux-amd64/node ## build for linux amd64
 
-linux-arm: tmp/build/linux-arm/metadata tmp/build/linux-arm/sort tmp/build/linux-arm/node ## build for linux arm (raspberry-pi)
+linux-arm: tmp/build/linux-arm/metadata tmp/build/linux-arm/storage tmp/build/linux-arm/node ## build for linux arm (raspberry-pi)
 
 .PHONY: darwin-amd64 linux-i386 linux-amd64 linux-arm
 
