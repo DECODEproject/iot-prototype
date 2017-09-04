@@ -9,10 +9,10 @@ import (
 	storageclient "github.com/DECODEproject/iot-prototype/client/storage"
 	"github.com/DECODEproject/iot-prototype/utils"
 
+	"github.com/DECODEproject/iot-prototype/node/api"
+	"github.com/DECODEproject/iot-prototype/node/sensors"
 	"github.com/kazarena/json-gold/ld"
 	uuid "github.com/satori/go.uuid"
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/api"
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
 )
 
 type device_manager struct {
