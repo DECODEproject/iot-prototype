@@ -1,5 +1,7 @@
 # decode-prototype-da
 
+[![Build Status](https://travis-ci.org/DECODEproject/iot-prototype.svg?branch=master)](https://travis-ci.org/DECODEproject/iot-prototype)
+
 This repository contains an early stage prototype working demonstrator which is capable of:
 
 - retaining private IoT data
