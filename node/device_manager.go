@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"log"
 
-	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
-	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+	metadataclient "github.com/DECODEproject/iot-prototype/client/metadata"
+	storageclient "github.com/DECODEproject/iot-prototype/client/storage"
+	"github.com/DECODEproject/iot-prototype/utils"
 
 	"github.com/kazarena/json-gold/ld"
 	uuid "github.com/satori/go.uuid"

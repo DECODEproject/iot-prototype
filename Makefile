@@ -1,5 +1,5 @@
 SOURCE_VERSION = $(shell git rev-parse --short=6 HEAD)
-BUILD_FLAGS = -v -ldflags "-X gogs.dyne.org/DECODE/decode-prototype-da.SourceVersion=$(SOURCE_VERSION)"
+BUILD_FLAGS = -v -ldflags "-X github.com/DECODEproject/iot-prototype.SourceVersion=$(SOURCE_VERSION)"
 PACKAGES := $(shell go list ./... | grep -v /vendor/ )
 
 GO_TEST = go test -covermode=atomic

@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/DECODEproject/iot-prototype/storage"
 	"github.com/spf13/cobra"
-	"gogs.dyne.org/DECODE/decode-prototype-da/storage"
 )
 
 var serverCommand = &cobra.Command{

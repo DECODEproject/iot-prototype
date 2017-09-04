@@ -1,8 +1,8 @@
 package main
 
 import (
+	"github.com/DECODEproject/iot-prototype/metadata"
 	"github.com/spf13/cobra"
-	"gogs.dyne.org/DECODE/decode-prototype-da/metadata"
 )
 
 var serverCommand = &cobra.Command{
