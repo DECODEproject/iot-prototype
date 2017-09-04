@@ -1,0 +1,17 @@
+language: go
+
+go:
+    - 1.8
+
+sudo: required
+services:
+  - docker
+
+before_script:
+  - make get-build-deps
+
+script:
+  - make check-vendor-licenses
+  - make docker-build
+
+
