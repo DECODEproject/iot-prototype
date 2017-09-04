@@ -5,10 +5,10 @@ import (
 
 	validator "gopkg.in/validator.v2"
 
+	storageclient "github.com/DECODEproject/iot-prototype/client/storage"
+	"github.com/DECODEproject/iot-prototype/utils"
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"
-	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
 )
 
 type dataResource struct {

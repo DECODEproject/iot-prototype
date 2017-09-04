@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/cmd"
+	"github.com/DECODEproject/iot-prototype/cmd"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/spf13/cobra"

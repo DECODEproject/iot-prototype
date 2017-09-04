@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/sensors"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+	"github.com/DECODEproject/iot-prototype/node/sensors"
+	"github.com/DECODEproject/iot-prototype/utils"
 	validator "gopkg.in/validator.v2"
 
 	randomdata "github.com/Pallinder/go-randomdata"

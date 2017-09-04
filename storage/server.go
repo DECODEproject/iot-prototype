@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/storage/api"
+	"github.com/DECODEproject/iot-prototype/storage/api"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"

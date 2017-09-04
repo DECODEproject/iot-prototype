@@ -5,7 +5,7 @@ import (
 	"sort"
 	"sync"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+	"github.com/DECODEproject/iot-prototype/utils"
 )
 
 type EntitlementStore struct {

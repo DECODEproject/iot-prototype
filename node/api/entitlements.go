@@ -6,7 +6,7 @@ import (
 
 	validator "gopkg.in/validator.v2"
 
-	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
+	metadataclient "github.com/DECODEproject/iot-prototype/client/metadata"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"

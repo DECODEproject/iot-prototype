@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/metadata/api"
+	"github.com/DECODEproject/iot-prototype/metadata/api"
 
 	restful "github.com/emicklei/go-restful"
 	restfulspec "github.com/emicklei/go-restful-openapi"

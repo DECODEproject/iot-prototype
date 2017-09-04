@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
+	prototype "github.com/DECODEproject/iot-prototype"
 	"github.com/spf13/cobra"
-	prototype "gogs.dyne.org/DECODE/decode-prototype-da"
 )
 
 var VersionCommand = &cobra.Command{

@@ -6,11 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"gogs.dyne.org/DECODE/decode-prototype-da/node/api"
-	"gogs.dyne.org/DECODE/decode-prototype-da/utils"
+	"github.com/DECODEproject/iot-prototype/node/api"
+	"github.com/DECODEproject/iot-prototype/utils"
 
-	metadataclient "gogs.dyne.org/DECODE/decode-prototype-da/client/metadata"
-	storageclient "gogs.dyne.org/DECODE/decode-prototype-da/client/storage"
+	metadataclient "github.com/DECODEproject/iot-prototype/client/metadata"
+	storageclient "github.com/DECODEproject/iot-prototype/client/storage"
 
 	"github.com/cenkalti/backoff"
 	restful "github.com/emicklei/go-restful"
