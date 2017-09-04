@@ -1,28 +1,40 @@
 # decode-prototype-da
 
 This repository contains an early stage prototype working demonstrator which is capable of:
+
 - retaining private IoT data
-- search
-- data entitlement
-- decentralised data access
+- search of private IOT data
+- demonstrating an implementation of data entitlement specifically around the visibility and access of private IoT data
+- decentralized data access of private IoT data
 
-The architectural context for the prototype is based around the discussions in the first 6 months of the
-[DECODE project](https://decodeproject.eu/) by the technical partners [Thoughtworks](https://www.thoughtworks.com/), [Dyne](https://www.dyne.org/) and [thingful](https://www.thingful.net). 
+The architectural context for the prototype is based around the discussions in the first 6 months of the [DECODE project](https://decodeproject.eu/) by the technical partners including [Thoughtworks](https://www.thoughtworks.com/), [Dyne](https://www.dyne.org/), [UCL](http://sec.cs.ucl.ac.uk/home/) and [thingful](https://www.thingful.net). 
 
-The purpose of the prototype is to demonstrate the concepts from the DECODE project grounded in an IoT usecase.
+The purpose of the prototype is to demonstrate some of the concepts from the DECODE project grounded in an IoT use-case.
 
 Data Entitlement
 ----------------
 
 An introduction to concepts of data entitlements as well as a review of prior art was completed as part of the DECODE project.
-This document can be found [here](https://desk.dyne.org/s/7gHFaUIoNEFB1Wx#pdfviewer).
 
-For the purposes of the prototype any singular piece of data in our system will be in one of three logical states -
-- owner-only - the data is not discoverable or accessible.
-- can-discover - the data is discoverable and there will be made available for search. The data is not accessible.
+From the review:
+Data entitlements could be thought of as an evolution of a traditional authorization scheme specialized for the securing of both personal, business and IoT data. Giving the data owner full control of the access and discovery of their data creates a system of empowerment whose currency is privacy….The relationship of privacy and data entitlement is subject to many nuances.  Users might allow a party to search and access  their  data,  but  only  under  the  understanding that they  will  not  be personally  identified  or  only  under  specific  circumstances. For example,  a driver of a motor vehicle with an on-board camera might want to entitle the emergency services access to his data when there is a road traffic accident. However, the driver might not want to be identified as being in a certain geographical area or that he was exceeding the speed limit at the time.  Data,when available, can directly or indirectly compromise privacy in a way that would surprise a user.
+The full document, D3.1 Survey of Technologies for ABC, Entitlements and Blockchains, can be found here - https://desk.dyne.org/s/7gHFaUIoNEFB1Wx#pdfviewer.
+
+For the purposes of the prototype any singular piece of data in our system will have a data entitlement in one of three logical states -
+
+- owner-only - the data is not discoverable or accessible and is essentially private.
+- can-discover - the data is discoverable and will be made available for search. The data is not accessible.
 - can-access - the data is accessible and by default discoverable.
 
+To qualify the terms used above :
+
+- discoverable – the existence of the data can be found.
+- accessible – the value of the data can be viewed. For the data to be accessible it is of course discoverable.
+
 It is important to note that the prototype does not, by design, implement authentication and as such all entitlements once given are applied globally.
+
+An introduction to concepts of data entitlements as well as a review of prior art was completed as part of the DECODE project.
+This document can be found [here](https://desk.dyne.org/s/7gHFaUIoNEFB1Wx#pdfviewer).
 
 Architecture
 ------------
@@ -64,12 +76,10 @@ The architecture is designed to scale with multiple DECODE nodes using a single 
 
 ![multi-node overview] (docs/multi-node.png)
 
+Interactions
+------------
 
-Walkthrough
------------
-
-TODO
-
+![interactions] (docs/interactionsi.png)
 
 Notes
 -----
@@ -116,7 +126,7 @@ docker-compose up
 
 The docker-compose tool will then map the ports exposed by the containers to local ports on you own machine.
 
-The ports it will try and use are - 8080, 8081 and 8083. 
+The ports it will try and use are - 8080, 8081 and 8083.
 
 If theses ports are already in use the docker-compose tool will display a warning.
 

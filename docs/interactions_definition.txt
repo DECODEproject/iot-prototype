@@ -1,0 +1,17 @@
+title Walkthrough overview
+
+IoT device <-> data owner : Configures IoT device with the node
+IoT device <-> node : IoT device "sends" data to the node
+note right of node : "data" : "owner-only"
+data owner -> node: Sets data entitlement to "can-discover"
+note right of node : "data" : "can-discover"
+node -> metadata : notify the metadata service that data exists and location
+data requester -> metadata : search
+metadata -> data requester  : search results
+data requester -> node : data request
+node -> data requester : data request refused
+data requester -> node : entitlement request
+data owner -> node: Sets data entitlement to "can-access"
+note right of node : "data" : "can-access"
+data requester -> node : data request
+node -> data requester : data
