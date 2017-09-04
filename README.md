@@ -79,7 +79,7 @@ The architecture is designed to scale with multiple DECODE nodes using a single 
 Interactions
 ------------
 
-![interactions] (docs/interactionsi.png)
+![interactions] (docs/interactions.png)
 
 Notes
 -----
