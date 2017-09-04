@@ -76,12 +76,12 @@ Both the node and metadata service expose a user interface.
 
 The architecture is designed to scale with multiple DECODE nodes using a single metadata service.
 
-![multi-node overview] (docs/multi-node.png)
+![multi-node overview]( docs/multi-node.png)
 
 Interactions
 ------------
 
-![interactions] (docs/interactions.png)
+![interactions]( docs/interactions.png)
 
 Notes
 -----
