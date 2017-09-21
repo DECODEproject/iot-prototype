@@ -19,7 +19,9 @@ Data Entitlement
 An introduction to concepts of data entitlements as well as a review of prior art was completed as part of the DECODE project.
 
 From the review:
+
 Data entitlements could be thought of as an evolution of a traditional authorization scheme specialized for the securing of both personal, business and IoT data. Giving the data owner full control of the access and discovery of their data creates a system of empowerment whose currency is privacy….The relationship of privacy and data entitlement is subject to many nuances.  Users might allow a party to search and access  their  data,  but  only  under  the  understanding that they  will  not  be personally  identified  or  only  under  specific  circumstances. For example,  a driver of a motor vehicle with an on-board camera might want to entitle the emergency services access to his data when there is a road traffic accident. However, the driver might not want to be identified as being in a certain geographical area or that he was exceeding the speed limit at the time.  Data,when available, can directly or indirectly compromise privacy in a way that would surprise a user.
+
 The full document, D3.1 Survey of Technologies for ABC, Entitlements and Blockchains, can be found here - https://desk.dyne.org/s/7gHFaUIoNEFB1Wx#pdfviewer.
 
 For the purposes of the prototype any singular piece of data in our system will have a data entitlement in one of three logical states -
