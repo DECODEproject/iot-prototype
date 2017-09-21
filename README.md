@@ -1,4 +1,4 @@
-# decode-prototype-da
+# iot-prototype
 
 [![Build Status](https://travis-ci.org/DECODEproject/iot-prototype.svg?branch=master)](https://travis-ci.org/DECODEproject/iot-prototype)
 
